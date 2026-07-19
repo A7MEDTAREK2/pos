@@ -6,6 +6,19 @@ import '../printing_manager.dart';
 
 
 class ShiftClosingService {
+  Future<void> resetShift() async {
+    final db = await _database;
+
+    await db.insert(
+      'shift_session',
+      {
+        'id': 1,
+        'shift_start': DateTime.now().toIso8601String(),
+        'order_counter': 1,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
 
   final Future<Database> _database =
       AppDatabase.instance.database;
@@ -114,23 +127,20 @@ class ShiftClosingService {
     final productRows = await db.rawQuery(
       '''
       SELECT
+    sale_items.product_name,
+    SUM(sale_items.quantity) AS quantity,
+    SUM(sale_items.total) AS total
 
-        product_name,
-        SUM(quantity) AS quantity,
-        SUM(total) AS total
+FROM sale_items
 
-      FROM sale_items
+INNER JOIN sales
+ON sales.id = sale_items.sale_id
 
-      INNER JOIN sales
-      ON sales.id = sale_items.sale_id
+WHERE DATE(sales.created_at) = DATE(?)
 
+GROUP BY sale_items.product_name
 
-      WHERE DATE(sales.created_at) = DATE(?)
-
-
-      GROUP BY product_name
-
-      ORDER BY quantity DESC
+ORDER BY quantity DESC
 
       ''',
       [
@@ -193,5 +203,6 @@ class ShiftClosingService {
     );
 
   }
+
 
 }

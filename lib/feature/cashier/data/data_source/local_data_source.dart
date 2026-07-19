@@ -3,6 +3,7 @@ import '../../../../core/data_base/pos_database.dart';
 import '../model/pos_model.dart';
 
 abstract class OrderLocalDataSource {
+  Future<void> increaseOrderCounter();
   // حفظ الأوردر كمعلق
   Future<void> cacheOrder(OrderModel order);
 
@@ -58,6 +59,7 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
         'customer_address': order.customerAddress,
         'created_at': order.createdAt.toIso8601String(),
       });
+
 
       // حفظ الأصناف
       for (final item in order.items) {
@@ -300,22 +302,31 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
     });
   }
 
+
   @override
   Future<int> getNextOrderNumber() async {
     final db = await _database;
 
-    final holding = await db.rawQuery(
-      'SELECT MAX(order_number) as maxNo FROM holding_orders',
+    final result = await db.query(
+      'shift_session',
+      where: 'id = ?',
+      whereArgs: [1],
     );
 
-    final sales = await db.rawQuery(
-      'SELECT MAX(order_number) as maxNo FROM sales',
-    );
+    if (result.isEmpty) {
+      await db.insert(
+        'shift_session',
+        {
+          'id': 1,
+          'shift_start': DateTime.now().toIso8601String(),
+          'order_counter': 1,
+        },
+      );
 
-    final holdingNo = (holding.first['maxNo'] as int?) ?? 0;
-    final salesNo = (sales.first['maxNo'] as int?) ?? 0;
+      return 1;
+    }
 
-    return (holdingNo > salesNo ? holdingNo : salesNo) + 1;
+    return (result.first['order_counter'] as int?) ?? 1;
   }
 
   @override
@@ -382,6 +393,15 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
     });
 
   }
+  @override
+  Future<void> increaseOrderCounter() async {
+    final db = await _database;
 
+    await db.rawUpdate('''
+    UPDATE shift_session
+    SET order_counter = order_counter + 1
+    WHERE id = 1
+  ''');
+  }
 }
 

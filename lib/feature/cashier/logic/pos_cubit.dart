@@ -301,6 +301,8 @@ class OrderCubit extends Cubit<OrderState> {
         );
 
         await _repository.holdOrderAndPrintKitchen(order);
+        await _repository.increaseOrderCounter();
+        await refreshNextOrderNumber();
       }
 
       if (clearAfterSave) {
@@ -348,6 +350,7 @@ class OrderCubit extends Cubit<OrderState> {
       }
 
       await _repository.completePaymentAndPrintReceipt(orderId);
+      await refreshNextOrderNumber();
 
       clearCart();
 

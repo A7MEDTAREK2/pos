@@ -7,6 +7,7 @@ import '../data_source/local_data_source.dart';
 import '../model/pos_model.dart';
 
 abstract class OrderRepository {
+  Future<void> increaseOrderCounter();
   OrderRepository(OrderLocalDataSource orderLocalDataSource);
 
   Future<void> holdOrderAndPrintKitchen(OrderModel order);
@@ -90,5 +91,9 @@ class OrderRepositoryImpl implements OrderRepository {
     if (printKitchenTicket) {
       await PrintingManager.instance.printKitchen(order);
     }
+  }
+  @override
+  Future<void> increaseOrderCounter() {
+    return localDataSource.increaseOrderCounter();
   }
 }

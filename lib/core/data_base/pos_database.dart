@@ -16,7 +16,7 @@ class AppDatabase {
 
     _database = await openDatabase(
       path,
-      version: 23, // ✅ رفعناها من 21 لـ 22 عشان جدول drivers
+      version: 24, // ✅ رفعناها من 21 لـ 22 عشان جدول drivers
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -321,6 +321,22 @@ CREATE TABLE print_queue(
   last_error TEXT
 )
 ''');
+
+
+
+    await db.execute('''
+CREATE TABLE shift_session(
+  id INTEGER PRIMARY KEY CHECK(id = 1),
+  shift_start TEXT NOT NULL,
+  order_counter INTEGER NOT NULL DEFAULT 1
+
+)
+''');
+
+
+
+
+
   }
 
   // ===========================
@@ -413,6 +429,16 @@ CREATE TABLE print_queue (
   last_error TEXT
 )
 ''');
+
+
+      await db.insert(
+        'shift_session',
+        {
+          'id': 1,
+          'shift_start': DateTime.now().toIso8601String(),
+          'order_counter': 1,
+        },
+      );
       }
 
     if (oldVersion < 11) {
@@ -725,6 +751,28 @@ CREATE TABLE IF NOT EXISTS drivers(
     last_error TEXT
   )
   ''');
+    }
+    if (oldVersion < 24) {
+      await db.execute('''
+CREATE TABLE IF NOT EXISTS shift_session(
+  id INTEGER PRIMARY KEY CHECK(id = 1),
+  shift_start TEXT NOT NULL,
+  order_counter INTEGER NOT NULL DEFAULT 1
+)
+''');
+
+      final result = await db.query('shift_session');
+
+      if (result.isEmpty) {
+        await db.insert(
+          'shift_session',
+          {
+            'id': 1,
+            'shift_start': DateTime.now().toIso8601String(),
+            'order_counter': 1,
+          },
+        );
+      }
     }
 
   }

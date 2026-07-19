@@ -105,20 +105,15 @@ class ShiftClosingService {
     final productsResult = await db.rawQuery(
       '''
       SELECT
-        si.product_name,
-        SUM(si.quantity) as quantity,
-        SUM(si.total) as total
-      FROM sale_items si
-
-      INNER JOIN sales s
-      ON s.id = si.sale_id
-
-      WHERE DATE(s.created_at) = DATE(?)
-
-      GROUP BY si.product_name
-
-      ORDER BY quantity DESC
-
+    si.product_name,
+    SUM(si.quantity) AS quantity,
+    SUM(si.total) AS total
+FROM sale_items si
+INNER JOIN sales s
+ON s.id = si.sale_id
+WHERE DATE(s.created_at) = DATE(?)
+GROUP BY si.product_name
+ORDER BY quantity DESC
       ''',
       [
         DateTime.now().toIso8601String(),
@@ -173,6 +168,22 @@ class ShiftClosingService {
 
     );
 
+  }
+  Future<void> resetShift() async {
+    final db = await _database;
+
+    await db.insert(
+      'shift_session',
+      {
+        'id': 1,
+        'shift_start': DateTime.now().toIso8601String(),
+        'order_counter': 1,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+
+    final result = await db.query('shift_session');
+    print(result);
   }
 
 }

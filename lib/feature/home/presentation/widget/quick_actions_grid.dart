@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home/feature/setting/pre/screen/settings_screen.dart';
 
 // ====== Core ======
-import '../../../../core/service/printing/model/close shift.dart';
+import '../../../../core/service/printing/service/shift_closing_service.dart';
 import '../../../../core/service/printing/service/modu_print_service.dart';
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/icons.dart';
@@ -338,21 +338,24 @@ class QuickActionsGrid extends StatelessWidget {
                     );
 
 
-                    if(confirm == true){
+                    if (confirm == true) {
+                      try {
+                        await ShiftClosingService().printShiftReport();
+                      } catch (e) {
+                        debugPrint(e.toString());
+                      }
 
-                      await ShiftClosingService()
-                          .printShiftReport();
+                      await ShiftClosingService().resetShift();
 
+                      if (context.mounted) {
+                        await context.read<OrderCubit>().refreshNextOrderNumber();
 
-                      ScaffoldMessenger.of(context)
-                          .showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                              "تم طباعة تقرير نهاية الشيفت"
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text("تم إنهاء الشيفت بنجاح"),
                           ),
-                        ),
-                      );
-
+                        );
+                      }
                     }
 
                   }
