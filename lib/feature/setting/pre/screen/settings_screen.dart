@@ -1,0 +1,616 @@
+// lib/feature/settings/presentation/screens/settings_screen.dart
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/icons.dart';
+import '../../../../core/theming/txt_style.dart';
+
+// ====== Settings ======
+import '../../../driver/data/localdata.dart';
+import '../../../driver/data/repo.dart';
+import '../../../driver/logic/drive_cubit.dart';
+import '../../../driver/pre/driver_Screen.dart';
+import '../../data/model/settings_model.dart';
+import '../../logic/set_cubit.dart';
+import '../../logic/set_state.dart';
+import '../widget/settings_action_button.dart';
+import '../widget/settings_card.dart';
+import '../widget/settings_dropdown.dart';
+import '../widget/settings_footer.dart';
+import '../widget/settings_radio_group.dart';
+import '../widget/settings_section.dart';
+import '../widget/settings_switch.dart';
+import '../widget/settings_text_field.dart';
+import '../widget/users_section.dart';
+
+class SettingsScreen extends StatefulWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  // ====== Controllers ======
+  final storeController = TextEditingController();
+  final phoneController = TextEditingController();
+  final addressController = TextEditingController();
+  final taxNumberController = TextEditingController();
+  final taxController = TextEditingController();
+  final footerController = TextEditingController();
+
+  // ====== Variables ======
+  String currency = "جنيه مصري";
+  String language = "العربية";
+
+  String cashierPrinter = "طابعة 1";
+  String kitchenPrinter = "طابعة 1";
+
+  int paperWidth = 80;
+
+  // ====== Switches ======
+  bool taxEnabled = true;
+  bool autoPrintReceipt = false;
+  bool autoPrintKitchen = true;
+  bool autoOpenDrawer = true;
+
+  bool showLogo = true;
+  bool showAddress = true;
+  bool showPhone = true;
+  bool showTaxNumber = false;
+  bool showQr = true;
+
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<SettingsCubit>().loadSettings();
+  }
+
+  @override
+  void dispose() {
+    storeController.dispose();
+    phoneController.dispose();
+    addressController.dispose();
+    taxNumberController.dispose();
+    taxController.dispose();
+    footerController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<SettingsCubit, SettingsState>(
+      listener: (context, state) {
+        if (state is SettingsLoaded && !_loaded) {
+          final settings = state.settings;
+          debugPrint(settings.currency);
+          debugPrint(settings.language);
+          debugPrint(settings.cashierPrinter);
+          debugPrint(settings.kitchenPrinter);
+
+          storeController.text = settings.storeName;
+          phoneController.text = settings.phone;
+          addressController.text = settings.address;
+          taxNumberController.text = settings.taxNumber;
+          taxController.text = settings.taxPercentage.toString();
+
+          currency = settings.currency;
+          print(settings.currency);
+          language = settings.language;
+
+          cashierPrinter = settings.cashierPrinter;
+          kitchenPrinter = settings.kitchenPrinter;
+          paperWidth = settings.paperWidth;
+
+          taxEnabled = settings.taxEnabled;
+          autoPrintReceipt = settings.autoPrintReceipt;
+          autoPrintKitchen = settings.autoPrintKitchen;
+          autoOpenDrawer = settings.autoOpenDrawer;
+
+          showLogo = settings.showLogo;
+          showAddress = settings.showAddress;
+          showPhone = settings.showPhone;
+          showTaxNumber = settings.showTaxNumber;
+          showQr = settings.showQr;
+
+          _loaded = true;
+          setState(() {});
+        }
+
+        if (state is SettingsSaved) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("تم حفظ الإعدادات"),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+
+        if (state is SettingsError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            backgroundColor: Colorsmanegments.background,
+            appBar: AppBar(
+              title: Text(
+                'الإعدادات',
+                style: TxtStyle.headerMedium,
+              ),
+              centerTitle: true,
+              backgroundColor: Colorsmanegments.card,
+              foregroundColor: Colorsmanegments.textPrimary,
+              elevation: 0,
+              leading: IconButton(
+                icon: Icon(
+                  Iconss.arrowBack,
+                  color: Colorsmanegments.textPrimary,
+                ),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+            body: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                children: [
+                  // ====== 1. General ======
+                  SettingsSection(
+                    title: 'عام',
+                    icon: Iconss.settings,
+                    child: SettingsCard(
+                      children: [
+                        SettingsTextField(
+                          label: 'اسم المتجر',
+                          hint: 'Modu POS',
+                          icon: Iconss.store,
+                          controller: storeController,
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsTextField(
+                          label: 'رقم الهاتف',
+                          hint: '010xxxxxxxx',
+                          icon: Iconss.phone,
+                          controller: phoneController,
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsTextField(
+                          label: 'العنوان',
+                          hint: 'العنوان بالكامل',
+                          icon: Iconss.location,
+                          controller: addressController,
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsTextField(
+                          label: 'الرقم الضريبي',
+                          hint: 'الرقم الضريبي',
+                          icon: Iconss.receipt,
+                          controller: taxNumberController,
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsDropdown(
+                          label: 'العملة',
+                          value: currency,
+                          items: const [
+                            "EGP",
+                          ],
+                          icon: Iconss.sales,
+                          onChanged: (value) {
+                            setState(() {
+                              currency = value!;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsDropdown(
+                          label: 'اللغة',
+                          value: language,
+                          items: const [
+                            "ar",
+                            "en",
+                          ],
+                          icon: Iconss.language,
+                          onChanged: (value) {
+                            setState(() {
+                              language = value!;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsActionButton(
+                          label: 'تغيير الشعار',
+                          icon: Iconss.image,
+                          color: Colorsmanegments.primary,
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ====== 2. Printing ======
+                  SettingsSection(
+                    title: 'الطباعة',
+                    icon: Iconss.print,
+                    child: SettingsCard(
+                      children: [
+                        SettingsDropdown(
+                          label: 'طابعة الكاشير',
+                          value: cashierPrinter,
+                          items: ['طابعة 1', 'طابعة 2', 'طابعة 3'],
+                          icon: Iconss.print,
+                          onChanged: (value) {
+                            setState(() {
+                              cashierPrinter = value!;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsDropdown(
+                          label: 'طابعة المطبخ',
+                          value: kitchenPrinter,
+                          items: ['طابعة 1', 'طابعة 2', 'طابعة 3'],
+                          icon: Iconss.print,
+                          onChanged: (value) {
+                            setState(() {
+                              kitchenPrinter = value!;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsRadioGroup(
+                          label: 'عرض الورق',
+                          value: "$paperWidth مم",
+                          items: ['58 مم', '80 مم'],
+                          icon: Iconss.size,
+                          onChanged: (value) {
+                            setState(() {
+                              if (value == '58 مم') {
+                                paperWidth = 58;
+                              } else if (value == '80 مم') {
+                                paperWidth = 80;
+                              }
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: SettingsActionButton(
+                                label: 'طباعة تجربة',
+                                icon: Iconss.print,
+                                color: Colorsmanegments.primary,
+                                onTap: () {},
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: SettingsActionButton(
+                                label: 'طباعة المطبخ',
+                                icon: Iconss.print,
+                                color: Colorsmanegments.warning,
+                                onTap: () {},
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsActionButton(
+                          label: 'فتح درج النقود',
+                          icon: Iconss.cash,
+                          color: Colorsmanegments.success,
+                          onTap: () {},
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ====== 3. Sales ======
+                  SettingsSection(
+                    title: 'المبيعات',
+                    icon: Iconss.sales,
+                    child: SettingsCard(
+                      children: [
+                        SettingsTextField(
+                          label: 'نسبة الضريبة',
+                          hint: '0.00',
+                          icon: Iconss.percent,
+                          controller: taxController,
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsSwitch(
+                          label: 'تفعيل الضريبة',
+                          value: taxEnabled,
+                          onChanged: (value) {
+                            setState(() {
+                              taxEnabled = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsSwitch(
+                          label: 'طباعة الفاتورة تلقائياً',
+                          value: autoPrintReceipt,
+                          onChanged: (value) {
+                            setState(() {
+                              autoPrintReceipt = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsSwitch(
+                          label: 'طباعة المطبخ تلقائياً',
+                          value: autoPrintKitchen,
+                          onChanged: (value) {
+                            setState(() {
+                              autoPrintKitchen = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsSwitch(
+                          label: 'فتح الدرج بعد الدفع',
+                          value: autoOpenDrawer,
+                          onChanged: (value) {
+                            setState(() {
+                              autoOpenDrawer = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ====== 4. Receipt ======
+                  SettingsSection(
+                    title: 'الفاتورة',
+                    icon: Iconss.receipt,
+                    child: SettingsCard(
+                      children: [
+                        SettingsSwitch(
+                          label: 'عرض الشعار',
+                          value: showLogo,
+                          onChanged: (value) {
+                            setState(() {
+                              showLogo = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsSwitch(
+                          label: 'عرض عنوان المتجر',
+                          value: showAddress,
+                          onChanged: (value) {
+                            setState(() {
+                              showAddress = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsSwitch(
+                          label: 'عرض رقم الهاتف',
+                          value: showPhone,
+                          onChanged: (value) {
+                            setState(() {
+                              showPhone = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsSwitch(
+                          label: 'عرض الرقم الضريبي',
+                          value: showTaxNumber,
+                          onChanged: (value) {
+                            setState(() {
+                              showTaxNumber = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsSwitch(
+                          label: 'طباعة QR Code',
+                          value: showQr,
+                          onChanged: (value) {
+                            setState(() {
+                              showQr = value;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 16),
+                        SettingsTextField(
+                          label: 'رسالة التذييل',
+                          hint: 'شكراً لزيارتكم',
+                          icon: Iconss.note,
+                          controller: footerController,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ====== 5. Backup ======
+                  SettingsSection(
+                    title: 'النسخ الاحتياطي',
+                    icon: Iconss.backup,
+                    child: SettingsCard(
+                      children: [
+                        SettingsActionButton(
+                          label: 'تصدير قاعدة البيانات',
+                          icon: Iconss.export,
+                          color: Colorsmanegments.primary,
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsActionButton(
+                          label: 'استيراد قاعدة البيانات',
+                          icon: Iconss.import,
+                          color: Colorsmanegments.warning,
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsActionButton(
+                          label: 'إنشاء نسخة احتياطية',
+                          icon: Iconss.backup,
+                          color: Colorsmanegments.success,
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: 12),
+                        SettingsActionButton(
+                          label: 'استعادة نسخة احتياطية',
+                          icon: Iconss.restore,
+                          color: Colorsmanegments.danger,
+                          onTap: () {},
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'آخر نسخة احتياطية: 15/07/2026 14:30',
+                          style: TxtStyle.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
+                  // ====== 6. Users ======
+                  const UsersSection(),
+
+                  const SizedBox(height: 24),
+                  // ====== داخل SettingsScreen ======
+// أضف هذا الـ ListTile مع باقي عناصر الإعدادات
+
+                  ListTile(
+                    leading: Icon(
+                      Iconss.driver,
+                      color: Colorsmanegments.primary,
+                      size: 28,
+                    ),
+                    title: Text(
+                      'المندوبين',
+                      style: TxtStyle.titleMedium,
+                    ),
+                    subtitle: Text(
+                      'إدارة المندوبين وإضافة وتعديل وحذف',
+                      style: TxtStyle.bodySmall,
+                    ),
+                    trailing: Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: Colorsmanegments.grey,
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider(
+                            create: (context) => DriverCubit(
+                              DriverRepository(
+                                DriverLocalDataSource(),
+                              ),
+                            )..loadDrivers(),
+                            child: const DriverScreen(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // ====== 7. About ======
+                  SettingsSection(
+                    title: 'عن التطبيق',
+                    icon: Iconss.info,
+                    child: SettingsCard(
+                      children: [
+                        _buildAboutItem('اسم التطبيق', 'Modu POS'),
+                        _buildAboutItem('الإصدار', '2.0.0'),
+                        _buildAboutItem('المطور', 'Ahmed Tarek'),
+                        _buildAboutItem('الهاتف', '010xxxxxxxx'),
+                        _buildAboutItem('الموقع', 'www.modupos.com'),
+                        _buildAboutItem('البريد الإلكتروني', 'info@modupos.com'),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // ====== Save Button ======
+                  SettingsFooter(
+                    onPressed: () {
+                      final settings = SettingsModel(
+                        storeName: storeController.text,
+                        phone: phoneController.text,
+                        address: addressController.text,
+                        taxNumber: taxNumberController.text,
+                        taxPercentage: double.tryParse(taxController.text) ?? 0,
+                        currency: currency,
+                        language: language,
+                        cashierPrinter: cashierPrinter,
+                        kitchenPrinter: kitchenPrinter,
+                        paperWidth: paperWidth,
+                        taxEnabled: taxEnabled,
+                        autoPrintReceipt: autoPrintReceipt,
+                        autoPrintKitchen: autoPrintKitchen,
+                        autoOpenDrawer: autoOpenDrawer,
+                        showLogo: showLogo,
+                        showAddress: showAddress,
+                        showPhone: showPhone,
+                        showTaxNumber: showTaxNumber,
+                        showQr: showQr,
+                        footerMessage: footerController.text, logo: '',
+                      );
+                      context.read<SettingsCubit>().saveSettings(settings);
+                    },
+                  ),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAboutItem(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Text(
+            '$label:',
+            style: TxtStyle.labelBold,
+          ),
+          const SizedBox(width: 12),
+          Text(
+            value,
+            style: TxtStyle.bodyMedium,
+          ),
+          const Spacer(),
+        ],
+      ),
+    );
+  }
+}
