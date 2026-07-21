@@ -1,6 +1,8 @@
 // lib/feature/home/presentation/widget/quick_actions_grid.dart
 
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:home/feature/setting/pre/screen/settings_screen.dart';
 
@@ -58,6 +60,194 @@ class QuickActionsGrid extends StatelessWidget {
     required this.user,
   });
 
+  // ============================================================
+  // WORKFLOW 1: End Shift Workflow
+  // ============================================================
+  Future<bool> _handleEndShiftWorkflow(BuildContext context) async {
+    // 1. Show RTL Confirmation Dialog
+    final confirm = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text("إنهاء الشيفت"),
+            content: const Text(
+              "سيتم تنفيذ العمليات التالية:\n\n"
+                  "• طباعة تقرير نهاية الشيفت\n"
+                  "• إعادة تعيين عداد الفواتير\n"
+                  "• بدء شيفت جديد",
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, false),
+                child: const Text("إلغاء"),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colorsmanegments.primary,
+                ),
+                onPressed: () => Navigator.pop(dialogContext, true),
+                child: const Text("إنهاء الشيفت"),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (confirm != true) return false;
+
+    // 2. Show Responsive Loading Dialog
+    if (!context.mounted) return false;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Directionality(
+        textDirection: TextDirection.rtl,
+        child: AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text("جاري إنهاء الشيفت وطباعة التقرير..."),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    try {
+      // 3. Print Shift Report (Wait until completely finished)
+      await ShiftClosingService().printShiftReport();
+
+      // 4. Reset Shift in Database (ONLY executed if printing succeeds)
+      await ShiftClosingService().resetShift();
+
+      // 5. Refresh Order Counter in OrderCubit if available
+      if (context.mounted) {
+        try {
+          await context.read<OrderCubit>().refreshNextOrderNumber();
+        } catch (_) {
+          // Safe catch if OrderCubit is not in current context tree
+        }
+      }
+
+      // 6. Close Loading Dialog
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+
+      // 7. Show Success Dialog
+      if (context.mounted) {
+        await showDialog(
+          context: context,
+          builder: (_) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: AlertDialog(
+              title: const Text("تم بنجاح"),
+              content: const Text("تم إنهاء الشيفت وبدء شيفت جديد."),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("موافق"),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+      return true;
+    } catch (e) {
+      // Error Handling: Close Loading Dialog & Show Error Dialog
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+
+        await showDialog(
+          context: context,
+          builder: (_) => Directionality(
+            textDirection: TextDirection.rtl,
+            child: AlertDialog(
+              title: const Text("خطأ في إنهاء الشيفت"),
+              content: Text(
+                "فشلت عملية طباعة تقرير الشيفت. لم يتم إنهاء الشيفت أو إعادة تعيين العداد.\n\nالتفاصيل: $e",
+              ),
+              actions: [
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("حسناً"),
+                ),
+              ],
+            ),
+          ),
+        );
+      }
+      return false;
+    }
+  }
+
+  // ============================================================
+  // WORKFLOW 2: Exit Application Workflow
+  // ============================================================
+  Future<void> _handleExitAppWorkflow(BuildContext context) async {
+    final action = await showDialog<String>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: AlertDialog(
+            title: const Text("إغلاق البرنامج"),
+            content: const Text("هل تريد إنهاء الشيفت قبل إغلاق البرنامج؟"),
+            actionsAlignment: MainAxisAlignment.spaceBetween,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext, "cancel"),
+                child: const Text("إلغاء"),
+              ),
+              OutlinedButton(
+                onPressed: () => Navigator.pop(dialogContext, "exit_only"),
+                child: const Text("إغلاق فقط"),
+              ),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colorsmanegments.primary,
+                ),
+                onPressed: () => Navigator.pop(dialogContext, "end_and_exit"),
+                child: const Text("إنهاء الشيفت ثم إغلاق"),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (action == "exit_only") {
+      await _closeDatabaseAndExit();
+    } else if (action == "end_and_exit") {
+      if (context.mounted) {
+        final success = await _handleEndShiftWorkflow(context);
+        if (success) {
+          await _closeDatabaseAndExit();
+        }
+      }
+    }
+  }
+
+  // 🎯 إغلاق الداتابيز والخروج القياسي بدون حزم خارجية
+  Future<void> _closeDatabaseAndExit() async {
+    try {
+      await AppDatabase.instance.close();
+    } catch (_) {}
+
+    // الخروج النظيف المدمج في Dart/Flutter للـ Desktop
+    try {
+      await SystemNavigator.pop();
+    } catch (_) {}
+
+    exit(0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,45 +326,30 @@ class QuickActionsGrid extends StatelessWidget {
       },
     ];
 
-    final filteredActions = actions.where((action){
-
-      switch(action["title"]){
-
+    final filteredActions = actions.where((action) {
+      switch (action["title"]) {
         case "المنتجات":
           return user.canManageProducts;
-
         case "الأقسام":
           return user.canManageCategories;
-
         case "العملاء":
           return user.canManageCustomers;
-
         case "الموردين":
           return user.canManageSuppliers;
-
         case "المخزن":
           return user.canManageInventory;
-
         case "التقارير":
           return user.canManageReports;
-
         case "الإعدادات":
           return user.canManageSettings;
-
         case "الكاشير":
           return true;
-
         case "سجل المبيعات":
           return true;
-
         default:
           return true;
       }
-
     }).toList();
-
-
-
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -184,7 +359,6 @@ class QuickActionsGrid extends StatelessWidget {
           style: TxtStyle.titleCard,
         ),
         const SizedBox(height: 16),
-
         Directionality(
           textDirection: TextDirection.rtl,
           child: GridView.builder(
@@ -196,7 +370,7 @@ class QuickActionsGrid extends StatelessWidget {
               mainAxisSpacing: 16,
               childAspectRatio: 1.35,
             ),
-            itemCount:  filteredActions.length,
+            itemCount: filteredActions.length,
             itemBuilder: (context, index) {
               final item = filteredActions[index];
 
@@ -295,7 +469,7 @@ class QuickActionsGrid extends StatelessWidget {
                         ),
                       ),
                     );
-                  }else if (item["title"] == "الإعدادات") {
+                  } else if (item["title"] == "الإعدادات") {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -309,69 +483,11 @@ class QuickActionsGrid extends StatelessWidget {
                         ),
                       ),
                     );
+                  } else if (item["title"] == "إنهاء الشيفت") {
+                    await _handleEndShiftWorkflow(context);
+                  } else if (item["title"] == "إغلاق Modu") {
+                    await _handleExitAppWorkflow(context);
                   }
-
-
-
-                  else if (item["title"] == "إغلاق Modu") {
-                    ElevatedButton(onPressed: (){}, child: null,);
-                  }
-                  else if (item["title"] == "إنهاء البرنامج") {
-
-                    final confirm = await showDialog<bool>(
-                      context: context,
-                      builder: (_) {
-                        return AlertDialog(
-                          title: const Text("إنهاء الشيفت"),
-                          content: const Text(
-                              "هل تريد طباعة تقرير نهاية الشيفت؟"
-                          ),
-
-                          actions: [
-
-                            TextButton(
-                              onPressed: (){
-                                Navigator.pop(context,false);
-                              },
-                              child: const Text("إلغاء"),
-                            ),
-
-
-                            ElevatedButton(
-                              onPressed: (){
-                                Navigator.pop(context,true);
-                              },
-                              child: const Text("طباعة"),
-                            ),
-
-                          ],
-                        );
-                      },
-                    );
-
-
-                    if (confirm == true) {
-                      try {
-                        await ShiftClosingService().printShiftReport();
-                      } catch (e) {
-                        debugPrint(e.toString());
-                      }
-
-                      await ShiftClosingService().resetShift();
-
-                      if (context.mounted) {
-                        await context.read<OrderCubit>().refreshNextOrderNumber();
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("تم إنهاء الشيفت بنجاح"),
-                          ),
-                        );
-                      }
-                    }
-
-                  }
-
                 },
               );
             },
@@ -379,7 +495,6 @@ class QuickActionsGrid extends StatelessWidget {
         ),
       ],
     );
-
   }
 }
 
@@ -476,5 +591,4 @@ class _ActionCardState extends State<ActionCard> {
       ),
     );
   }
-
 }
