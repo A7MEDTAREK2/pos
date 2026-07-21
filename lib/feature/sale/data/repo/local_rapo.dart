@@ -1,9 +1,11 @@
 // lib/feature/sales_history/data/repo/local_rapo.dart
 
+import '../../../cashier/data/model/pos_model.dart';
 import '../data_source/local_data_source.dart';
 import '../model/sale_model.dart';
 
 abstract class SalesHistoryRepository {
+  Future<OrderModel> getSaleAsOrder(int saleId);
   Future<List<SalesHistoryModel>> getSales();
   Future<List<SalesHistoryModel>> searchSales(String keyword);
   Future<List<SaleItemModel>> getSaleItems(int saleId);
@@ -80,5 +82,9 @@ class SalesHistoryRepositoryImpl implements SalesHistoryRepository {
     } catch (e) {
       throw Exception('Failed to reopen order: $e');
     }
+  }
+  @override
+  Future<OrderModel> getSaleAsOrder(int saleId) {
+    return dataSource.getSaleAsOrder(saleId);
   }
 }

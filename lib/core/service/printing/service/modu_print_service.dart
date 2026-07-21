@@ -6,8 +6,8 @@ class ModuPrintService {
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: _baseUrl,
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 20),
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 30),
       headers: {
         "Content-Type": "application/json",
       },
@@ -19,8 +19,8 @@ class ModuPrintService {
   // =============================
 
   Future<List<dynamic>> getPrinters() async {
+    print("HTTP PRINTER LIST REQUEST");
     final response = await _dio.get("/api/printer/list");
-
     return response.data;
   }
 
@@ -30,7 +30,6 @@ class ModuPrintService {
 
   Future<Map<String, dynamic>> getStatus() async {
     final response = await _dio.get("/api/printer/status");
-
     return Map<String, dynamic>.from(response.data);
   }
 
@@ -67,25 +66,41 @@ class ModuPrintService {
   }
 
   // =============================
-  // Print Receipt
+  // Print Receipt (معالجة ذكية للـ Timeout)
   // =============================
 
-  Future<void> printReceipt(
-      Map<String, dynamic> request,
-      ) async {
-    await _dio.post(
-      "/api/printer/receipt",
-      data: request,
-    );
+  Future<void> printReceipt(Map<String, dynamic> request) async {
+    print("➡️ Before POST /api/printer/receipt");
+
+    try {
+      final response = await _dio.post(
+        "/api/printer/receipt",
+        data: request,
+      );
+
+      print("✅ After POST Success");
+      print("Status Code: ${response.statusCode}");
+      print("Response Data: ${response.data}");
+    } on DioException catch (e) {
+      print("❌ Dio Error on Receipt Print");
+      print("Error Type: ${e.type}");
+      print("Error Message: ${e.message}");
+
+      if (e.type == DioExceptionType.receiveTimeout) {
+        // إذا كان الخطأ مجرد تأخر استجابة ولكن السيرفر نفذ الطباعة
+        print("⚠️ Warning: Receive timeout reached, but print job was dispatched.");
+      }
+
+      // إعادة الـ Exception ليتعامل معها الـ UI إذا لزم الأمر
+      rethrow;
+    }
   }
 
   // =============================
   // Kitchen Receipt
   // =============================
 
-  Future<void> printKitchen(
-      Map<String, dynamic> request,
-      ) async {
+  Future<void> printKitchen(Map<String, dynamic> request) async {
     await _dio.post(
       "/api/printer/kitchen",
       data: request,
@@ -96,9 +111,7 @@ class ModuPrintService {
   // End Shift Report
   // =============================
 
-  Future<void> printEndShift(
-      Map<String, dynamic> request,
-      ) async {
+  Future<void> printEndShift(Map<String, dynamic> request) async {
     await _dio.post(
       "/api/printer/end-shift",
       data: request,
@@ -109,21 +122,18 @@ class ModuPrintService {
   // Daily Report
   // =============================
 
-  Future<void> printDailyReport(
-      Map<String, dynamic> request,
-      ) async {
+  Future<void> printDailyReport(Map<String, dynamic> request) async {
     await _dio.post(
       "/api/printer/daily-report",
       data: request,
     );
   }
-  // =============================
-// Thermal Report
-// =============================
 
-  Future<void> printReport(
-      Map<String, dynamic> request,
-      ) async {
+  // =============================
+  // Thermal Report
+  // =============================
+
+  Future<void> printReport(Map<String, dynamic> request) async {
     await _dio.post(
       "/api/printer/report",
       data: request,

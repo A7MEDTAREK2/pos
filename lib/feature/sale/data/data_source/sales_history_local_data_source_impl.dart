@@ -8,10 +8,12 @@ import '../../../cashier/data/data_source/local_data_source.dart';
 import '../../../cashier/data/model/pos_model.dart';
 
 class SalesHistoryLocalDataSourceImpl implements SalesHistoryLocalDataSource {
+
   final Future<Database> _database = AppDatabase.instance.database;
 
   @override
   Future<List<Map<String, dynamic>>> getSales() async {
+
     final db = await _database;
     return await db.query('sales', orderBy: 'created_at DESC');
   }
@@ -192,5 +194,76 @@ class SalesHistoryLocalDataSourceImpl implements SalesHistoryLocalDataSource {
     });
 
     print("11- Transaction Finished");
+  }
+
+  @override
+  Future<OrderModel> getSaleAsOrder(int saleId) async {
+    final db = await _database;
+
+    final saleResult = await db.query(
+      'sales',
+      where: 'id = ?',
+      whereArgs: [saleId],
+    );
+
+    if (saleResult.isEmpty) {
+      throw Exception("Sale not found");
+    }
+
+    final sale = saleResult.first;
+
+    final items = await db.query(
+      'sale_items',
+      where: 'sale_id = ?',
+      whereArgs: [saleId],
+    );
+
+    return OrderModel(
+      id: saleId.toString(),
+      orderNumber: sale['order_number'] as int,
+      items: items.map((item) {
+        return {
+          'productId': item['product_id'],
+          'name': item['product_name'],
+          'quantity': item['quantity'],
+          'price': (item['price'] as num).toDouble(),
+          'image': null,
+          'note': item['note'] ?? '',
+          'size': item['size_name'],
+        };
+      }).toList(),
+
+      totalAmount: (sale['total'] as num).toDouble(),
+
+      orderType:
+      OrderType.values[sale['order_type'] as int],
+
+      orderStatus: OrderStatus.paid,
+
+      customerId: sale['customer_id'] as int?,
+      customerAddressId: sale['customer_address_id'] as int?,
+
+      customerName: sale['customer_name']?.toString(),
+      customerPhone: sale['customer_phone']?.toString(),
+      customerAddress: sale['customer_address']?.toString(),
+
+      subtotal:
+      (sale['subtotal'] as num?)?.toDouble() ?? 0,
+
+      discount:
+      (sale['discount'] as num?)?.toDouble() ?? 0,
+
+      tax:
+      (sale['tax'] as num?)?.toDouble() ?? 0,
+
+      deliveryFee:
+      (sale['delivery_fee'] as num?)?.toDouble() ?? 0,
+
+      paymentMethod:
+      sale['payment_method']?.toString() ?? 'Cash',
+
+      createdAt:
+      DateTime.parse(sale['created_at'].toString()),
+    );
   }
 }

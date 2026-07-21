@@ -1,3 +1,5 @@
+import '../../../cashier/data/model/pos_model.dart';
+
 abstract class SalesHistoryLocalDataSource {
   Future<List<Map<String, dynamic>>> getSales();
 
@@ -7,4 +9,5 @@ abstract class SalesHistoryLocalDataSource {
   Future<void> reopenOrder(int saleId);
 
   Future<void> deleteSale(int saleId);
+  Future<OrderModel> getSaleAsOrder(int saleId);
 }

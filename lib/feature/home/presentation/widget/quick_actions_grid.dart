@@ -128,6 +128,12 @@ class QuickActionsGrid extends StatelessWidget {
         "icon": Icons.print_outlined,
         "isActive": false,
       },
+      {
+        "title": "إغلاق Modu",
+        "subtitle": "إغلاق الابلكيشن",
+        "icon": Icons.close,
+        "isActive": false,
+      },
     ];
 
     final filteredActions = actions.where((action){
@@ -304,7 +310,13 @@ class QuickActionsGrid extends StatelessWidget {
                       ),
                     );
                   }
-                  else if (item["title"] == "إنهاء الشيفت") {
+
+
+
+                  else if (item["title"] == "إغلاق Modu") {
+                    ElevatedButton(onPressed: (){}, child: null,);
+                  }
+                  else if (item["title"] == "إنهاء البرنامج") {
 
                     final confirm = await showDialog<bool>(
                       context: context,

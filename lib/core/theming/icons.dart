@@ -236,6 +236,15 @@ class Iconss {
   static const IconData driver = Icons.drive_eta_rounded;
 
 
+// lib/core/theming/iconss.da
+  // ... الأيقونات الموجودة ...
+
+  // ============================================================
+  // Reset Data
+  // ============================================================
+  static const IconData restart = Icons.restart_alt;
+  static const IconData deleteForever = Icons.delete_forever;
+  static const IconData deleteSales = Icons.receipt_long_outlined;
 
 
 

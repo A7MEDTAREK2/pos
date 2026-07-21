@@ -155,6 +155,9 @@ class PrintingManager {
 
     try {
       print("Start Receipt Request");
+      print("========== PRINT RECEIPT ==========");
+      print(requestData["invoiceNumber"]);
+      print(DateTime.now());
       await _service.printReceipt(requestData);
       print("Receipt Request Finished");
     } catch (e) {

@@ -14,6 +14,7 @@ class SaleActions extends StatelessWidget {
   final VoidCallback onDetails;
   final VoidCallback onDelete;
 
+
   const SaleActions({
     super.key,
     required this.onReopen,
@@ -60,6 +61,7 @@ class SaleActions extends StatelessWidget {
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
+
   }) {
     return IconButton(
       tooltip: tooltip,

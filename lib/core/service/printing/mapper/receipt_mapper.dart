@@ -30,14 +30,17 @@ class ReceiptMapper {
       "paymentMethod": order.paymentMethod ?? "Cash",
 
       "products": order.items.map((item) {
+
+        final quantity = (item["quantity"] as num?)?.toInt() ?? 1;
+        print("RECEIPT ITEMS => ${order.items}");
+
         return {
           "productName": item["name"] ?? "",
           "sizeName": item["size"] ?? "",
-          "quantity": item["quantity"] ?? 1,
+          "quantity": quantity <= 0 ? 1 : quantity,
           "price": (item["price"] as num).toDouble(),
           "total":
-          ((item["price"] as num).toDouble()) *
-              ((item["quantity"] as int)),
+          ((item["price"] as num).toDouble()) * quantity,
           "note": item["note"] ?? "",
         };
       }).toList(),

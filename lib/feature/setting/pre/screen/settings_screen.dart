@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // ====== Core ======
+import '../../../../core/data_mange/data_mange/app_restart.dart';
+import '../../../../core/data_mange/data_mange/cubit_mange.dart';
+import '../../../../core/data_mange/data_mange/state_mange.dart';
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/icons.dart';
 import '../../../../core/theming/txt_style.dart';
@@ -16,6 +19,7 @@ import '../../../driver/pre/driver_Screen.dart';
 import '../../data/model/settings_model.dart';
 import '../../logic/set_cubit.dart';
 import '../../logic/set_state.dart';
+import '../widget/data reste_dailog.dart';
 import '../widget/settings_action_button.dart';
 import '../widget/settings_card.dart';
 import '../widget/settings_dropdown.dart';
@@ -84,7 +88,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<SettingsCubit, SettingsState>(
+    return BlocListener<MaintenanceCubit, MaintenanceState>(
+        listener: (context, state) {
+          if (state is MaintenanceSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.green,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            if (state.message.contains("سيتم إعادة تشغيل البرنامج")) {
+              Future.delayed(const Duration(seconds: 1), () async {
+                await AppRestart.restart();
+              });
+            }
+          }
+
+          if (state is MaintenanceError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: Colors.red,
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
+        },
+        child: BlocConsumer<SettingsCubit, SettingsState>(
       listener: (context, state) {
         if (state is SettingsLoaded && !_loaded) {
           final settings = state.settings;
@@ -456,36 +487,40 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: SettingsCard(
                       children: [
                         SettingsActionButton(
-                          label: 'تصدير قاعدة البيانات',
-                          icon: Iconss.export,
-                          color: Colorsmanegments.primary,
-                          onTap: () {},
-                        ),
-                        const SizedBox(height: 12),
-                        SettingsActionButton(
-                          label: 'استيراد قاعدة البيانات',
-                          icon: Iconss.import,
-                          color: Colorsmanegments.warning,
-                          onTap: () {},
-                        ),
-                        const SizedBox(height: 12),
-                        SettingsActionButton(
                           label: 'إنشاء نسخة احتياطية',
                           icon: Iconss.backup,
                           color: Colorsmanegments.success,
-                          onTap: () {},
+                          onTap: () {
+                            context.read<MaintenanceCubit>().backupDatabase();
+                          },
                         ),
                         const SizedBox(height: 12),
                         SettingsActionButton(
                           label: 'استعادة نسخة احتياطية',
                           icon: Iconss.restore,
                           color: Colorsmanegments.danger,
-                          onTap: () {},
+                          onTap: () {
+                            context.read<MaintenanceCubit>().restoreDatabase();
+                          },
                         ),
                         const SizedBox(height: 12),
-                        Text(
-                          'آخر نسخة احتياطية: 15/07/2026 14:30',
-                          style: TxtStyle.bodySmall,
+                        // Text(
+                        //   'آخر نسخة احتياطية: 15/07/2026 14:30',
+                        //   style: TxtStyle.bodySmall,
+                        // ),
+                        const SizedBox(height: 12),
+
+                        SettingsActionButton(
+                          label: 'إعادة تهيئة البيانات',
+                          icon: Iconss.deleteForever,
+                          color: Colorsmanegments.danger,
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (_) => const ResetDataDialog(),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -544,11 +579,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: SettingsCard(
                       children: [
                         _buildAboutItem('اسم التطبيق', 'Modu POS'),
-                        _buildAboutItem('الإصدار', '2.0.0'),
+                        _buildAboutItem('الإصدار', '1.0.0'),
                         _buildAboutItem('المطور', 'Ahmed Tarek'),
-                        _buildAboutItem('الهاتف', '010xxxxxxxx'),
-                        _buildAboutItem('الموقع', 'www.modupos.com'),
-                        _buildAboutItem('البريد الإلكتروني', 'info@modupos.com'),
+                        _buildAboutItem('الهاتف', '01092400184'),
+
+                        _buildAboutItem('البريد الإلكتروني', 'modytareq225@gmail.com'),
                       ],
                     ),
                   ),
@@ -591,6 +626,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         );
       },
+            )
     );
   }
 

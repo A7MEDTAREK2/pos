@@ -8,6 +8,9 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 // ====== Core ======
 import 'core/data_base/pos_database.dart';
+import 'core/data_mange/data_mange/cubit_mange.dart';
+import 'core/data_mange/data_mange/local_mange.dart';
+import 'core/data_mange/data_mange/repo.dart';
 import 'core/service/printing/printing_manager.dart';
 import 'core/service/printing/service/modu_print_service.dart';
 import 'core/theming/colors manegments.dart';
@@ -91,7 +94,7 @@ void main() {
 
   runApp(const MyApp());
 
-  PrintingManager.instance.startQueueWorker();
+  //PrintingManager.instance.startQueueWorker();
 
 }
 
@@ -258,6 +261,15 @@ class MyApp extends StatelessWidget {
               DriverLocalDataSource(),
             ),
           )..loadDrivers(),
+        ),
+        BlocProvider<MaintenanceCubit>(
+          create: (_) => MaintenanceCubit(
+            MaintenanceRepository(
+              MaintenanceLocalDataSource(
+                AppDatabase.instance,
+              ),
+            ),
+          ),
         ),
       ],
       child: MaterialApp(

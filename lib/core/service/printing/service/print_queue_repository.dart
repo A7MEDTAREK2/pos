@@ -50,14 +50,21 @@ class PrintQueueRepository {
         await markPrinted(job.id!);
 
         print("✅ Printed Job #${job.id}");
-      } catch (e) {
-        await markFailed(
-          job.id!,
-          e.toString(),
-          job.retryCount + 1,
-        );
+      }  catch (e, stackTrace) {
+  print("=================================");
+  print("❌ Failed Job #${job.id}");
+  print("Job Type: ${job.type}");
+  print("Error: $e");
+  print("StackTrace:");
+  print(stackTrace);
+  print("=================================");
 
-        print("❌ Failed Job #${job.id}");
+  await markFailed(
+  job.id!,
+  e.toString(),
+  job.retryCount + 1,
+  );
+
       }
 
   }
