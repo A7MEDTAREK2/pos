@@ -247,5 +247,9 @@ class Iconss {
   static const IconData deleteSales = Icons.receipt_long_outlined;
 
 
-
+  static const IconData locationOff = Icons.location_off_outlined;
+  static const IconData addLocation = Icons.add_location_alt_outlined;
+  static const IconData label = Icons.label_outline;
+  static const IconData map = Icons.map_outlined;
+  static const IconData check = Icons.check_circle;
 }

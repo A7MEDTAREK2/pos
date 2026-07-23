@@ -1,28 +1,35 @@
+// lib/feature/customer/presentation/widget/customer_appbar.dart
+
 import 'package:flutter/material.dart';
 
-class CustomerAppBar extends StatelessWidget implements PreferredSizeWidget {
-  // ====== متغيرات التحكم في الـ UI ======
-  final Color backgroundColor = Colors.blue.shade700;
-  final Color foregroundColor = Colors.white;
-  final Color shadowColor = Colors.blue.shade900;
-  final double elevation = 4.0;
-  final double titleFontSize = 22.0;
-  final double bottomBorderRadius = 16.0;
-  final bool showBottomBorder = true;
-  final String titleText = "العملاء";
-  final String searchHint = "بحث عن عميل...";
-  final bool showSearchButton = true;
-  final bool showAddButton = true;
-  final bool showBackButton = false;
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/icons.dart';
+import '../../../../core/theming/txt_style.dart';
 
-  final VoidCallback? onSearchPressed;
-  final VoidCallback? onAddPressed;
+class CustomerAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final Color shadowColor;
+  final double elevation;
+  final double titleFontSize;
+  final double bottomBorderRadius;
+  final bool showBottomBorder;
+  final String titleText;
+  final bool showBackButton;
   final VoidCallback? onBackPressed;
 
-   CustomerAppBar({
+  const CustomerAppBar({
     super.key,
-    this.onSearchPressed,
-    this.onAddPressed,
+    this.backgroundColor = Colorsmanegments.primary,
+    this.foregroundColor = Colorsmanegments.textWhite,
+    this.shadowColor = Colorsmanegments.primaryDark,
+    this.elevation = 4.0,
+    this.titleFontSize = 22.0,
+    this.bottomBorderRadius = 16.0,
+    this.showBottomBorder = true,
+    this.titleText = "العملاء",
+    this.showBackButton = false,
     this.onBackPressed,
   });
 
@@ -34,7 +41,6 @@ class CustomerAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: elevation,
       shadowColor: shadowColor.withOpacity(0.3),
 
-      // ====== شكل الـ AppBar ======
       shape: showBottomBorder
           ? RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
@@ -43,41 +49,36 @@ class CustomerAppBar extends StatelessWidget implements PreferredSizeWidget {
       )
           : null,
 
-      // ====== عنوان الصفحة ======
       title: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.people_alt,
+            Iconss.people,
             color: foregroundColor,
             size: 28,
           ),
           const SizedBox(width: 10),
           Text(
             titleText,
-            style: TextStyle(
+            style: TxtStyle.headerWhite.copyWith(
               fontSize: titleFontSize,
-              fontWeight: FontWeight.bold,
-              color: foregroundColor,
-              letterSpacing: 0.5,
             ),
           ),
         ],
       ),
       centerTitle: true,
 
-      // ====== زر الرجوع (اختياري) ======
       leading: showBackButton
           ? IconButton(
         onPressed: onBackPressed ?? () => Navigator.pop(context),
-        icon: const Icon(Icons.arrow_back_ios),
+        icon: Icon(
+          Iconss.arrowBack,
+          color: foregroundColor,
+        ),
         tooltip: 'رجوع',
       )
           : null,
 
-
-
-      // ====== تنسيق النصوص ======
       toolbarTextStyle: TextStyle(
         color: foregroundColor,
         fontSize: 18,

@@ -48,18 +48,17 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    HomeAppBar(
-                      userName: user.username,
-                    ),
+                    // 🎯 تم إزالة userName لإلغاء الخطأ واستخدام البيانات الحية من الجلسة
+                    const HomeAppBar(),
                     const SizedBox(height: 32),
-                    MetricsGrid(
-                      todaySales: state.metrics.todaySales,
-                      invoiceCount: state.metrics.invoiceCount,
-                      totalProducts: state.metrics.totalProducts,
-                      totalCustomers: state.metrics.totalCustomers,
-                    ),
+                    // MetricsGrid(
+                    //   todaySales: state.metrics.todaySales,
+                    //   invoiceCount: state.metrics.invoiceCount,
+                    //   totalProducts: state.metrics.totalProducts,
+                    //   totalCustomers: state.metrics.totalCustomers,
+                    // ),
                     const SizedBox(height: 32),
-                     QuickActionsGrid(user: user,),
+                    QuickActionsGrid(user: user),
                   ],
                 ),
               );

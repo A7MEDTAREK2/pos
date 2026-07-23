@@ -1,19 +1,27 @@
+// lib/core/service/printing/service/printing_manager.dart
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:home/core/service/printing/service/modu_print_service.dart';
 import 'package:home/core/service/printing/service/print_queue_local.dart';
 import 'package:home/core/service/printing/service/print_queue_repository.dart';
-import '../../../feature/cashier/data/model/pos_model.dart';
+import '../../../../feature/cashier/data/model/pos_model.dart';
+import '../../../../feature/setting/data/datasorce/local_data.dart';
+import '../../../../feature/setting/data/model/settings_model.dart';
 import '../export/report_export_model.dart';
+import 'mapper/receipt_mapper.dart';
 import 'model/print_queue_model.dart';
 
 bool _isRetrying = false;
+
 class PrintingManager {
   PrintingManager._();
   Timer? _timer;
+
   void stopRetryService() {
     _timer?.cancel();
   }
+
   void dispose() {
     _timer?.cancel();
   }
@@ -21,10 +29,21 @@ class PrintingManager {
   static final PrintingManager instance = PrintingManager._();
 
   final ModuPrintService _service = ModuPrintService();
-  final PrintQueueRepository _queueRepository =
-  PrintQueueRepository(
+  final SettingsLocalDataSource _settingsDataSource = SettingsLocalDataSourceImpl();
+
+  final PrintQueueRepository _queueRepository = PrintQueueRepository(
     PrintQueueLocalDataSource(),
   );
+
+  // 🎯 جلب الإعدادات الحالية من قاعدة البيانات محلياً
+  Future<SettingsModel?> _getSettings() async {
+    try {
+      return await _settingsDataSource.getSettings();
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<void> _savePrintJob({
     required String type,
     required Map<String, dynamic> payload,
@@ -38,9 +57,22 @@ class PrintingManager {
     );
   }
 
-  String printerName = "XP-80C";
-
+  // =============================
+  // KITCHEN PRINT
+  // =============================
   Future<void> printKitchen(OrderModel order) async {
+    final settings = await _getSettings();
+
+    // 🔍 التحقق من اسم طابعة المطبخ وتجاوز "طابعة 1" إن وجدت
+    String printerName = settings?.kitchenPrinter ?? "";
+    if (printerName.isEmpty || printerName == "طابعة 1") {
+      printerName = "XP-80C";
+    }
+
+    print("🔍 طابعة المطبخ المُستخدمة: $printerName");
+
+    final int paperWidth = settings?.paperWidth ?? 80;
+
     if (printerName.isEmpty) return;
 
     final Map<String, List<Map<String, dynamic>>> groupedItems = {};
@@ -49,14 +81,11 @@ class PrintingManager {
       final quantity = int.tryParse(e["quantity"].toString()) ?? 0;
       final price = double.tryParse(e["price"].toString()) ?? 0.0;
 
-      final category =
-          e["categoryName"]?.toString() ??
-              e["category"]?.toString() ??
-              "General";
+      final category = e["categoryName"]?.toString() ??
+          e["category"]?.toString() ??
+          "General";
 
       groupedItems.putIfAbsent(category, () => []);
-      print("PRODUCT: ${e["name"]}");
-      print("CATEGORY: $category");
 
       groupedItems[category]!.add({
         "name": e["name"].toString(),
@@ -68,108 +97,113 @@ class PrintingManager {
       });
     }
 
-
-
     for (final entry in groupedItems.entries) {
-      print("PRINT DEPARTMENT => ${entry.key}");
       final department = entry.key;
       final items = entry.value;
 
-      final requestData = {
-        "printerName": printerName,
-        "paperWidth": 80,
-        "invoiceNumber": order.orderNumber,
-        "date": order.createdAt.toIso8601String(),
-        "orderType": order.orderType.name,
-        "tableNumber": order.tableNumber ?? "",
-        "customerName": order.customerName ?? "",
-        "deliveryAddress": order.customerAddress ?? "",
-        "cashier": "Admin",
-
-        // الجديد
-        "department": department,
-
-        "items": items,
-      };
-
-      print("📤 Kitchen [$department]");
-      print(jsonEncode(requestData));
+      // 🎯 الاعتماد على ReceiptMapper لتوليد الـ Payload الخاص بالمطبخ
+      final requestData = ReceiptMapper.toKitchenPayload(
+        order: order,
+        settings: settings,
+        printerName: printerName,
+        department: department,
+        items: items,
+      );
 
       try {
-        print("Start Kitchen Request");
         await _service.printKitchen(requestData);
-        print("Kitchen Request Finished");
       } catch (e) {
         await _savePrintJob(
           type: "kitchen",
           payload: requestData,
         );
-
-        print("❌ Kitchen Print Failed");
-        print(e);
+        print("❌ Kitchen Print Failed: $e");
       }
     }
   }
 
+  // =============================
+  // RECEIPT PRINT (مع التنسيقات الكاملة للسيرفر)
+  // =============================
   Future<void> printReceipt(OrderModel order) async {
+    final settings = await _getSettings();
+
+    // 🔍 التحقق من اسم طابعة الكاشير وتجاوز "طابعة 1" إن وجدت
+    String printerName = settings?.cashierPrinter ?? "";
+    if (printerName.isEmpty || printerName == "طابعة 1") {
+      printerName = "XP-80C";
+    }
+
+    print("🔍 طابعة الكاشير المُستخدمة: $printerName");
+
     if (printerName.isEmpty) return;
 
-    final products = order.items.map((e) {
-      final price = (e["price"] as num).toDouble();
-      final quantity = (e["quantity"] as num).toInt();
-
-      return {
-        "name": e["name"].toString(),
-        "qty": quantity,
-        "size": e["size"]?.toString() ?? "", // ✅ أضفنا الحجم
-        "note": e["note"]?.toString() ?? "",
-        "price": price,
-        "total": price * quantity,
-      };
-    }).toList();
-
-    final requestData = {
-      "printerName": printerName,
-      "paperWidth": 80,
-      "storeName": "Modu POS",
-      "invoiceNumber": order.orderNumber,
-      "date": order.createdAt.toIso8601String(),
-      "cashier": "Admin",
-      "customerName": order.customerName ?? "",
-      "customerPhone": order.customerPhone ?? "",
-      "orderType": order.orderType.name,
-      "paymentMethod": order.paymentMethod ?? "Cash",
-
-      // ✅ رجعناها products
-      "products": products,
-
-      "subTotal": (order.subtotal ?? order.totalAmount).toDouble(),
-      "discount": (order.discount ?? 0).toDouble(),
-      "tax": (order.tax ?? 0).toDouble(),
-      "delivery": (order.deliveryFee ?? 0).toDouble(),
-      "grandTotal": order.totalAmount.toDouble(),
-      "footer": "م / أحمد طارق",
-    };
-
-    print("📤 Receipt JSON: ${jsonEncode(requestData)}");
+    // 🎯 الاعتماد على ReceiptMapper لتوليد الـ Payload الخاص بالكاشير
+    final requestData = ReceiptMapper.toCashierPayload(
+      order: order,
+      settings: settings,
+      printerName: printerName,
+    );
 
     try {
-      print("Start Receipt Request");
-      print("========== PRINT RECEIPT ==========");
-      print(requestData["invoiceNumber"]);
-      print(DateTime.now());
       await _service.printReceipt(requestData);
-      print("Receipt Request Finished");
     } catch (e) {
       await _savePrintJob(
         type: "receipt",
         payload: requestData,
       );
-
-      print("❌ Receipt Print Failed");
-      print(e);
+      print("❌ Receipt Print Failed: $e");
     }
   }
+
+  // =============================
+  // BARCODE PRINT (جديد للربط مع السيرفر)
+  // =============================
+  Future<void> printBarcode({
+    required String itemName,
+    required double price,
+    required String barcodeValue,
+    String barcodeSize = "رول 38 * 25",
+  }) async {
+    final settings = await _getSettings();
+
+    final String printerName = settings?.barcodePrinter ?? settings?.cashierPrinter ?? "XP-80C";
+
+    final requestData = {
+      "printerName": printerName,
+      "barcodeSize": barcodeSize,
+      "itemName": itemName,
+      "price": price,
+      "barcodeValue": barcodeValue,
+      "titleStyle": {
+        "font": "Arial (Arabic)",
+        "size": 12,
+        "bold": true,
+        "italic": false,
+        "underline": false,
+      },
+      "displayOptions": {
+        "showBarcodeValue": true,
+        "showBarcodeTitle": true,
+        "showPrice": true,
+        "showItemName": true,
+      }
+    };
+
+    try {
+      await _service.printBarcode(requestData);
+    } catch (e) {
+      await _savePrintJob(
+        type: "barcode",
+        payload: requestData,
+      );
+      print("❌ Barcode Print Failed: $e");
+    }
+  }
+
+  // =============================
+  // DAILY REPORT PRINT
+  // =============================
   Future<void> printDailyReport({
     required String storeName,
     required String cashier,
@@ -182,30 +216,26 @@ class PrintingManager {
     required Map<String, dynamic> paymentSummary,
     required List<Map<String, dynamic>> products,
   }) async {
+    final settings = await _getSettings();
+
+    final String printerName = settings?.reportsPrinter ?? settings?.cashierPrinter ?? "XP-80C";
+    final int paperWidth = settings?.paperWidth ?? 80;
 
     final requestData = {
       "printerName": printerName,
-      "paperWidth": 80,
-
-      "storeName": storeName,
+      "paperWidth": paperWidth,
+      "storeName": settings?.storeName ?? storeName,
       "cashier": cashier,
       "reportDate": DateTime.now().toIso8601String(),
-
       "ordersCount": ordersCount,
-
       "subTotal": subTotal,
       "discount": discount,
       "tax": tax,
       "delivery": delivery,
       "netSales": netSales,
-
       "paymentSummary": paymentSummary,
-
       "products": products,
     };
-
-    print("📤 Daily Report");
-    print(requestData);
 
     try {
       await _service.printDailyReport(requestData);
@@ -214,31 +244,28 @@ class PrintingManager {
         type: "daily_report",
         payload: requestData,
       );
-
-      print("❌ Daily Report Print Failed");
-      print(e);
+      print("❌ Daily Report Print Failed: $e");
     }
   }
-  Future<void> printReport(
-      ReportExportModel report,
-      ) async {
+
+  // =============================
+  // THERMAL REPORT PRINT
+  // =============================
+  Future<void> printReport(ReportExportModel report) async {
+    final settings = await _getSettings();
+
+    final String printerName = settings?.reportsPrinter ?? settings?.cashierPrinter ?? "XP-80C";
+    final int paperWidth = settings?.paperWidth ?? 80;
 
     final request = {
-
       "printerName": printerName,
-      "paperWidth":80,
-
-      "title":report.title,
-
-      "from":report.from?.toIso8601String(),
-      "to":report.to?.toIso8601String(),
-
-      "headers":report.headers,
-
-      "rows":report.rows,
-
+      "paperWidth": paperWidth,
+      "title": report.title,
+      "from": report.from?.toIso8601String(),
+      "to": report.to?.toIso8601String(),
+      "headers": report.headers,
+      "rows": report.rows,
     };
-
 
     try {
       await _service.printReport(request);
@@ -247,13 +274,13 @@ class PrintingManager {
         type: "report",
         payload: request,
       );
-
-      print("❌ Report Print Failed");
-      print(e);
+      print("❌ Report Print Failed: $e");
     }
   }
 
-
+  // =============================
+  // QUEUE RETRY WORKER
+  // =============================
   void startQueueWorker() {
     _timer?.cancel();
 
@@ -261,28 +288,26 @@ class PrintingManager {
       const Duration(seconds: 30),
           (_) async {
         if (_isRetrying) return;
-
         _isRetrying = true;
 
         try {
           await _queueRepository.retryPendingJobs(
                 (job) async {
-              final payload =
-              jsonDecode(job.payload) as Map<String, dynamic>;
+              final payload = jsonDecode(job.payload) as Map<String, dynamic>;
 
               switch (job.type) {
                 case "receipt":
                   await _service.printReceipt(payload);
                   break;
-
                 case "kitchen":
                   await _service.printKitchen(payload);
                   break;
-
+                case "barcode":
+                  await _service.printBarcode(payload);
+                  break;
                 case "daily_report":
                   await _service.printDailyReport(payload);
                   break;
-
                 case "report":
                   await _service.printReport(payload);
                   break;
@@ -295,9 +320,9 @@ class PrintingManager {
       },
     );
   }
+
   Future<void> retryPendingJobs() async {
     if (_isRetrying) return;
-
     _isRetrying = true;
 
     try {
@@ -308,19 +333,18 @@ class PrintingManager {
           case "receipt":
             await _service.printReceipt(payload);
             break;
-
           case "kitchen":
             await _service.printKitchen(payload);
             break;
-
+          case "barcode":
+            await _service.printBarcode(payload);
+            break;
           case "daily_report":
             await _service.printDailyReport(payload);
             break;
-
           case "report":
             await _service.printReport(payload);
             break;
-
           default:
             throw Exception("Unknown print type");
         }
@@ -329,5 +353,4 @@ class PrintingManager {
       _isRetrying = false;
     }
   }
-
 }

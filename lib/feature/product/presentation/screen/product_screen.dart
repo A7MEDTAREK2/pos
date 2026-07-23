@@ -6,8 +6,21 @@ import '../../logic/product_state.dart';
 import '../widget/product_table_row.dart';
 import '../widget/add_product_dialog.dart';
 
-class ProductsScreen extends StatelessWidget {
+class ProductsScreen extends StatefulWidget {
   const ProductsScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ProductsScreen> createState() => _ProductsScreenState();
+}
+
+class _ProductsScreenState extends State<ProductsScreen> {
+  final TextEditingController searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +32,11 @@ class ProductsScreen extends StatelessWidget {
           children: [
             // الهيدر بيحتوي على زرار الرجوع والعنوان وزر الإضافة
             _buildHeader(context),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
+
+            // شريط البحث
+            _buildSearchBar(context),
+            const SizedBox(height: 20),
 
             // رأس الجدول لتوضيح البيانات
             _buildTableHeader(),
@@ -35,7 +52,7 @@ class ProductsScreen extends StatelessWidget {
                   // حالة النجاح وعرض البيانات
                   else if (state is ProductSuccess) {
                     if (state.products.isEmpty) {
-                      return const Center(child: Text("لا توجد منتجات مضافة"));
+                      return const Center(child: Text("لا توجد منتجات مطابقة للبحث"));
                     }
                     return ListView.builder(
                       itemCount: state.products.length,
@@ -58,7 +75,39 @@ class ProductsScreen extends StatelessWidget {
     );
   }
 
-  // تصميم رأس الجدول
+  // تصميم شريط البحث (Search Bar)
+  Widget _buildSearchBar(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colorsmanegments.card,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colorsmanegments.border),
+      ),
+      child: TextField(
+        controller: searchController,
+        onChanged: (value) {
+          context.read<ProductCubit>().searchProducts(value);
+        },
+        decoration: InputDecoration(
+          hintText: "ابحث باسم المنتج أو الباركود...",
+          hintStyle: const TextStyle(color: Colors.grey),
+          prefixIcon: const Icon(Icons.search, color: Colorsmanegments.primary),
+          suffixIcon: searchController.text.isNotEmpty
+              ? IconButton(
+            icon: const Icon(Icons.clear, color: Colors.grey),
+            onPressed: () {
+              searchController.clear();
+              context.read<ProductCubit>().searchProducts('');
+            },
+          )
+              : null,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        ),
+      ),
+    );
+  }
+
   // تصميم رأس الجدول
   Widget _buildTableHeader() {
     return Container(
@@ -68,8 +117,8 @@ class ProductsScreen extends StatelessWidget {
       ),
       child: const Row(
         children: [
-          Expanded(flex: 1, child: Text("صورة", style: TextStyle(fontWeight: FontWeight.bold))), // أضفنا عمود الصورة
-          Expanded(flex: 4, child: Text("المنتج", style: TextStyle(fontWeight: FontWeight.bold))), // زاد الـ flex عشان يتناسب مع الصف
+          Expanded(flex: 1, child: Text("صورة", style: TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(flex: 4, child: Text("المنتج", style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 2, child: Text("الباركود", style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 2, child: Text("السعر", style: TextStyle(fontWeight: FontWeight.bold))),
           Expanded(flex: 1, child: Text("الكمية", style: TextStyle(fontWeight: FontWeight.bold))),
@@ -89,29 +138,33 @@ class ProductsScreen extends StatelessWidget {
           children: [
             IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
-              onPressed: () => Navigator.pop(context), // العودة للشاشة السابقة
+              onPressed: () => Navigator.pop(context),
             ),
             const SizedBox(width: 8),
             const Text("إدارة المنتجات", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
           ],
         ),
 
-        // زر إضافة منتج جديد
+        // 🎯 زر إضافة منتج جديد (تم تصحيح طريقة فتح الديالوج ليعمل فوراً ويستقبل الأقسام)
         ElevatedButton.icon(
           onPressed: () {
-            // 1. خزن الـ Cubit في متغير عشان نستخدمه جوه الـ Dialog
             final productCubit = context.read<ProductCubit>();
-            final state = productCubit.state;
 
-            if (state is ProductSuccess) {
-              showDialog(
-                context: context,
-                builder: (_) => BlocProvider.value( // 2. استخدم .value للربط
-                  value: productCubit, // 3. مرر الـ Cubit الحالي هنا
-                  child: AddProductDialog(categories: state.categories),
+            // استدعاء دالة التحديث في الخلفية للتأكد من جلب البيانات الجديدة
+            productCubit.loadProducts();
+
+            // فتح الديالوج فوراً وربطه بالـ Cubit لكي تظهر الأقسام بمجرد توفرها
+            showDialog(
+              context: context,
+              builder: (_) => BlocProvider.value(
+                value: productCubit,
+                child: AddProductDialog(
+                  categories: productCubit.state is ProductSuccess
+                      ? (productCubit.state as ProductSuccess).categories
+                      : [], // تمرير القائمة المتاحة حالياً وضمان عدم حدوث Crash
                 ),
-              );
-            }
+              ),
+            );
           },
           icon: const Icon(Icons.add),
           label: const Text("إضافة منتج"),

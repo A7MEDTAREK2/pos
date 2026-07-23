@@ -1,29 +1,55 @@
 // lib/feature/home/presentation/widgets/home_appbar.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/service/user_session.dart';
 import '../../../auth/login/presentation/screen/login_screen.dart';
 
-
-class HomeAppBar extends StatelessWidget {
-  final String userName;
-  final String userRole;
+class HomeAppBar extends StatefulWidget {
   final VoidCallback? onNotificationsPressed;
   final VoidCallback? onSettingsPressed;
 
   const HomeAppBar({
     super.key,
-    this.userName = 'أحمد محمد',
-    this.userRole = 'مدير المتجر',
     this.onNotificationsPressed,
     this.onSettingsPressed,
   });
 
   @override
+  State<HomeAppBar> createState() => _HomeAppBarState();
+}
+
+class _HomeAppBarState extends State<HomeAppBar> {
+  late DateTime _now;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _now = DateTime.now();
+    // 🎯 تحديث الوقت والتاريخ كل ثانية لحظياً
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _now = DateTime.now();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel(); // 🎯 إلغاء التايمر عند التدمير لمنع تسريب الذاكرة
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
+    // 🎯 جلب بيانات المستخدم المسجل حالياً من الجلسة (UserSession)
+    final String currentUserName = UserSession.currentUser?.name ?? 'مستخدم النظام';
+    final String currentUserRole = UserSession.currentUser?.role ?? 'كاشير';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
@@ -71,7 +97,7 @@ class HomeAppBar extends StatelessWidget {
 
           const Spacer(),
 
-          // ====== التاريخ والوقت ======
+          // ====== التاريخ والوقت (يتحدث لحظياً) ======
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
@@ -88,7 +114,7 @@ class HomeAppBar extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _formatDate(now),
+                  _formatDate(_now),
                   style: GoogleFonts.cairo(
                     fontSize: 13,
                     color: const Color(0xFF6B7280),
@@ -108,7 +134,7 @@ class HomeAppBar extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  _formatTime(now),
+                  _formatTime(_now),
                   style: GoogleFonts.cairo(
                     fontSize: 13,
                     color: const Color(0xFF6B7280),
@@ -133,7 +159,7 @@ class HomeAppBar extends StatelessWidget {
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
-                  onPressed: onNotificationsPressed ?? () {},
+                  onPressed: widget.onNotificationsPressed ?? () {},
                   icon: const Icon(
                     Icons.notifications_none,
                     size: 22,
@@ -156,20 +182,9 @@ class HomeAppBar extends StatelessWidget {
             ],
           ),
 
-          const SizedBox(width: 8),
-
-          // ====== زر الإعدادات ======
-
-
           const SizedBox(width: 16),
 
-          // ====== صورة المستخدم ======
-
-
-
-          const SizedBox(width: 12),
-
-          // ====== اسم المستخدم ======
+          // ====== اسم المستخدم والقائمة ======
           PopupMenuButton<UserMenuAction>(
             onSelected: (value) {
               switch (value) {
@@ -189,7 +204,7 @@ class HomeAppBar extends StatelessWidget {
             itemBuilder: (context) => [
               const PopupMenuItem(
                 enabled: false,
-                child: Text("👤 تبديل المستخدم"),
+                child: Text("👤 حساب المستخدم"),
               ),
               const PopupMenuDivider(),
               const PopupMenuItem(
@@ -202,14 +217,13 @@ class HomeAppBar extends StatelessWidget {
                   ],
                 ),
               ),
-
             ],
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  userName,
+                  currentUserName, // 👈 الاسم الحقيقي ديناميكياً
                   style: GoogleFonts.cairo(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -217,7 +231,7 @@ class HomeAppBar extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  userRole,
+                  currentUserRole, // 👈 الدور الحقيقي ديناميكياً
                   style: GoogleFonts.cairo(
                     fontSize: 12,
                     color: const Color(0xFF6B7280),
@@ -232,16 +246,8 @@ class HomeAppBar extends StatelessWidget {
   }
 
   // ============================================================
-  // دوال مساعدة
+  // دوال مساعدة للتنسيق
   // ============================================================
-  String _getInitials(String name) {
-    final names = name.trim().split(' ');
-    if (names.length >= 2) {
-      return '${names[0][0]}${names[1][0]}';
-    }
-    return name.isNotEmpty ? name[0] : 'م';
-  }
-
   String _formatDate(DateTime date) {
     return '${date.day} ${_getMonthName(date.month)} ${date.year}';
   }
@@ -255,12 +261,14 @@ class HomeAppBar extends StatelessWidget {
   }
 
   String _formatTime(DateTime date) {
-    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
+    final hour = date.hour == 0 ? 12 : (date.hour > 12 ? date.hour - 12 : date.hour);
     final minute = date.minute.toString().padLeft(2, '0');
+    final second = date.second.toString().padLeft(2, '0');
     final ampm = date.hour >= 12 ? 'م' : 'ص';
-    return '$hour:$minute $ampm';
+    return '$hour:$minute:$second $ampm';
   }
 }
+
 enum UserMenuAction {
   switchAccount,
 }

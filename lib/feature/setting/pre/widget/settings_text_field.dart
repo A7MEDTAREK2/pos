@@ -12,6 +12,7 @@ class SettingsTextField extends StatelessWidget {
   final IconData icon;
   final String? initialValue;
   final bool readOnly;
+  final TextEditingController? controller; // 👈 1. حفظ الكنترولر هنا
 
   const SettingsTextField({
     super.key,
@@ -19,7 +20,8 @@ class SettingsTextField extends StatelessWidget {
     required this.hint,
     required this.icon,
     this.initialValue,
-    this.readOnly = false, required TextEditingController controller,
+    this.readOnly = false,
+    this.controller, // 👈 2. استلام الكنترولر اختياري أو إجباري
   });
 
   @override
@@ -33,7 +35,8 @@ class SettingsTextField extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         TextFormField(
-          initialValue: initialValue,
+          controller: controller, // 👈 3. ربطه بـ TextFormField (مهم جداً!)
+          initialValue: controller == null ? initialValue : null, // لا يُستخدم initialValue مع controller
           readOnly: readOnly,
           style: TxtStyle.bodyMedium,
           decoration: InputDecoration(

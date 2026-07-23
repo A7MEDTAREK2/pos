@@ -1,32 +1,22 @@
+// lib/feature/customer/presentation/widget/customer_item.dart
+
 import 'package:flutter/material.dart';
+
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/icons.dart';
+import '../../../../core/theming/txt_style.dart';
+
+// ====== Customer ======
 import '../../data/model/customer_model.dart';
 
 class CustomerItem extends StatelessWidget {
-  // ====== متغيرات التحكم في الـ UI ======
-  final Color primaryColor = Colors.blue.shade700;
-  final Color secondaryColor = Colors.grey.shade700;
-  final Color cardColor = Colors.white;
-  final Color borderColor = Colors.blue.shade50;
-  final double cardElevation = 3.0;
-  final double cardBorderRadius = 14.0;
-  final double avatarSize = 48.0;
-  final double avatarTextSize = 20.0;
-  final Color avatarColor = Colors.blue.shade100;
-  final Color avatarTextColor = Colors.blue.shade700;
-  final double nameFontSize = 17.0;
-  final double subtitleFontSize = 14.0;
-  final double iconSize = 18.0;
-  final double horizontalPadding = 16.0;
-  final double verticalPadding = 14.0;
-  final Color editIconColor = Colors.blue.shade600;
-  final Color deleteIconColor = Colors.red.shade600;
-
   final CustomerModel customer;
   final VoidCallback onTap;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
 
-   CustomerItem({
+  const CustomerItem({
     super.key,
     required this.customer,
     required this.onTap,
@@ -34,13 +24,11 @@ class CustomerItem extends StatelessWidget {
     this.onDelete,
   });
 
-  // ====== دالة لاستخراج أول حرف من الاسم ======
   String _getInitial() {
     if (customer.name.isEmpty) return '?';
     return customer.name.trim()[0].toUpperCase();
   }
 
-  // ====== دالة لتنسيق التاريخ ======
   String _formatDate(DateTime? date) {
     if (date == null) return '';
     final now = DateTime.now();
@@ -61,23 +49,20 @@ class CustomerItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      elevation: cardElevation,
-      color: cardColor,
+      elevation: 3,
+      color: Colorsmanegments.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(cardBorderRadius),
+        borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: borderColor,
+          color: Colorsmanegments.primary.withOpacity(0.1),
           width: 1.5,
         ),
       ),
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: horizontalPadding,
-          vertical: verticalPadding,
-        ),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Row(
           children: [
-            // ====== الـ Avatar ======
+            // ====== Avatar ======
             Container(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -85,27 +70,26 @@ class CustomerItem extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    avatarColor,
-                    primaryColor.withOpacity(0.3),
+                    Colorsmanegments.primary.withOpacity(0.2),
+                    Colorsmanegments.primary.withOpacity(0.1),
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryColor.withOpacity(0.2),
+                    color: Colorsmanegments.primary.withOpacity(0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
                 ],
               ),
               child: CircleAvatar(
-                radius: avatarSize / 2,
+                radius: 24,
                 backgroundColor: Colors.transparent,
                 child: Text(
                   _getInitial(),
-                  style: TextStyle(
-                    fontSize: avatarTextSize,
-                    fontWeight: FontWeight.bold,
-                    color: avatarTextColor,
+                  style: TxtStyle.headerWhite.copyWith(
+                    fontSize: 20,
+                    color: Colorsmanegments.primary,
                   ),
                 ),
               ),
@@ -113,60 +97,46 @@ class CustomerItem extends StatelessWidget {
 
             const SizedBox(width: 14),
 
-            // ====== المعلومات ======
+            // ====== معلومات العميل ======
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ====== الاسم ======
                   Text(
                     customer.name,
-                    style: TextStyle(
-                      fontSize: nameFontSize,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade900,
-                    ),
+                    style: TxtStyle.titleSmall,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-
                   const SizedBox(height: 6),
-
-                  // ====== رقم الهاتف ======
                   Row(
                     children: [
                       Icon(
-                        Icons.phone,
-                        size: iconSize,
-                        color: secondaryColor,
+                        Iconss.phone,
+                        size: 16,
+                        color: Colorsmanegments.textSecondary,
                       ),
                       const SizedBox(width: 6),
                       Text(
                         customer.phone,
-                        style: TextStyle(
-                          fontSize: subtitleFontSize,
-                          color: secondaryColor,
-                        ),
+                        style: TxtStyle.bodySmall,
                       ),
                     ],
                   ),
-
-                  // ====== تاريخ الإضافة (إذا موجود) ======
                   if (customer.createdAt != null) ...[
                     const SizedBox(height: 4),
                     Row(
                       children: [
                         Icon(
-                          Icons.calendar_today,
-                          size: iconSize - 2,
-                          color: secondaryColor.withOpacity(0.6),
+                          Iconss.calendar,
+                          size: 14,
+                          color: Colorsmanegments.textSecondary.withOpacity(0.6),
                         ),
                         const SizedBox(width: 6),
                         Text(
                           _formatDate(customer.createdAt),
-                          style: TextStyle(
-                            fontSize: subtitleFontSize - 1,
-                            color: secondaryColor.withOpacity(0.6),
+                          style: TxtStyle.labelSmall.copyWith(
+                            color: Colorsmanegments.textSecondary.withOpacity(0.6),
                           ),
                         ),
                       ],
@@ -178,18 +148,17 @@ class CustomerItem extends StatelessWidget {
 
             // ====== أزرار التحكم ======
             if (onEdit != null || onDelete != null) ...[
-              // زر التعديل
               if (onEdit != null)
                 Container(
                   decoration: BoxDecoration(
-                    color: editIconColor.withOpacity(0.08),
+                    color: Colorsmanegments.primary.withOpacity(0.08),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
                     onPressed: onEdit,
                     icon: Icon(
-                      Icons.edit_outlined,
-                      color: editIconColor,
+                      Iconss.edit,
+                      color: Colorsmanegments.primary,
                       size: 22,
                     ),
                     padding: const EdgeInsets.all(8),
@@ -197,22 +166,19 @@ class CustomerItem extends StatelessWidget {
                     splashRadius: 20,
                   ),
                 ),
-
               if (onEdit != null && onDelete != null)
                 const SizedBox(width: 4),
-
-              // زر الحذف
               if (onDelete != null)
                 Container(
                   decoration: BoxDecoration(
-                    color: deleteIconColor.withOpacity(0.08),
+                    color: Colorsmanegments.danger.withOpacity(0.08),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
                     onPressed: onDelete,
                     icon: Icon(
-                      Icons.delete_outline,
-                      color: deleteIconColor,
+                      Iconss.delete,
+                      color: Colorsmanegments.danger,
                       size: 22,
                     ),
                     padding: const EdgeInsets.all(8),

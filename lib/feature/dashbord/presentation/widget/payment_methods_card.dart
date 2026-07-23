@@ -1,11 +1,18 @@
+// lib/feature/dashboard/presentation/widgets/payment_methods_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/txt_style.dart';
+
+// ====== Dashboard ======
+import '../../../setting/pre/widget/section_title.dart';
 import '../../logic/dash_cubit.dart';
 import '../../logic/dash_state.dart';
 import 'dashboard_card.dart';
-import 'section_title.dart';
+
 
 class PaymentMethodsCard extends StatelessWidget {
   const PaymentMethodsCard({super.key});
@@ -16,21 +23,11 @@ class PaymentMethodsCard extends StatelessWidget {
       child: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return const SizedBox(
-              height: 220,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
+            return _buildLoadingState();
           }
 
           if (state is DashboardError) {
-            return SizedBox(
-              height: 220,
-              child: Center(
-                child: Text(state.message),
-              ),
-            );
+            return _buildErrorState(state.message);
           }
 
           if (state is! DashboardSuccess) {
@@ -40,12 +37,7 @@ class PaymentMethodsCard extends StatelessWidget {
           final methods = state.dashboard.paymentMethods;
 
           if (methods.isEmpty) {
-            return const SizedBox(
-              height: 220,
-              child: Center(
-                child: Text("لا توجد بيانات"),
-              ),
-            );
+            return _buildEmptyState();
           }
 
           final totalAmount = methods.fold<double>(
@@ -53,36 +45,84 @@ class PaymentMethodsCard extends StatelessWidget {
                 (sum, item) => sum + item.total,
           );
 
-
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SectionTitle(title: 'طرق الدفع'),
-              const SizedBox(height: 16),
-
-              ...methods.asMap().entries.map(
-                    (entry) {
-                  final item = entry.value;
-
-                  final percentage = totalAmount == 0
-                      ? 0.0
-                      : item.total / totalAmount;
-
-                  return _buildMethodItem(
-                    name: item.method,
-                    count: item.count,
-                    percentage: percentage,
-                    color: _getColor(entry.key),
-                  );
-                },
-              ),
-            ],
-          );
+          return _buildContent(methods, totalAmount);
         },
       ),
     );
   }
 
+  // ============================================================
+  // Loading State
+  // ============================================================
+  Widget _buildLoadingState() {
+    return const SizedBox(
+      height: 220,
+      child: Center(
+        child: CircularProgressIndicator(
+          color: Colorsmanegments.primary,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // Error State
+  // ============================================================
+  Widget _buildErrorState(String message) {
+    return SizedBox(
+      height: 220,
+      child: Center(
+        child: Text(
+          message,
+          style: TxtStyle.danger,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // Empty State
+  // ============================================================
+  Widget _buildEmptyState() {
+    return SizedBox(
+      height: 220,
+      child: Center(
+        child: Text(
+          "لا توجد بيانات",
+          style: TxtStyle.bodyMedium,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // Content
+  // ============================================================
+  Widget _buildContent(List<dynamic> methods, double totalAmount) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionTitle(title: 'طرق الدفع'),
+        const SizedBox(height: 16),
+        ...methods.asMap().entries.map(
+              (entry) {
+            final item = entry.value;
+            final percentage = totalAmount == 0 ? 0.0 : item.total / totalAmount;
+            return _buildMethodItem(
+              name: item.method,
+              count: item.count,
+              percentage: percentage,
+              color: _getColor(entry.key),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // Method Item
+  // ============================================================
   Widget _buildMethodItem({
     required String name,
     required int count,
@@ -104,48 +144,33 @@ class PaymentMethodsCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-
               Text(
                 name,
-                style: GoogleFonts.cairo(
-                  fontSize: 13,
+                style: TxtStyle.bodyMedium.copyWith(
                   fontWeight: FontWeight.w500,
-                  color: const Color(0xFF111827),
                 ),
               ),
-
               const Spacer(),
-
               Text(
                 '$count',
-                style: GoogleFonts.cairo(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF111827),
-                ),
+                style: TxtStyle.tableRowBold,
               ),
-
               const SizedBox(width: 12),
-
               Text(
                 '${(percentage * 100).toStringAsFixed(1)}%',
-                style: GoogleFonts.cairo(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
+                style: TxtStyle.tableRowBold.copyWith(
                   color: color,
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 6),
-
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: percentage,
               minHeight: 6,
-              backgroundColor: const Color(0xFFE5E7EB),
+              backgroundColor: Colorsmanegments.border,
               color: color,
             ),
           ),
@@ -154,16 +179,18 @@ class PaymentMethodsCard extends StatelessWidget {
     );
   }
 
+  // ============================================================
+  // Helper
+  // ============================================================
   Color _getColor(int index) {
-    const colors = [
-      Color(0xFF16A34A),
-      Color(0xFF2563EB),
-      Color(0xFF8B5CF6),
-      Color(0xFFF59E0B),
-      Color(0xFFEF4444),
-      Color(0xFF06B6D4),
+    final colors = [
+      Colorsmanegments.success,
+      Colorsmanegments.primary,
+      Colorsmanegments.purple,
+      Colorsmanegments.warning,
+      Colorsmanegments.danger,
+      Colorsmanegments.teal,
     ];
-
     return colors[index % colors.length];
   }
 }

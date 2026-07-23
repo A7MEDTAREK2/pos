@@ -9,8 +9,7 @@ abstract class SettingsLocalDataSource {
   Future<void> saveSettings(SettingsModel settings);
 }
 
-class SettingsLocalDataSourceImpl
-    implements SettingsLocalDataSource {
+class SettingsLocalDataSourceImpl implements SettingsLocalDataSource {
   @override
   Future<SettingsModel> getSettings() async {
     final Database db = await AppDatabase.instance.database;
@@ -20,8 +19,11 @@ class SettingsLocalDataSourceImpl
       limit: 1,
     );
 
+    // لو الجدول فاضي، ننشئ سجل افتراضي ونحفظه بـ id = 1 فوراً
     if (result.isEmpty) {
-      throw Exception("Settings not found");
+      final defaultSettings = SettingsModel.defaultSettings();
+      await saveSettings(defaultSettings);
+      return defaultSettings;
     }
 
     return SettingsModel.fromMap(result.first);
@@ -31,11 +33,14 @@ class SettingsLocalDataSourceImpl
   Future<void> saveSettings(SettingsModel settings) async {
     final Database db = await AppDatabase.instance.database;
 
-    await db.update(
+    final map = settings.toMap();
+    map['id'] = 1; // التأكد دائمًا أن السجل المحفوظ يحمل id = 1
+
+    // insert مع ConflictAlgorithm.replace هيحدث البيانات لو الـ id موجود، أو ينشئه لو مش موجود
+    await db.insert(
       "settings",
-      settings.toMap(),
-      where: "id=?",
-      whereArgs: [1],
+      map,
+      conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
 }

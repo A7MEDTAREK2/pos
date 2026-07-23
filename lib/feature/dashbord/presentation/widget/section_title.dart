@@ -1,7 +1,9 @@
 // lib/feature/dashboard/presentation/components/section_title.dart
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+
+// ====== Core ======
+import '../../../../core/theming/txt_style.dart';
 
 class SectionTitle extends StatelessWidget {
   final String title;
@@ -12,11 +14,7 @@ class SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: GoogleFonts.cairo(
-        fontSize: 16,
-        fontWeight: FontWeight.bold,
-        color: const Color(0xFF111827),
-      ),
+      style: TxtStyle.titleCard,
     );
   }
 }

@@ -1,6 +1,17 @@
+// lib/feature/customer/presentation/screen/customer_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/icons.dart';
+import '../../../../core/theming/txt_style.dart';
+
+// ====== Home (لعمل Refresh للداشبورد) ======
+import '../../../home/logic/home_cubit.dart';
+
+// ====== Customer ======
 import '../../data/model/customer_model.dart';
 import '../../logic/customer_cubit.dart';
 import '../../logic/customer_state.dart';
@@ -17,17 +28,6 @@ class CustomerScreen extends StatefulWidget {
 }
 
 class _CustomerScreenState extends State<CustomerScreen> {
-  // ====== متغيرات التحكم في الـ UI ======
-  final Color primaryColor = Colors.blue.shade700;
-  final Color backgroundColor = Colors.grey.shade50;
-  final double fabSize = 60.0;
-  final double fabElevation = 6.0;
-  final double fabIconSize = 30.0;
-  final String emptyStateTitle = "لا يوجد عملاء";
-  final String emptyStateSubtitle = "قم بإضافة عميل جديد";
-  final String errorTitle = "حدث خطأ";
-  final String retryButtonText = "إعادة المحاولة";
-
   final TextEditingController searchController = TextEditingController();
 
   @override
@@ -42,7 +42,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
     super.dispose();
   }
 
-  // ====== عرض حالة التحميل ======
+  // ============================================================
+  // Loading State
+  // ============================================================
   Widget _buildLoadingState() {
     return Center(
       child: Column(
@@ -50,14 +52,15 @@ class _CustomerScreenState extends State<CustomerScreen> {
         children: [
           const CircularProgressIndicator(
             strokeWidth: 3,
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            valueColor: AlwaysStoppedAnimation<Color>(
+              Colorsmanegments.primary,
+            ),
           ),
           const SizedBox(height: 16),
           Text(
             "جاري تحميل العملاء...",
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade600,
+            style: TxtStyle.bodyMedium.copyWith(
+              color: Colorsmanegments.textSecondary,
             ),
           ),
         ],
@@ -65,7 +68,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
     );
   }
 
-  // ====== عرض الحالة الفارغة ======
+  // ============================================================
+  // Empty State
+  // ============================================================
   Widget _buildEmptyState() {
     return Center(
       child: Column(
@@ -75,56 +80,46 @@ class _CustomerScreenState extends State<CustomerScreen> {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.08),
+              color: Colorsmanegments.primary.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.people_outline,
+              Iconss.people,
               size: 60,
-              color: primaryColor.withOpacity(0.5),
+              color: Colorsmanegments.primary.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 24),
           Text(
-            emptyStateTitle,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+            "لا يوجد عملاء",
+            style: TxtStyle.emptyTitle.copyWith(
+              color: Colorsmanegments.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            emptyStateSubtitle,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
+            "قم بإضافة عميل جديد",
+            style: TxtStyle.emptySubtitle,
           ),
           const SizedBox(height: 30),
           ElevatedButton.icon(
-            onPressed: () {
-              _navigateToAddCustomer();
-            },
+            onPressed: _navigateToAddCustomer,
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
-              foregroundColor: Colors.white,
+              backgroundColor: Colorsmanegments.primary,
+              foregroundColor: Colorsmanegments.textWhite,
               elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 30,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
             ),
-            icon: const Icon(Icons.add),
-            label: const Text(
+            icon: Icon(
+              Iconss.add,
+              color: Colorsmanegments.textWhite,
+            ),
+            label: Text(
               "إضافة عميل",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              style: TxtStyle.buttonMedium,
             ),
           ),
         ],
@@ -132,7 +127,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
     );
   }
 
-  // ====== عرض حالة الخطأ ======
+  // ============================================================
+  // Error State
+  // ============================================================
   Widget _buildErrorState(String error) {
     return Center(
       child: Column(
@@ -142,22 +139,20 @@ class _CustomerScreenState extends State<CustomerScreen> {
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: Colors.red.shade50,
+              color: Colorsmanegments.danger.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
-              Icons.error_outline,
+              Iconss.error,
               size: 50,
-              color: Colors.red.shade400,
+              color: Colorsmanegments.danger.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 20),
           Text(
-            errorTitle,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade700,
+            "حدث خطأ",
+            style: TxtStyle.headerSmall.copyWith(
+              color: Colorsmanegments.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -165,9 +160,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Text(
               error,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade600,
+              style: TxtStyle.bodyMedium.copyWith(
+                color: Colorsmanegments.textSecondary,
               ),
               textAlign: TextAlign.center,
             ),
@@ -178,24 +172,21 @@ class _CustomerScreenState extends State<CustomerScreen> {
               context.read<CustomerCubit>().loadCustomers();
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: primaryColor,
-              foregroundColor: Colors.white,
+              backgroundColor: Colorsmanegments.primary,
+              foregroundColor: Colorsmanegments.textWhite,
               elevation: 2,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 30,
-                vertical: 14,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
             ),
-            icon: const Icon(Icons.refresh),
+            icon: Icon(
+              Iconss.refresh,
+              color: Colorsmanegments.textWhite,
+            ),
             label: Text(
-              retryButtonText,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
+              "إعادة المحاولة",
+              style: TxtStyle.buttonMedium,
             ),
           ),
         ],
@@ -203,7 +194,9 @@ class _CustomerScreenState extends State<CustomerScreen> {
     );
   }
 
-  // ====== التنقل لإضافة عميل ======
+  // ============================================================
+  // Navigation
+  // ============================================================
   Future<void> _navigateToAddCustomer() async {
     await Navigator.push(
       context,
@@ -217,10 +210,14 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
     if (mounted) {
       context.read<CustomerCubit>().loadCustomers();
+
+      // 🌟 تحديث الداشبورد فوراً بعد إضافة العميل
+      try {
+        context.read<HomeCubit>().refreshDashboard();
+      } catch (_) {}
     }
   }
 
-  // ====== التنقل لتعديل عميل ======
   Future<void> _navigateToEditCustomer(CustomerModel customer) async {
     await Navigator.push(
       context,
@@ -234,10 +231,17 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
     if (mounted) {
       context.read<CustomerCubit>().loadCustomers();
+
+      // 🌟 تحديث الداشبورد فوراً بعد تعديل العميل
+      try {
+        context.read<HomeCubit>().refreshDashboard();
+      } catch (_) {}
     }
   }
 
-  // ====== عرض مربع حوار الحذف ======
+  // ============================================================
+  // Delete Dialog
+  // ============================================================
   Future<bool?> _showDeleteDialog(String customerName) {
     return showDialog<bool>(
       context: context,
@@ -249,52 +253,44 @@ class _CustomerScreenState extends State<CustomerScreen> {
           title: Row(
             children: [
               Icon(
-                Icons.warning_amber_rounded,
-                color: Colors.red.shade600,
+                Iconss.warning,
+                color: Colorsmanegments.danger,
                 size: 28,
               ),
               const SizedBox(width: 10),
-              const Text(
+              Text(
                 "حذف العميل",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TxtStyle.headerSmall,
               ),
             ],
           ),
           content: Text(
             "هل تريد حذف $customerName ؟",
-            style: const TextStyle(
-              fontSize: 16,
-            ),
+            style: TxtStyle.bodyMedium,
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
               style: TextButton.styleFrom(
-                foregroundColor: Colors.grey.shade600,
+                foregroundColor: Colorsmanegments.textSecondary,
               ),
-              child: const Text(
+              child: Text(
                 "إلغاء",
-                style: TextStyle(fontSize: 16),
+                style: TxtStyle.buttonPrimary,
               ),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red.shade600,
-                foregroundColor: Colors.white,
+                backgroundColor: Colorsmanegments.danger,
+                foregroundColor: Colorsmanegments.textWhite,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              child: const Text(
+              child: Text(
                 "حذف",
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TxtStyle.buttonMedium,
               ),
             ),
           ],
@@ -306,32 +302,27 @@ class _CustomerScreenState extends State<CustomerScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: Colorsmanegments.background,
 
-      // ====== الـ AppBar الجديد ======
-      appBar:  CustomerAppBar(
-      ),
+      appBar: const CustomerAppBar(),
 
-      // ====== زر الإضافة العائم ======
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddCustomer,
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
-        elevation: fabElevation,
+        backgroundColor: Colorsmanegments.primary,
+        foregroundColor: Colorsmanegments.textWhite,
+        elevation: 6,
         child: Icon(
-          Icons.person_add,
-          size: fabIconSize,
+          Iconss.personAdd,
+          size: 30,
         ),
         shape: const CircleBorder(),
         tooltip: 'إضافة عميل',
       ),
 
-      // ====== المحتوى ======
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // ====== شريط البحث ======
             CustomerSearch(
               controller: searchController,
               onChanged: (value) {
@@ -345,16 +336,13 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
             const SizedBox(height: 16),
 
-            // ====== قائمة العملاء ======
             Expanded(
               child: BlocBuilder<CustomerCubit, CustomerState>(
                 builder: (context, state) {
-                  // حالة التحميل
                   if (state is CustomerLoading) {
                     return _buildLoadingState();
                   }
 
-                  // حالة النجاح
                   if (state is CustomerSuccess) {
                     if (state.customers.isEmpty) {
                       return _buildEmptyState();
@@ -377,9 +365,16 @@ class _CustomerScreenState extends State<CustomerScreen> {
                             final result = await _showDeleteDialog(customer.name);
 
                             if (result == true) {
-                              context.read<CustomerCubit>().deleteCustomer(
+                              await context.read<CustomerCubit>().deleteCustomer(
                                 customer.id!,
                               );
+
+                              // 🌟 تحديث الداشبورد أيضاً فور حذف العميل
+                              if (mounted) {
+                                try {
+                                  context.read<HomeCubit>().refreshDashboard();
+                                } catch (_) {}
+                              }
                             }
                           },
                         );
@@ -387,7 +382,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
                     );
                   }
 
-                  // حالة الخطأ
                   if (state is CustomerError) {
                     return _buildErrorState(state.error);
                   }

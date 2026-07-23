@@ -57,31 +57,9 @@ class _SplashScreenState extends State<SplashScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               const Spacer(flex: 2),
-
+              const SizedBox(height: 24),
               // ====== Logo ======
-              Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? Colorsmanegments.primary.withOpacity(0.2)
-                      : Colorsmanegments.primary.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: Center(
-                  child: Text(
-                    'M',
-                    style: TextStyle(
-                      fontSize: 56,
-                      fontWeight: FontWeight.bold,
-                      color: isDark
-                          ? Colorsmanegments.primary
-                          : Colorsmanegments.primary,
-                    ),
-                  ),
-                ),
-              ),
-
+              Image.asset("assets/image/icons/logo1.png",width: 300,height: 200,),
               const SizedBox(height: 24),
 
               // ====== App Name ======

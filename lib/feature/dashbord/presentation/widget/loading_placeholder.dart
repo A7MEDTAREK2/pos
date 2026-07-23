@@ -2,21 +2,44 @@
 
 import 'package:flutter/material.dart';
 
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/txt_style.dart';
+
 class LoadingPlaceholder extends StatelessWidget {
-  const LoadingPlaceholder({super.key});
+  final String? message;
+
+  const LoadingPlaceholder({
+    super.key,
+    this.message,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colorsmanegments.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: Colorsmanegments.border),
       ),
-      child: const Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF2563EB),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              color: Colorsmanegments.primary,
+            ),
+            if (message != null) ...[
+              const SizedBox(height: 16),
+              Text(
+                message!,
+                style: TxtStyle.bodyMedium.copyWith(
+                  color: Colorsmanegments.textSecondary,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );

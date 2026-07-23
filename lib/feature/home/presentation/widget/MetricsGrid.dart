@@ -14,18 +14,17 @@ class MetricsGrid extends StatelessWidget {
   final int totalCustomers;
 
   const MetricsGrid({
-    Key? key,
+    super.key,
     required this.todaySales,
     required this.invoiceCount,
     required this.totalProducts,
     required this.totalCustomers,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // 1. كارت مبيعات اليوم
         Expanded(
           child: MetricCard(
             title: "مبيعات اليوم",
@@ -36,8 +35,6 @@ class MetricsGrid extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 24),
-
-        // 2. كارت الفواتير
         Expanded(
           child: MetricCard(
             title: "الفواتير",
@@ -46,8 +43,6 @@ class MetricsGrid extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 24),
-
-        // 3. كارت المنتجات
         Expanded(
           child: MetricCard(
             title: "المنتجات",
@@ -56,8 +51,6 @@ class MetricsGrid extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 24),
-
-        // 4. كارت العملاء
         Expanded(
           child: MetricCard(
             title: "العملاء",
@@ -70,9 +63,6 @@ class MetricsGrid extends StatelessWidget {
   }
 }
 
-// ============================================================
-// MetricCard - Component موحد
-// ============================================================
 class MetricCard extends StatelessWidget {
   final String title;
   final String value;
@@ -86,8 +76,8 @@ class MetricCard extends StatelessWidget {
     required this.icon,
     this.badgeText,
     this.isPositive = true,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -108,26 +98,36 @@ class MetricCard extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // ====== الجزء الأيسر: العناوين والأرقام ======
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: TxtStyle.labelLarge.copyWith(
-                  letterSpacing: 0.5,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  title,
+                  style: TxtStyle.labelLarge.copyWith(
+                    letterSpacing: 0.5,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                value,
-                style: TxtStyle.dashboardValue,
-              ),
-            ],
+                const SizedBox(height: 8),
+
+                // 🎯 تحول سلس للرقم عند التحديث اللحظي
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 300),
+                  transitionBuilder: (child, animation) => FadeTransition(
+                    opacity: animation,
+                    child: child,
+                  ),
+                  child: Text(
+                    value,
+                    key: ValueKey<String>(value), // يضمن إرسال التأثير اللحظي فور تغيّر القيمة
+                    style: TxtStyle.dashboardValue,
+                  ),
+                ),
+              ],
+            ),
           ),
 
-          // ====== الجزء الأيمن: الأيقونة ونسبة الصعود/الهبوط ======
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

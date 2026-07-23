@@ -1,11 +1,17 @@
+// lib/feature/dashboard/presentation/widgets/low_stock_card.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/txt_style.dart';
+
+// ====== Dashboard ======
+import '../../../setting/pre/widget/section_title.dart';
 import '../../logic/dash_cubit.dart';
 import '../../logic/dash_state.dart';
 import 'dashboard_card.dart';
-import 'section_title.dart';
 
 class LowStockCard extends StatelessWidget {
   const LowStockCard({super.key});
@@ -16,21 +22,11 @@ class LowStockCard extends StatelessWidget {
       child: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return const SizedBox(
-              height: 200,
-              child: Center(
-                child: CircularProgressIndicator(),
-              ),
-            );
+            return _buildLoadingState();
           }
 
           if (state is DashboardError) {
-            return SizedBox(
-              height: 200,
-              child: Center(
-                child: Text(state.message),
-              ),
-            );
+            return _buildErrorState(state.message);
           }
 
           if (state is! DashboardSuccess) {
@@ -40,57 +36,97 @@ class LowStockCard extends StatelessWidget {
           final products = state.dashboard.lowStockProducts;
 
           if (products.isEmpty) {
-            return const SizedBox(
-              height: 200,
-              child: Center(
-                child: Text("لا يوجد منتجات منخفضة المخزون"),
-              ),
-            );
+            return _buildEmptyState();
           }
 
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  const SectionTitle(title: "المخزون المنخفض"),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFDC2626).withOpacity(.1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Text(
-                      "${products.length} منتج",
-                      style: GoogleFonts.cairo(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFFDC2626),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              ...products.map(
-                    (product) => _buildProductItem(
-                  name: product.name,
-                  stock: product.quantity,
-                ),
-              ),
-            ],
-          );
+          return _buildContent(products);
         },
       ),
     );
   }
 
+  // ============================================================
+  // Loading State
+  // ============================================================
+  Widget _buildLoadingState() {
+    return const SizedBox(
+      height: 200,
+      child: Center(
+        child: CircularProgressIndicator(
+          color: Colorsmanegments.primary,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // Error State
+  // ============================================================
+  Widget _buildErrorState(String message) {
+    return SizedBox(
+      height: 200,
+      child: Center(
+        child: Text(
+          message,
+          style: TxtStyle.danger,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // Empty State
+  // ============================================================
+  Widget _buildEmptyState() {
+    return SizedBox(
+      height: 200,
+      child: Center(
+        child: Text(
+          "لا يوجد منتجات منخفضة المخزون",
+          style: TxtStyle.bodyMedium,
+        ),
+      ),
+    );
+  }
+
+  // ============================================================
+  // Content
+  // ============================================================
+  Widget _buildContent(List<dynamic> products) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const SectionTitle(title: "المخزون المنخفض"),
+            const Spacer(),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colorsmanegments.danger.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                "${products.length} منتج",
+                style: TxtStyle.badgeSmall.copyWith(
+                  color: Colorsmanegments.danger,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        ...products.map((product) => _buildProductItem(
+          name: product.name,
+          stock: product.quantity,
+        )),
+      ],
+    );
+  }
+
+  // ============================================================
+  // Product Item
+  // ============================================================
   Widget _buildProductItem({
     required String name,
     required int stock,
@@ -102,59 +138,44 @@ class LowStockCard extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isCritical
-                  ? const Color(0xFFDC2626).withOpacity(.1)
-                  : const Color(0xFFF59E0B).withOpacity(.1),
+                  ? Colorsmanegments.danger.withOpacity(0.1)
+                  : Colorsmanegments.warning.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               "$stock",
-              style: GoogleFonts.cairo(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
+              style: TxtStyle.tableRowBold.copyWith(
                 color: isCritical
-                    ? const Color(0xFFDC2626)
-                    : const Color(0xFFF59E0B),
+                    ? Colorsmanegments.danger
+                    : Colorsmanegments.warning,
               ),
             ),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Text(
               name,
-              style: GoogleFonts.cairo(
-                fontSize: 14,
+              style: TxtStyle.bodyMedium.copyWith(
                 fontWeight: FontWeight.w500,
-                color: const Color(0xFF111827),
               ),
             ),
           ),
-
           Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 8,
-              vertical: 4,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.red.withOpacity(.1),
+              color: Colorsmanegments.danger.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
-                color: Colors.red.withOpacity(.2),
+                color: Colorsmanegments.danger.withOpacity(0.2),
               ),
             ),
             child: Text(
               "⚠️ $stock",
-              style: GoogleFonts.cairo(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFFDC2626),
+              style: TxtStyle.badgeSmall.copyWith(
+                color: Colorsmanegments.danger,
               ),
             ),
           ),

@@ -6,6 +6,8 @@ import '../../../driver/data/localdata.dart';
 import '../../../driver/data/repo.dart';
 import '../../../driver/logic/drive_cubit.dart';
 import '../../../product/logic/product_cubit.dart';
+// تأكد من استيراد الـ HomeCubit هنا حسب مسار المشروع عندك
+import '../../../home/logic/home_cubit.dart';
 import '../../logic/pos_cubit.dart';
 import '../../logic/pos_state.dart';
 import '../helper/pos_helpers.dart';
@@ -70,6 +72,7 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
                         onChanged: (value) {
                           context.read<ProductCubit>().searchProducts(value);
                         },
+                        focusNode: null,
                       ),
                       const PosCategoryBar(),
                       Expanded(
@@ -102,9 +105,18 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
     if (state is OrderHeldSuccess) {
       PosHelpers.showSnackBar(context, "تم حفظ الأوردر", Colorsmanegments.success);
     }
+
     if (state is PaymentCompleteSuccess) {
       PosHelpers.showSnackBar(context, "تم الدفع بنجاح", Colorsmanegments.success);
+
+      // 🎯 التحديث الفوري للوحة التحكم بمجرد نجاح الدفع
+      try {
+        context.read<HomeCubit>().refreshDashboard();
+      } catch (_) {
+        // لو الـ Cubit غير موجود في هذا السياق يتم تجاهله بأمان
+      }
     }
+
     if (state is OrderError) {
       PosHelpers.showSnackBar(context, state.error, Colorsmanegments.danger);
     }

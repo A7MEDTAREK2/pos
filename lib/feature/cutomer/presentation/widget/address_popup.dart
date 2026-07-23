@@ -1,6 +1,14 @@
+// lib/feature/customer/presentation/widget/address_popup.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/icons.dart';
+import '../../../../core/theming/txt_style.dart';
+
+// ====== Customer ======
 import '../../data/model/customer_model.dart';
 import '../../logic/customer_cubit.dart';
 import '../../logic/customer_state.dart';
@@ -9,16 +17,6 @@ import 'address.dart';
 class AddressPopup extends StatelessWidget {
   final int customerId;
   final Function(CustomerAddressModel) onSelected;
-
-  // ====== متغيرات التحكم في الـ UI ======
-  final Color primaryTextColor = Colors.blue;
-  final Color secondaryTextColor = Colors.grey;
-  final Color backgroundColor = Colors.white;
-  final double titleFontSize = 16.0;
-  final double normalFontSize = 14.0;
-  final double popupElevation = 8.0;
-  final double popupBorderRadius = 12.0;
-  final String addNewAddressText = "إضافة عنوان جديد";
 
   const AddressPopup({
     super.key,
@@ -34,11 +32,11 @@ class AddressPopup extends StatelessWidget {
 
         return PopupMenuButton<dynamic>(
           offset: const Offset(0, 50),
-          elevation: popupElevation,
+          elevation: 8,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(popupBorderRadius),
+            borderRadius: BorderRadius.circular(12),
           ),
-          color: backgroundColor,
+          color: Colorsmanegments.card,
           itemBuilder: (context) {
             return [
               ...cubit.addresses.map(
@@ -50,17 +48,15 @@ class AddressPopup extends StatelessWidget {
                       Row(
                         children: [
                           Icon(
-                            Icons.location_on,
+                            Iconss.location,
                             size: 18,
-                            color: primaryTextColor,
+                            color: Colorsmanegments.primary,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             address.title ?? "بدون عنوان",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: titleFontSize,
-                              color: primaryTextColor,
+                            style: TxtStyle.labelBold.copyWith(
+                              color: Colorsmanegments.primary,
                             ),
                           ),
                         ],
@@ -73,18 +69,12 @@ class AddressPopup extends StatelessWidget {
                           children: [
                             Text(
                               address.area,
-                              style: TextStyle(
-                                fontSize: normalFontSize,
-                                color: secondaryTextColor,
-                              ),
+                              style: TxtStyle.bodySmall,
                             ),
                             const SizedBox(height: 2),
                             Text(
                               address.address,
-                              style: TextStyle(
-                                fontSize: normalFontSize,
-                                color: secondaryTextColor,
-                              ),
+                              style: TxtStyle.bodySmall,
                             ),
                           ],
                         ),
@@ -101,17 +91,13 @@ class AddressPopup extends StatelessWidget {
                 child: Row(
                   children: [
                     Icon(
-                      Icons.add_location_alt,
-                      color: primaryTextColor,
+                      Iconss.addLocation,
+                      color: Colorsmanegments.primary,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      addNewAddressText,
-                      style: TextStyle(
-                        fontSize: normalFontSize,
-                        fontWeight: FontWeight.w600,
-                        color: primaryTextColor,
-                      ),
+                      "إضافة عنوان جديد",
+                      style: TxtStyle.buttonPrimary,
                     ),
                   ],
                 ),
@@ -139,12 +125,12 @@ class AddressPopup extends StatelessWidget {
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colors.grey.shade200,
+              color: Colorsmanegments.border,
             ),
-            child: const Icon(
-              Icons.keyboard_arrow_down,
-              size: 26,
-              color: Colors.blue,
+            child: Icon(
+              Iconss.arrowForward,
+              size: 22,
+              color: Colorsmanegments.primary,
             ),
           ),
         );

@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+
 class DashboardCard extends StatelessWidget {
   final Widget child;
   final double padding;
@@ -17,12 +20,12 @@ class DashboardCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colorsmanegments.card,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: Colorsmanegments.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colorsmanegments.shadowLight,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

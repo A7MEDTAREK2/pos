@@ -16,6 +16,7 @@ import '../../../category/data/model/category_model.dart';
 // ====== Product ======
 import '../../data/model/product_model.dart';
 import '../../logic/product_cubit.dart';
+import '../../logic/product_state.dart'; // 🎯 تم الاستيراد للوصول لحالات الـ Cubit
 
 class AddProductDialog extends StatefulWidget {
   final List<CategoryModel> categories;
@@ -187,14 +188,6 @@ class _AddProductDialogState extends State<AddProductDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final uniqueCategories = widget.categories
-        .fold<Map<int, CategoryModel>>({}, (map, cat) {
-      if (cat.id != null) map[cat.id!] = cat;
-      return map;
-    })
-        .values
-        .toList();
-
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: ConstrainedBox(
@@ -258,7 +251,8 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     ),
                     const SizedBox(height: 14),
 
-                    _buildCategoryDropdown(uniqueCategories),
+                    // 🎯 استبدال الدؤن القدييم بـ BlocBuilder لتحديث الأقسام لحظياً
+                    _buildCategoryDropdownBloc(),
                     const SizedBox(height: 14),
 
                     Row(
@@ -399,50 +393,69 @@ class _AddProductDialogState extends State<AddProductDialog> {
   }
 
   // ============================================================
-  // Widget: Category Dropdown
+  // Widget: Category Dropdown with BlocBuilder (تحديث لحظي للأقسام)
   // ============================================================
-  Widget _buildCategoryDropdown(List<CategoryModel> categories) {
-    return DropdownButtonFormField<int>(
-      value: _selectedCategoryId,
-      style: TxtStyle.bodyMedium,
-      decoration: InputDecoration(
-        labelText: "القسم",
-        labelStyle: TxtStyle.labelMedium,
-        prefixIcon: Icon(
-          Iconss.category,
-          size: 20,
-          color: Colorsmanegments.primary,
-        ),
-        filled: true,
-        fillColor: Colorsmanegments.background,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colorsmanegments.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Colorsmanegments.primary,
-            width: 1.5,
+  Widget _buildCategoryDropdownBloc() {
+    return BlocBuilder<ProductCubit, ProductState>(
+      builder: (context, state) {
+        // سحب الأقسام المتاحة إما من الـ State الحالية أو الاعتماد الاحتياطي على الـ widget.categories الممررة
+        List<CategoryModel> categoriesList = widget.categories;
+        if (state is ProductSuccess) {
+          categoriesList = state.categories;
+        }
+
+        // فلترة العناصر الفريدة (تجنب التكرار)
+        final uniqueCategories = categoriesList
+            .fold<Map<int, CategoryModel>>({}, (map, cat) {
+          if (cat.id != null) map[cat.id!] = cat;
+          return map;
+        })
+            .values
+            .toList();
+
+        return DropdownButtonFormField<int>(
+          value: _selectedCategoryId,
+          style: TxtStyle.bodyMedium,
+          decoration: InputDecoration(
+            labelText: "القسم",
+            labelStyle: TxtStyle.labelMedium,
+            prefixIcon: Icon(
+              Iconss.category,
+              size: 20,
+              color: Colorsmanegments.primary,
+            ),
+            filled: true,
+            fillColor: Colorsmanegments.background,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Colorsmanegments.border),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(
+                color: Colorsmanegments.primary,
+                width: 1.5,
+              ),
+            ),
           ),
-        ),
-      ),
-      items: categories
-          .map(
-            (category) => DropdownMenuItem<int>(
-          value: category.id,
-          child: Text(category.name),
-        ),
-      )
-          .toList(),
-      onChanged: (value) {
-        setState(() {
-          _selectedCategoryId = value;
-        });
+          items: uniqueCategories
+              .map(
+                (category) => DropdownMenuItem<int>(
+              value: category.id,
+              child: Text(category.name),
+            ),
+          )
+              .toList(),
+          onChanged: (value) {
+            setState(() {
+              _selectedCategoryId = value;
+            });
+          },
+        );
       },
     );
   }

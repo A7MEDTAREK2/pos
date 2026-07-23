@@ -1,40 +1,20 @@
+// lib/feature/customer/presentation/widget/customer_form.dart
+
 import 'package:flutter/material.dart';
 
-class CustomerForm extends StatelessWidget {
-  // ====== متغيرات التحكم في الـ UI ======
-  final Color primaryColor = Colors.blue.shade700;
-  final Color focusColor = Colors.blue.shade100;
-  final Color errorColor = Colors.red.shade700;
-  final Color labelColor = Colors.grey.shade700;
-  final Color textColor = Colors.grey.shade900;
-  final double fieldBorderRadius = 12.0;
-  final double fieldElevation = 2.0;
-  final double fontSizeLabel = 14.0;
-  final double fontSizeText = 16.0;
-  final double fieldHeight = 55.0;
-  final double fieldPadding = 4.0;
-  final String nameLabel = "اسم العميل";
-  final String phoneLabel = "رقم الهاتف";
-  final String addressLabel = "العنوان";
-  final String areaLabel = "المنطقة";
-  final String notesLabel = "ملاحظات";
-  final String nameHint = "أدخل اسم العميل";
-  final String phoneHint = "أدخل رقم الهاتف";
-  final String addressHint = "أدخل العنوان";
-  final String areaHint = "أدخل المنطقة";
-  final String notesHint = "أضف ملاحظات (اختياري)";
-  final String nameError = "أدخل اسم العميل";
-  final String phoneError = "أدخل رقم الهاتف";
-  final String addressError = "أدخل العنوان";
-  final String areaError = "أدخل المنطقة";
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/icons.dart';
+import '../../../../core/theming/txt_style.dart';
 
+class CustomerForm extends StatelessWidget {
   final TextEditingController nameController;
   final TextEditingController phoneController;
   final TextEditingController addressController;
   final TextEditingController areaController;
   final TextEditingController notesController;
 
-   CustomerForm({
+  const CustomerForm({
     super.key,
     required this.nameController,
     required this.phoneController,
@@ -56,10 +36,10 @@ class CustomerForm extends StatelessWidget {
   }) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(fieldBorderRadius),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.shade200,
+            color: Colorsmanegments.shadowLight,
             blurRadius: 4,
             offset: const Offset(0, 2),
           ),
@@ -69,68 +49,59 @@ class CustomerForm extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
-        style: TextStyle(
-          fontSize: fontSizeText,
-          color: textColor,
-        ),
+        style: TxtStyle.bodyMedium,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(
-            fontSize: fontSizeLabel,
+          labelStyle: TxtStyle.labelMedium.copyWith(
             fontWeight: FontWeight.w600,
-            color: labelColor,
           ),
           hintText: hint,
-          hintStyle: TextStyle(
-            fontSize: fontSizeText,
-            color: Colors.grey.shade400,
-          ),
+          hintStyle: TxtStyle.hint,
           prefixIcon: icon != null
               ? Icon(
             icon,
-            color: primaryColor,
+            color: Colorsmanegments.primary,
             size: 22,
           )
               : null,
           filled: true,
-          fillColor: Colors.white,
+          fillColor: Colorsmanegments.card,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(fieldBorderRadius),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: Colors.grey.shade300,
+              color: Colorsmanegments.border,
               width: 1.5,
             ),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(fieldBorderRadius),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: Colors.grey.shade300,
+              color: Colorsmanegments.border,
               width: 1.5,
             ),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(fieldBorderRadius),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: primaryColor,
+              color: Colorsmanegments.primary,
               width: 2.5,
             ),
           ),
           errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(fieldBorderRadius),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: errorColor,
+              color: Colorsmanegments.danger,
               width: 2,
             ),
           ),
           focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(fieldBorderRadius),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: errorColor,
+              color: Colorsmanegments.danger,
               width: 2.5,
             ),
           ),
-          errorStyle: TextStyle(
-            color: errorColor,
+          errorStyle: TxtStyle.danger.copyWith(
             fontSize: 13,
             fontWeight: FontWeight.w500,
           ),
@@ -152,12 +123,12 @@ class CustomerForm extends StatelessWidget {
         // ====== اسم العميل ======
         _buildField(
           controller: nameController,
-          label: nameLabel,
-          hint: nameHint,
-          icon: Icons.person,
+          label: "اسم العميل",
+          hint: "أدخل اسم العميل",
+          icon: Iconss.person,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return nameError;
+              return "أدخل اسم العميل";
             }
             return null;
           },
@@ -167,17 +138,16 @@ class CustomerForm extends StatelessWidget {
         // ====== رقم الهاتف ======
         _buildField(
           controller: phoneController,
-          label: phoneLabel,
-          hint: phoneHint,
-          icon: Icons.phone,
+          label: "رقم الهاتف",
+          hint: "أدخل رقم الهاتف",
+          icon: Iconss.phone,
           keyboardType: TextInputType.phone,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return phoneError;
+              return "أدخل رقم الهاتف";
             }
-            // التحقق من صحة رقم الهاتف (10 أرقام على الأقل)
-            if (value.trim().length < 10) {
-              return "رقم الهاتف يجب أن يكون 10 أرقام على الأقل";
+            if (value.trim().length < 11) {
+              return "رقم الهاتف يجب ألا يقل عن 11 رقماً";
             }
             return null;
           },
@@ -185,18 +155,37 @@ class CustomerForm extends StatelessWidget {
         const SizedBox(height: 16),
 
         // ====== العنوان ======
-
-
-        // ====== ملاحظات ======
         _buildField(
-          controller: notesController,
-          label: notesLabel,
-          hint: notesHint,
-          icon: Icons.note,
-          maxLines: 4,
-          isRequired: false,
-          validator: (value) => null, // اختياري
+          controller: addressController,
+          label: "العنوان",
+          hint: "أدخل العنوان",
+          icon: Iconss.location,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "أدخل العنوان";
+            }
+            return null;
+          },
         ),
+        const SizedBox(height: 16),
+
+        // ====== المنطقة ======
+        _buildField(
+          controller: areaController,
+          label: "المنطقة",
+          hint: "أدخل المنطقة",
+          icon: Iconss.map,
+          validator: (value) {
+            if (value == null || value.trim().isEmpty) {
+              return "أدخل المنطقة";
+            }
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+
+
+
       ],
     );
   }

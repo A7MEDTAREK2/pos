@@ -8,12 +8,12 @@ import '../../../../core/theming/icons.dart';
 import '../../../../core/theming/txt_style.dart';
 
 class NewCustomerDialog extends StatefulWidget {
-  final String phone;
-  final Function(String name, String area, String address) onSave;
+  final String? initialPhone;
+  final Function(String phone, String name, String area, String address) onSave;
 
   const NewCustomerDialog({
     super.key,
-    required this.phone,
+    this.initialPhone,
     required this.onSave,
   });
 
@@ -22,9 +22,45 @@ class NewCustomerDialog extends StatefulWidget {
 }
 
 class _NewCustomerDialogState extends State<NewCustomerDialog> {
-  final nameController = TextEditingController();
-  final areaController = TextEditingController();
-  final addressController = TextEditingController();
+  // 1. مفتاح الفورم الخاص بالديالوج للتحقق من الفاليديشن
+  final _formKey = GlobalKey<FormState>();
+
+  late final TextEditingController phoneController;
+  late final TextEditingController nameController;
+  late final TextEditingController areaController;
+  late final TextEditingController addressController;
+
+  @override
+  void initState() {
+    super.initState();
+    phoneController = TextEditingController(text: widget.initialPhone ?? '');
+    nameController = TextEditingController();
+    areaController = TextEditingController();
+    addressController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    nameController.dispose();
+    areaController.dispose();
+    addressController.dispose();
+    super.dispose();
+  }
+
+  void _validateAndSave() {
+    // 2. تفعيل الفاليديشن والتأكد أن جميع الحقول صحيحة
+    if (!_formKey.currentState!.validate()) return;
+
+    // 3. إرسال البيانات وإغلاق الديالوج
+    widget.onSave(
+      phoneController.text.trim(),
+      nameController.text.trim(),
+      areaController.text.trim(),
+      addressController.text.trim(),
+    );
+    Navigator.pop(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,125 +84,157 @@ class _NewCustomerDialogState extends State<NewCustomerDialog> {
       ),
       content: SizedBox(
         width: 350,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // ====== رقم الهاتف (للقراءة فقط) ======
-            TextField(
-              enabled: false,
-              style: TxtStyle.bodyMedium.copyWith(
-                color: Colorsmanegments.textSecondary,
-              ),
-              decoration: InputDecoration(
-                labelText: "رقم الهاتف",
-                labelStyle: TxtStyle.labelMedium,
-                prefixIcon: Icon(
-                  Iconss.phone,
-                  color: Colorsmanegments.textSecondary,
-                  size: 20,
-                ),
-                hintText: widget.phone,
-                hintStyle: TxtStyle.hint,
-                filled: true,
-                fillColor: Colorsmanegments.background,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colorsmanegments.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colorsmanegments.border),
-                ),
-              ),
-            ),
-            const SizedBox(height: 14),
-
-            // ====== اسم العميل ======
-            TextField(
-              controller: nameController,
-              style: TxtStyle.bodyMedium,
-              decoration: InputDecoration(
-                labelText: "اسم العميل",
-                labelStyle: TxtStyle.labelMedium,
-                prefixIcon: Icon(
-                  Iconss.person,
-                  color: Colorsmanegments.primary,
-                  size: 20,
-                ),
-                filled: true,
-                fillColor: Colorsmanegments.background,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colorsmanegments.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: Colorsmanegments.primary,
-                    width: 2,
+        child: Form(
+          key: _formKey, // ربط الفورم بالمفتاح
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ====== رقم الهاتف (11 رقماً بالضبط) ======
+                TextFormField(
+                  controller: phoneController,
+                  keyboardType: TextInputType.phone,
+                  style: TxtStyle.bodyMedium,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "برجاء إدخال رقم الهاتف";
+                    }
+                    if (value.trim().length != 11) {
+                      return "رقم الهاتف يجب أن يكون 11 رقماً بالضبط";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: "رقم الهاتف",
+                    labelStyle: TxtStyle.labelMedium,
+                    prefixIcon: Icon(
+                      Iconss.phone,
+                      color: Colorsmanegments.primary,
+                      size: 20,
+                    ),
+                    filled: true,
+                    fillColor: Colorsmanegments.background,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colorsmanegments.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colorsmanegments.primary,
+                        width: 2,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 14),
+                const SizedBox(height: 14),
 
-            // ====== المنطقة ======
-            TextField(
-              controller: areaController,
-              style: TxtStyle.bodyMedium,
-              decoration: InputDecoration(
-                labelText: "المنطقة",
-                labelStyle: TxtStyle.labelMedium,
-                prefixIcon: Icon(
-                  Iconss.location,
-                  color: Colorsmanegments.primary,
-                  size: 20,
-                ),
-                filled: true,
-                fillColor: Colorsmanegments.background,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colorsmanegments.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: Colorsmanegments.primary,
-                    width: 2,
+                // ====== اسم العميل ======
+                TextFormField(
+                  controller: nameController,
+                  style: TxtStyle.bodyMedium,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "برجاء إدخال اسم العميل";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: "اسم العميل",
+                    labelStyle: TxtStyle.labelMedium,
+                    prefixIcon: Icon(
+                      Iconss.person,
+                      color: Colorsmanegments.primary,
+                      size: 20,
+                    ),
+                    filled: true,
+                    fillColor: Colorsmanegments.background,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colorsmanegments.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colorsmanegments.primary,
+                        width: 2,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 14),
+                const SizedBox(height: 14),
 
-            // ====== العنوان ======
-            TextField(
-              controller: addressController,
-              style: TxtStyle.bodyMedium,
-              decoration: InputDecoration(
-                labelText: "العنوان",
-                labelStyle: TxtStyle.labelMedium,
-                prefixIcon: Icon(
-                  Iconss.location,
-                  color: Colorsmanegments.primary,
-                  size: 20,
-                ),
-                filled: true,
-                fillColor: Colorsmanegments.background,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colorsmanegments.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(
-                    color: Colorsmanegments.primary,
-                    width: 2,
+                // ====== المنطقة ======
+                TextFormField(
+                  controller: areaController,
+                  style: TxtStyle.bodyMedium,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "برجاء إدخال المنطقة";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: "المنطقة",
+                    labelStyle: TxtStyle.labelMedium,
+                    prefixIcon: Icon(
+                      Iconss.location,
+                      color: Colorsmanegments.primary,
+                      size: 20,
+                    ),
+                    filled: true,
+                    fillColor: Colorsmanegments.background,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colorsmanegments.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colorsmanegments.primary,
+                        width: 2,
+                      ),
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 14),
+
+                // ====== العنوان ======
+                TextFormField(
+                  controller: addressController,
+                  style: TxtStyle.bodyMedium,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) {
+                      return "برجاء إدخال تفاصيل العنوان";
+                    }
+                    return null;
+                  },
+                  decoration: InputDecoration(
+                    labelText: "العنوان",
+                    labelStyle: TxtStyle.labelMedium,
+                    prefixIcon: Icon(
+                      Iconss.location,
+                      color: Colorsmanegments.primary,
+                      size: 20,
+                    ),
+                    filled: true,
+                    fillColor: Colorsmanegments.background,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(color: Colorsmanegments.border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: BorderSide(
+                        color: Colorsmanegments.primary,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
       actions: [
@@ -187,14 +255,7 @@ class _NewCustomerDialogState extends State<NewCustomerDialog> {
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          onPressed: () {
-            widget.onSave(
-              nameController.text,
-              areaController.text,
-              addressController.text,
-            );
-            Navigator.pop(context);
-          },
+          onPressed: _validateAndSave,
           child: Text(
             "حفظ",
             style: TxtStyle.buttonMedium,

@@ -10,11 +10,12 @@ import '../../../../core/theming/txt_style.dart';
 class ProductSearchBar extends StatelessWidget {
   final TextEditingController controller;
   final ValueChanged<String> onChanged;
-
+  final FocusNode? focusNode;
   const ProductSearchBar({
     super.key,
     required this.controller,
     required this.onChanged,
+    required this.focusNode
   });
 
   @override

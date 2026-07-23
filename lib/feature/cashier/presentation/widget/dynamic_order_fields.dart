@@ -30,47 +30,75 @@ class DynamicOrderFields extends StatefulWidget {
 class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
   bool customerFound = false;
   String customerName = "";
-  String customerArea = "";
+  String customerAddressValue = ""; // 🌟 تم تعديل المتجر ليكون للعنوان بدلاً من المنطقة
   final customerNameController = TextEditingController();
   final customerPhoneController = TextEditingController();
   final customerAddressController = TextEditingController();
   final customerAreaController = TextEditingController();
   bool showAddresses = false;
 
+  String? phoneErrorText;
+
   void _showNewCustomerDialog() {
+    final phoneText = customerPhoneController.text.trim();
+
     showDialog(
       context: context,
       builder: (_) => NewCustomerDialog(
-        phone: customerPhoneController.text,
-        onSave: (name, area, address) async {
+        initialPhone: phoneText,
+        onSave: (phone, name, area, address) async {
           final customerCubit = context.read<CustomerCubit>();
+          final addressCubit = context.read<CustomerAddressCubit>();
+          final orderCubit = context.read<OrderCubit>();
 
-          await customerCubit.addCustomer(
+          // 1. إضافة العميل الجديد
+          final customerId = await customerCubit.addCustomer(
             CustomerModel(
               id: 0,
               name: name,
-              phone: customerPhoneController.text,
+              phone: phone,
               createdAt: DateTime.now(),
             ),
           );
 
-          final customer = await customerCubit.getCustomerByPhone(
-            customerPhoneController.text,
-          );
+          if (customerId != null) {
+            // 2. إنشاء وحفظ العنوان المرتبط بالعميل الجديد
+            final newAddress = CustomerAddressModel(
+              customerId: customerId,
+              title: "المنزل",
+              area: area,
+              address: address,
+              isDefault: true,
+              createdAt: DateTime.now(),
+            );
 
-          if (customer != null) {
-            context.read<OrderCubit>().setCustomer(customer);
-            await context
-                .read<CustomerAddressCubit>()
-                .loadAddresses(customer.id!);
+            await addressCubit.addAddress(newAddress);
+            await addressCubit.loadAddresses(customerId);
 
-            setState(() {
-              customerFound = true;
-              customerName = customer.name;
-              customerNameController.text = customer.name;
-              customerAreaController.clear();
-              customerAddressController.clear();
-            });
+            final createdCustomer = CustomerModel(
+              id: customerId,
+              name: name,
+              phone: phone,
+              createdAt: DateTime.now(),
+            );
+
+            // 3. ربط العميل والعنوان فوراً بـ OrderCubit
+            orderCubit.setCustomer(createdCustomer);
+
+            if (addressCubit.addresses.isNotEmpty) {
+              final savedAddress = addressCubit.addresses.last;
+              addressCubit.selectAddress(savedAddress);
+              orderCubit.setAddress(savedAddress);
+
+              setState(() {
+                customerFound = true;
+                customerName = name;
+                customerPhoneController.text = phone;
+                customerAddressValue = savedAddress.address; // 🌟 تعيين العنوان الجديد
+                customerAddressController.text = savedAddress.address;
+                phoneErrorText = null;
+              });
+            }
           }
         },
       ),
@@ -99,9 +127,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     }
     if (customerAddressController.text != (cubit.customerAddress ?? '')) {
       customerAddressController.text = cubit.customerAddress ?? '';
-    }
-    if (customerAreaController.text != (cubit.customerArea ?? '')) {
-      customerAreaController.text = cubit.customerArea ?? '';
+      customerAddressValue = cubit.customerAddress ?? '';
     }
   }
 
@@ -224,10 +250,15 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
           children: [
             _buildCompactTextField(
               controller: customerPhoneController,
-              hint: "أدخل رقم الهاتف واضغط Enter للبحث",
+              hint: "أدخل رقم الهاتف (11 رقم) واضغط Enter",
               icon: Iconss.phone,
-              showArrow: customerFound,
-              onChanged: (_) {},
+              onChanged: (val) {
+                if (val.trim().length == 11 && phoneErrorText != null) {
+                  setState(() {
+                    phoneErrorText = null;
+                  });
+                }
+              },
               onSubmitted: () async {
                 await _searchCustomer();
               },
@@ -251,69 +282,74 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     required IconData icon,
     required ValueChanged<String> onChanged,
     VoidCallback? onSubmitted,
-    bool showArrow = false,
   }) {
     final customer = context.read<OrderCubit>().selectedCustomer;
-    return SizedBox(
-      height: 46,
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        onSubmitted: (_) {
-          if (onSubmitted != null) {
-            onSubmitted();
-          }
-        },
-        keyboardType: TextInputType.phone,
-        textDirection: TextDirection.ltr,
-        style: TxtStyle.bodyMedium.copyWith(
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.5,
+    return TextFormField(
+      controller: controller,
+      onChanged: onChanged,
+      onFieldSubmitted: (_) {
+        if (onSubmitted != null) {
+          onSubmitted();
+        }
+      },
+      keyboardType: TextInputType.phone,
+      textDirection: TextDirection.ltr,
+      style: TxtStyle.bodyMedium.copyWith(
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
+      ),
+      decoration: InputDecoration(
+        errorText: phoneErrorText,
+        suffixIcon: customerFound && customer != null
+            ? AddressPopup(
+          customerId: customer.id!,
+          onSelected: (address) {
+            context.read<OrderCubit>().setAddress(address);
+            setState(() {
+              customerAddressValue = address.address; // 🌟 تحديث العنوان عند اختياره من القائمة
+              customerAddressController.text = address.address;
+            });
+          },
+        )
+            : null,
+        hintText: hint,
+        hintStyle: TxtStyle.hintSmall,
+        prefixIcon: Icon(
+          icon,
+          size: 18,
+          color: Colorsmanegments.primary,
         ),
-        decoration: InputDecoration(
-          suffixIcon: customerFound && customer != null
-              ? AddressPopup(
-            customerId: customer.id!,
-            onSelected: (address) {
-              context.read<OrderCubit>().setAddress(address);
-              setState(() {
-                customerArea = address.area;
-                customerAddressController.text = address.address;
-              });
-            },
-          )
-              : null,
-          hintText: hint,
-          hintStyle: TxtStyle.hintSmall,
-          prefixIcon: Icon(
-            icon,
-            size: 18,
+        filled: true,
+        fillColor: Colorsmanegments.background,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colorsmanegments.borderLight),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(
             color: Colorsmanegments.primary,
+            width: 1.5,
           ),
-          filled: true,
-          fillColor: Colorsmanegments.background,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 12,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colorsmanegments.borderLight),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(
-              color: Colorsmanegments.primary,
-              width: 1.5,
-            ),
-          ),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Colors.red, width: 1.5),
         ),
       ),
     );
   }
 
   // ============================================================
-  // Customer Card
+  // Customer Card (عرض العنوان بدلاً من المنطقة)
   // ============================================================
   Widget _buildCustomerCard() {
     return Container(
@@ -359,8 +395,8 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
           Expanded(
             child: _buildLabeledValue(
               icon: Iconss.location,
-              label: "المنطقة",
-              value: customerArea.isNotEmpty ? customerArea : "اختر العنوان",
+              label: "العنوان", // 🌟 تغيير التسمية من المنطقة إلى العنوان
+              value: customerAddressValue.isNotEmpty ? customerAddressValue : "اختر العنوان", // 🌟 عرض تفاصيل العنوان
               isHighlight: true,
             ),
           ),
@@ -421,7 +457,23 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
   Future<void> _searchCustomer() async {
     final phone = customerPhoneController.text.trim();
 
-    if (phone.isEmpty) return;
+    if (phone.isEmpty) {
+      setState(() {
+        phoneErrorText = "برجاء إدخال رقم الهاتف";
+      });
+      return;
+    }
+
+    if (phone.length != 11) {
+      setState(() {
+        phoneErrorText = "رقم الهاتف يجب أن يكون 11 رقماً بالضبط";
+      });
+      return;
+    }
+
+    setState(() {
+      phoneErrorText = null;
+    });
 
     final customerCubit = context.read<CustomerCubit>();
     final customer = await customerCubit.findCustomerByPhone(phone);
@@ -437,14 +489,8 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
         addressCubit.selectAddress(addressCubit.addresses.first);
         orderCubit.setAddress(addressCubit.addresses.first);
 
-        customerArea = addressCubit.addresses.first.area;
+        customerAddressValue = addressCubit.addresses.first.address; // 🌟 جلب وعرض تفاصيل العنوان
         customerAddressController.text = addressCubit.addresses.first.address;
-      }
-
-      orderCubit.setCustomer(customer);
-
-      if (addressCubit.selectedAddress != null) {
-        orderCubit.setAddress(addressCubit.selectedAddress!);
       }
 
       setState(() {
@@ -478,7 +524,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
       setState(() {
         customerFound = true;
         customerName = orderCubit.customerName ?? "";
-        customerArea = address.area;
+        customerAddressValue = address.address; // 🌟 تعيين العنوان للـ UI
         customerAddressController.text = address.address;
       });
     }

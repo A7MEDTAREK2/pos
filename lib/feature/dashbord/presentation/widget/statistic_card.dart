@@ -1,7 +1,10 @@
 // lib/feature/dashboard/presentation/widgets/statistic_card.dart
 
-import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/cupertino.dart';
+
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/icons.dart';
+import '../../../../core/theming/txt_style.dart';
 
 class StatisticData {
   final IconData icon;
@@ -31,12 +34,12 @@ class StatisticCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colorsmanegments.card,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: Colorsmanegments.border),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colorsmanegments.shadowLight,
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -65,23 +68,29 @@ class StatisticCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
-                    color: isPositive ? const Color(0xFF16A34A).withOpacity(0.1) : const Color(0xFFDC2626).withOpacity(0.1),
+                    color: isPositive
+                        ? Colorsmanegments.success.withOpacity(0.1)
+                        : Colorsmanegments.danger.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
                     children: [
                       Icon(
-                        isPositive ? Icons.arrow_upward : Icons.arrow_downward,
+                        isPositive
+                            ? Iconss.trendingUp
+                            : Iconss.trendingDown,
                         size: 10,
-                        color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                        color: isPositive
+                            ? Colorsmanegments.success
+                            : Colorsmanegments.danger,
                       ),
                       const SizedBox(width: 2),
                       Text(
                         '${isPositive ? '+' : ''}${data.change.toStringAsFixed(1)}%',
-                        style: GoogleFonts.cairo(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w600,
-                          color: isPositive ? const Color(0xFF16A34A) : const Color(0xFFDC2626),
+                        style: TxtStyle.dashboardChange.copyWith(
+                          color: isPositive
+                              ? Colorsmanegments.success
+                              : Colorsmanegments.danger,
                         ),
                       ),
                     ],
@@ -94,19 +103,12 @@ class StatisticCard extends StatelessWidget {
             children: [
               Text(
                 data.value,
-                style: GoogleFonts.cairo(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF111827),
-                ),
+                style: TxtStyle.dashboardValue,
               ),
               const SizedBox(height: 2),
               Text(
                 data.title,
-                style: GoogleFonts.cairo(
-                  fontSize: 12,
-                  color: const Color(0xFF6B7280),
-                ),
+                style: TxtStyle.dashboardTitle,
               ),
             ],
           ),

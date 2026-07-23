@@ -1,5 +1,10 @@
+// lib/feature/sales/presentation/screen/sales_history_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+// ====== Home (لعمل Refresh للداشبورد) ======
+import '../../../home/logic/home_cubit.dart';
 
 import '../../logic/sale_cubit.dart';
 import '../../logic/sale_state.dart';
@@ -87,60 +92,74 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
                               child: state.displaySales.isEmpty
                                   ? const EmptySalesWidget()
                                   : ListView.builder(
-                                      padding: const EdgeInsets.all(16),
-                                      itemCount: state.displaySales.length,
-                                      itemBuilder: (context, index) {
-                                        final sale = state.displaySales[index];
+                                padding: const EdgeInsets.all(16),
+                                itemCount: state.displaySales.length,
+                                itemBuilder: (context, index) {
+                                  final sale = state.displaySales[index];
 
-                                        return Card(
-                                          margin: const EdgeInsets.only(
-                                            bottom: 12,
-                                          ),
-                                          child: SaleCard(
-                                            sale: sale,
+                                  return Card(
+                                    margin: const EdgeInsets.only(
+                                      bottom: 12,
+                                    ),
+                                    child: SaleCard(
+                                      sale: sale,
 
-                                            onDetails: () {
-                                              SaleDetailsBottomSheet.show(
-                                                context,
-                                                sale.id,
-                                              );
-                                            },
-
-                                            onDelete: () async {
-                                              final confirm =
-                                                  await SaleActionDialogs.confirmDelete(
-                                                    context,
-                                                  );
-
-                                              if (!confirm) return;
-
-                                              context
-                                                  .read<SalesHistoryCubit>()
-                                                  .deleteSale(sale.id);
-                                            },
-
-                                            onPrint: () {
-                                              context
-                                                  .read<SalesHistoryCubit>()
-                                                  .printSale(sale.id);
-                                            },
-
-                                            onReopen: () async {
-                                              final confirm =
-                                                  await SaleActionDialogs.confirmReopen(
-                                                    context,
-                                                  );
-
-                                              if (!confirm) return;
-
-                                              context
-                                                  .read<SalesHistoryCubit>()
-                                                  .reopenOrder(sale.id);
-                                            },
-                                          ),
+                                      onDetails: () {
+                                        SaleDetailsBottomSheet.show(
+                                          context,
+                                          sale.id,
                                         );
                                       },
+
+                                      onDelete: () async {
+                                        final confirm =
+                                        await SaleActionDialogs.confirmDelete(
+                                          context,
+                                        );
+
+                                        if (!confirm) return;
+
+                                        await context
+                                            .read<SalesHistoryCubit>()
+                                            .deleteSale(sale.id);
+
+                                        // 🌟 تحديث الداشبورد بعد الحذف
+                                        if (context.mounted) {
+                                          try {
+                                            context.read<HomeCubit>().refreshDashboard();
+                                          } catch (_) {}
+                                        }
+                                      },
+
+                                      onPrint: () {
+                                        context
+                                            .read<SalesHistoryCubit>()
+                                            .printSale(sale.id);
+                                      },
+
+                                      onReopen: () async {
+                                        final confirm =
+                                        await SaleActionDialogs.confirmReopen(
+                                          context,
+                                        );
+
+                                        if (!confirm) return;
+
+                                        await context
+                                            .read<SalesHistoryCubit>()
+                                            .reopenOrder(sale.id);
+
+                                        // 🌟 تحديث الداشبورد بعد إعادة فتح الطلب
+                                        if (context.mounted) {
+                                          try {
+                                            context.read<HomeCubit>().refreshDashboard();
+                                          } catch (_) {}
+                                        }
+                                      },
                                     ),
+                                  );
+                                },
+                              ),
                             ),
                           ],
                         );

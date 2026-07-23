@@ -1,11 +1,24 @@
+// lib/feature/customer/presentation/widget/address.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/icons.dart';
+import '../../../../core/theming/txt_style.dart';
+
+// ====== Cashier ======
 import '../../../cashier/logic/pos_cubit.dart';
+
+// ====== Customer ======
 import '../../data/model/customer_model.dart';
 import '../../logic/customer_cubit.dart';
 import '../../logic/customer_state.dart';
 
+// ============================================================
+// CustomerAddressesSection
+// ============================================================
 class CustomerAddressesSection extends StatefulWidget {
   final ValueChanged<CustomerAddressModel>? onAddressSelected;
   final int customerId;
@@ -24,8 +37,6 @@ class CustomerAddressesSection extends StatefulWidget {
 }
 
 class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
-  static const Color _primary = Color(0xff2563EB);
-
   @override
   void initState() {
     super.initState();
@@ -35,7 +46,7 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl, // ضمان اتجاه الواجهة بالكامل للعربية
+      textDirection: TextDirection.rtl,
       child: BlocBuilder<CustomerAddressCubit, CustomerAddressState>(
         builder: (context, state) {
           final cubit = context.read<CustomerAddressCubit>();
@@ -43,73 +54,99 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ================= Header =================
+              // ====== Header ======
               Row(
                 children: [
-                  const Icon(Icons.location_on_outlined, size: 18, color: _primary),
+                  Icon(
+                    Iconss.location,
+                    size: 18,
+                    color: Colorsmanegments.primary,
+                  ),
                   const SizedBox(width: 6),
-                  const Text(
+                  Text(
                     "العناوين",
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    style: TxtStyle.labelBold,
                   ),
                   const Spacer(),
                   if (!widget.selectable)
                     TextButton.icon(
                       onPressed: () => _openAddressDialog(context),
                       style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 4,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
                       ),
-                      icon: const Icon(Icons.add, size: 16),
-                      label: const Text("إضافة عنوان", style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                      icon: Icon(
+                        Iconss.add,
+                        size: 16,
+                        color: Colorsmanegments.primary,
+                      ),
+                      label: Text(
+                        "إضافة عنوان",
+                        style: TxtStyle.buttonPrimary.copyWith(fontSize: 13),
+                      ),
                     ),
                 ],
               ),
 
               const SizedBox(height: 10),
 
-              // ================= Empty State =================
+              // ====== Empty State ======
               if (cubit.addresses.isEmpty)
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 24),
                   decoration: BoxDecoration(
-                    color: const Color(0xffF8FAFC),
+                    color: Colorsmanegments.background,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xffE5E7EB)),
+                    border: Border.all(color: Colorsmanegments.border),
                   ),
-                  child: const Column(
+                  child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.location_off_outlined, color: Colors.grey, size: 28),
-                      SizedBox(height: 8),
+                      Icon(
+                        Iconss.locationOff,
+                        color: Colorsmanegments.textSecondary,
+                        size: 28,
+                      ),
+                      const SizedBox(height: 8),
                       Text(
                         "لا توجد عناوين مضافة لهذا العميل",
-                        style: TextStyle(color: Colors.grey, fontSize: 13, fontWeight: FontWeight.w500),
+                        style: TxtStyle.bodySmall.copyWith(
+                          color: Colorsmanegments.textSecondary,
+                        ),
                       ),
                     ],
                   ),
                 ),
 
-              // ================= Addresses List =================
+              // ====== Addresses List ======
               ...cubit.addresses.map((address) {
-                final isSelected =
-                    widget.selectable && cubit.selectedAddress?.id == address.id;
+                final isSelected = widget.selectable &&
+                    cubit.selectedAddress?.id == address.id;
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: isSelected ? const Color(0xffEFF6FF) : Colors.white,
+                      color: isSelected
+                          ? Colorsmanegments.primaryLight
+                          : Colorsmanegments.card,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isSelected ? _primary : const Color(0xffE5E7EB),
+                        color: isSelected
+                            ? Colorsmanegments.primary
+                            : Colorsmanegments.border,
                         width: isSelected ? 1.5 : 1,
                       ),
                       boxShadow: [
                         if (!isSelected)
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.02),
+                            color: Colorsmanegments.shadowLight,
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -119,7 +156,9 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                       borderRadius: BorderRadius.circular(12),
                       onTap: widget.selectable
                           ? () {
-                        context.read<CustomerAddressCubit>().selectAddress(address);
+                        context
+                            .read<CustomerAddressCubit>()
+                            .selectAddress(address);
                         widget.onAddressSelected?.call(address);
                       }
                           : null,
@@ -132,14 +171,16 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: isSelected
-                                    ? _primary.withOpacity(.12)
-                                    : const Color(0xffF8FAFC),
+                                    ? Colorsmanegments.primary.withOpacity(0.12)
+                                    : Colorsmanegments.background,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
-                                Icons.location_on,
+                                Iconss.location,
                                 size: 20,
-                                color: isSelected ? _primary : Colors.grey.shade600,
+                                color: isSelected
+                                    ? Colorsmanegments.primary
+                                    : Colorsmanegments.textSecondary,
                               ),
                             ),
                             const SizedBox(width: 12),
@@ -154,26 +195,26 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                                         child: Text(
                                           address.title ?? "عنوان غير مسمى",
                                           overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 14,
-                                          ),
+                                          style: TxtStyle.tableRowBold,
                                         ),
                                       ),
                                       if (address.isDefault) ...[
                                         const SizedBox(width: 8),
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green.shade50,
-                                            borderRadius: BorderRadius.circular(6),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 3,
                                           ),
-                                          child: const Text(
+                                          decoration: BoxDecoration(
+                                            color: Colorsmanegments.success
+                                                .withOpacity(0.1),
+                                            borderRadius:
+                                            BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
                                             "افتراضي",
-                                            style: TextStyle(
-                                              fontSize: 10,
-                                              color: Colors.green,
-                                              fontWeight: FontWeight.bold,
+                                            style: TxtStyle.badgeSmall.copyWith(
+                                              color: Colorsmanegments.success,
                                             ),
                                           ),
                                         ),
@@ -183,9 +224,7 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                                   const SizedBox(height: 4),
                                   Text(
                                     address.area,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade700,
+                                    style: TxtStyle.bodySmall.copyWith(
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -194,10 +233,7 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                                     address.address,
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.grey.shade500,
-                                    ),
+                                    style: TxtStyle.bodySmall,
                                   ),
                                 ],
                               ),
@@ -205,16 +241,13 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
 
                             const SizedBox(width: 8),
 
-                            // ============ Trailing Actions ============
+                            // ====== Trailing Actions ======
                             if (widget.selectable)
                               if (isSelected)
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 8),
-                                  child: Icon(
-                                    Icons.check_circle,
-                                    color: Colors.green,
-                                    size: 22,
-                                  ),
+                                Icon(
+                                  Iconss.check,
+                                  color: Colorsmanegments.success,
+                                  size: 22,
                                 )
                               else
                                 const SizedBox.shrink()
@@ -224,13 +257,12 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                                 children: [
                                   if (!address.isDefault)
                                     IconButton(
-
                                       constraints: const BoxConstraints(),
                                       tooltip: "تعيين كافتراضي",
-                                      icon: const Icon(
-                                        Icons.star_border_rounded,
+                                      icon: Icon(
+                                        Iconss.star,
                                         size: 20,
-                                        color: Colors.amber,
+                                        color: Colorsmanegments.warning,
                                       ),
                                       onPressed: () {
                                         context
@@ -243,26 +275,26 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                                     ),
                                   const SizedBox(width: 8),
                                   IconButton(
-                                    //padding: EdgeInsets.transparent,
                                     constraints: const BoxConstraints(),
                                     tooltip: "تعديل",
-                                    icon: const Icon(
-                                      Icons.edit_outlined,
+                                    icon: Icon(
+                                      Iconss.edit,
                                       size: 20,
-                                      color: _primary,
+                                      color: Colorsmanegments.primary,
                                     ),
-                                    onPressed: () =>
-                                        _openAddressDialog(context, address: address),
+                                    onPressed: () => _openAddressDialog(
+                                      context,
+                                      address: address,
+                                    ),
                                   ),
                                   const SizedBox(width: 8),
                                   IconButton(
-                                    //padding: EdgeInsets.transparent,
                                     constraints: const BoxConstraints(),
                                     tooltip: "حذف",
-                                    icon: const Icon(
-                                      Icons.delete_outline,
+                                    icon: Icon(
+                                      Iconss.delete,
                                       size: 20,
-                                      color: Colors.red,
+                                      color: Colorsmanegments.danger,
                                     ),
                                     onPressed: () {
                                       cubit.deleteAddress(
@@ -281,7 +313,7 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                 );
               }),
 
-              // ================= Add Button (Selectable Mode) =================
+              // ====== Add Button (Selectable Mode) ======
               if (widget.selectable) ...[
                 const SizedBox(height: 6),
                 SizedBox(
@@ -289,15 +321,22 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                   child: OutlinedButton.icon(
                     onPressed: () => _openAddressDialog(context),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: _primary,
-                      side: const BorderSide(color: _primary, width: 1.2),
+                      foregroundColor: Colorsmanegments.primary,
+                      side: BorderSide(color: Colorsmanegments.primary, width: 1.2),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    icon: const Icon(Icons.add_location_alt_outlined, size: 20),
-                    label: const Text("إضافة عنوان جديد", style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                    icon: Icon(
+                      Iconss.addLocation,
+                      size: 20,
+                      color: Colorsmanegments.primary,
+                    ),
+                    label: Text(
+                      "إضافة عنوان جديد",
+                      style: TxtStyle.buttonPrimary,
+                    ),
                   ),
                 ),
               ],
@@ -322,6 +361,9 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
   }
 }
 
+// ============================================================
+// AddAddressDialog
+// ============================================================
 class AddAddressDialog extends StatefulWidget {
   final int customerId;
   final CustomerAddressModel? address;
@@ -337,8 +379,6 @@ class AddAddressDialog extends StatefulWidget {
 }
 
 class _AddAddressDialogState extends State<AddAddressDialog> {
-  static const Color _primary = Color(0xff2563EB);
-
   final _formKey = GlobalKey<FormState>();
 
   final titleController = TextEditingController();
@@ -392,18 +432,23 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
     await cubit.loadAddresses(widget.customerId);
 
     if (widget.address == null && cubit.addresses.isNotEmpty) {
-      final newAddress = cubit.addresses.last;
-      cubit.selectAddress(newAddress);
+      final newlyAdded = cubit.addresses.lastWhere(
+            (element) => element.address == addressController.text.trim(),
+        orElse: () => cubit.addresses.last,
+      );
+
+      cubit.selectAddress(newlyAdded);
 
       if (mounted) {
-        // تأكد من وجود الـ OrderCubit في الشجرة لتفادي الـ Crash
         try {
-          context.read<OrderCubit>().setAddress(newAddress);
+          context.read<OrderCubit>().setAddress(newlyAdded);
         } catch (_) {}
       }
     }
 
-    if (mounted) Navigator.pop(context);
+    if (mounted) {
+      Navigator.pop(context);
+    }
   }
 
   @override
@@ -411,36 +456,44 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ================= Header =================
+              // ====== Header ======
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: const BoxDecoration(
-                  color: _primary,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                decoration: BoxDecoration(
+                  color: Colorsmanegments.primary,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(16),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.add_location_alt_outlined, color: Colors.white, size: 22),
+                    Icon(
+                      Iconss.addLocation,
+                      color: Colorsmanegments.textWhite,
+                      size: 22,
+                    ),
                     const SizedBox(width: 10),
                     Text(
                       widget.address == null ? "إضافة عنوان جديد" : "تعديل العنوان",
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: TxtStyle.headerWhite.copyWith(fontSize: 16),
                     ),
                     const Spacer(),
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.close, color: Colors.white, size: 22),
+                      icon: Icon(
+                        Iconss.close,
+                        color: Colorsmanegments.textWhite,
+                        size: 22,
+                      ),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     ),
@@ -448,7 +501,7 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                 ),
               ),
 
-              // ================= Body =================
+              // ====== Body ======
               Flexible(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
@@ -460,32 +513,32 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                         _buildField(
                           controller: titleController,
                           label: "اسم العنوان (مثال: المنزل، العمل)",
-                          icon: Icons.label_outline,
+                          icon: Iconss.label,
                           validator: (v) =>
                           v == null || v.isEmpty ? "برجاء إدخال اسم العنوان" : null,
                         ),
                         const SizedBox(height: 14),
                         _buildField(
                           controller: areaController,
-                          label: "المنطقة / الحي",
-                          icon: Icons.map_outlined,
+                          label: "المنطقة",
+                          icon: Iconss.map,
                           validator: (v) =>
                           v == null || v.isEmpty ? "برجاء إدخال المنطقة" : null,
                         ),
                         const SizedBox(height: 14),
                         _buildField(
                           controller: addressController,
-                          label: "تفاصيل العنوان (الشارع، رقم المبنى...)",
-                          icon: Icons.home_outlined,
+                          label: "العنوان بالتفصيل",
+                          icon: Iconss.location,
                           maxLines: 2,
                           validator: (v) =>
-                          v == null || v.isEmpty ? "برجاء إدخال تفاصيل العنوان" : null,
+                          v == null || v.isEmpty ? "برجاء إدخال العنوان" : null,
                         ),
                         const SizedBox(height: 14),
                         _buildField(
                           controller: notesController,
-                          label: "ملاحظات إضافية (اختياري)",
-                          icon: Icons.sticky_note_2_outlined,
+                          label: "ملاحظات (اختياري)",
+                          icon: Iconss.note,
                           maxLines: 2,
                         ),
                       ],
@@ -494,7 +547,7 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                 ),
               ),
 
-              // ================= Footer =================
+              // ====== Footer ======
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                 child: Row(
@@ -507,10 +560,13 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
-                          side: BorderSide(color: Colors.grey.shade300),
-                          foregroundColor: Colors.grey.shade700,
+                          side: BorderSide(color: Colorsmanegments.border),
+                          foregroundColor: Colorsmanegments.textSecondary,
                         ),
-                        child: const Text("إلغاء", style: TextStyle(fontWeight: FontWeight.bold)),
+                        child: Text(
+                          "إلغاء",
+                          style: TxtStyle.buttonPrimary,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -518,8 +574,8 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                       child: ElevatedButton(
                         onPressed: save,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: _primary,
-                          foregroundColor: Colors.white,
+                          backgroundColor: Colorsmanegments.primary,
+                          foregroundColor: Colorsmanegments.textWhite,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
@@ -528,10 +584,7 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                         ),
                         child: Text(
                           widget.address == null ? "حفظ العنوان" : "تحديث الآن",
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                          ),
+                          style: TxtStyle.buttonMedium,
                         ),
                       ),
                     ),
@@ -556,29 +609,42 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
       controller: controller,
       maxLines: maxLines,
       validator: validator,
-      textDirection: TextDirection.rtl, // لضبط الكتابة العربية والإنجليزية المختلطة بشكل صحيح
+      textDirection: TextDirection.rtl,
+      style: TxtStyle.bodyMedium,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-        prefixIcon: Icon(icon, size: 20, color: _primary),
+        labelStyle: TxtStyle.labelMedium,
+        prefixIcon: Icon(
+          icon,
+          size: 20,
+          color: Colorsmanegments.primary,
+        ),
         filled: true,
-        fillColor: const Color(0xffF8FAFC),
+        fillColor: Colorsmanegments.background,
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade200),
+          borderSide: BorderSide(color: Colorsmanegments.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: _primary, width: 1.5),
+          borderSide: BorderSide(
+            color: Colorsmanegments.primary,
+            width: 1.5,
+          ),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.red),
+          borderSide: BorderSide(
+            color: Colorsmanegments.danger,
+          ),
         ),
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+          borderSide: BorderSide(
+            color: Colorsmanegments.danger,
+            width: 1.5,
+          ),
         ),
       ),
     );

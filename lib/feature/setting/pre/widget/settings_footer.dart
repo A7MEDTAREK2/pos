@@ -8,7 +8,12 @@ import '../../../../core/theming/icons.dart';
 import '../../../../core/theming/txt_style.dart';
 
 class SettingsFooter extends StatelessWidget {
-  const SettingsFooter({super.key, required Null Function() onPressed});
+  final VoidCallback onPressed; // 👈 1. إعلان المتغير بشكل صحيح
+
+  const SettingsFooter({
+    super.key,
+    required this.onPressed, // 👈 2. ربطه بالـ Constructor
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +29,7 @@ class SettingsFooter extends StatelessWidget {
           ),
           elevation: 2,
         ),
-        onPressed: () {},
+        onPressed: onPressed, // 👈 3. ربط الضغطة بالدالة القادمة من SettingsScreen
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

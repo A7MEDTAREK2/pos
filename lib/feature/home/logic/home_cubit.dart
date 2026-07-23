@@ -16,12 +16,15 @@ class HomeCubit extends Cubit<HomeState> {
       emit(HomeError(e.toString()));
     }
   }
+
+  // 🎯 استدعِ هذه الدالة فوراً بعد حفظ فاتورة جديدة أو إضافة منتج لتتحدث الكروت في ساعتها
   Future<void> refreshDashboard() async {
     try {
       final metrics = await _repository.getHomeMetrics();
+      // إذا كانت الحالة الحالية ناجحة، نقوم بتحديثها بالبيانات الجديدة مباشرة
       emit(HomeSuccess(metrics));
     } catch (e) {
-      emit(HomeError(e.toString()));
+      // لا نقوم بإرسال HomeError هنا حتى لا نقطع تجربة المستخدم إذا فشل التحديث الصامت
     }
   }
 }

@@ -31,9 +31,9 @@ class SettingsCubit extends Cubit<SettingsState> {
 
       settings = newSettings;
 
+      // 🎯 نكتفي بإطلاق حالة تم الحفظ بنجاح
       emit(SettingsSaved(newSettings));
 
-      emit(SettingsLoaded(newSettings));
     } catch (e) {
       emit(SettingsError(e.toString()));
     }
@@ -70,4 +70,5 @@ class SettingsCubit extends Cubit<SettingsState> {
 
     await saveSettings(updated);
   }
+
 }

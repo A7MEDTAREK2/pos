@@ -1,6 +1,17 @@
+// lib/feature/customer/presentation/screen/add_customer_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// ====== Core ======
+import '../../../../core/theming/colors manegments.dart';
+import '../../../../core/theming/icons.dart';
+import '../../../../core/theming/txt_style.dart';
+
+// ====== Cashier ======
+import '../../../cashier/logic/pos_cubit.dart';
+
+// ====== Customer ======
 import '../../data/model/customer_model.dart';
 import '../../logic/customer_cubit.dart';
 import '../../logic/customer_state.dart';
@@ -20,23 +31,6 @@ class AddCustomerScreen extends StatefulWidget {
 }
 
 class _AddCustomerScreenState extends State<AddCustomerScreen> {
-  // ====== متغيرات التحكم في الـ UI ======
-  final Color primaryColor = Colors.blue.shade700;
-  final Color secondaryColor = Colors.grey.shade800;
-  final Color backgroundColor = Colors.grey.shade50;
-  final Color cardColor = Colors.white;
-  final double cardElevation = 4.0;
-  final double cardBorderRadius = 16.0;
-  final double appBarElevation = 2.0;
-  final double mainPadding = 24.0;
-  final double fontSizeTitle = 22.0;
-  final double fontSizeButton = 18.0;
-  final String addCustomerTitle = "إضافة عميل";
-  final String editCustomerTitle = "تعديل العميل";
-  final String addButtonText = "إضافة العميل";
-  final String editButtonText = "حفظ التعديلات";
-  final String customerAddressesLabel = "عناوين العميل";
-
   final _formKey = GlobalKey<FormState>();
 
   final nameController = TextEditingController();
@@ -79,17 +73,28 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
       final customerId = await context.read<CustomerCubit>().addCustomer(customer);
 
       if (customerId != null) {
-        await context.read<CustomerAddressCubit>().addAddress(
-          CustomerAddressModel(
-            customerId: customerId,
-            title: "المنزل",
-            address: addressController.text.trim(),
-            area: areaController.text.trim(),
-            notes: notesController.text.trim(),
-            isDefault: true,
-            createdAt: DateTime.now(),
-          ),
+        final newAddress = CustomerAddressModel(
+          customerId: customerId,
+          title: "المنزل",
+          address: addressController.text.trim(),
+          area: areaController.text.trim(),
+          notes: notesController.text.trim(),
+          isDefault: true,
+          createdAt: DateTime.now(),
         );
+
+        await context.read<CustomerAddressCubit>().addAddress(newAddress);
+
+        final addressCubit = context.read<CustomerAddressCubit>();
+        await addressCubit.loadAddresses(customerId);
+
+        if (addressCubit.addresses.isNotEmpty) {
+          final savedAddress = addressCubit.addresses.last;
+          final orderCubit = context.read<OrderCubit>();
+          final createdCustomer = customer.copyWith(id: customerId);
+          orderCubit.setCustomer(createdCustomer);
+          orderCubit.setAddress(savedAddress);
+        }
       }
     } else {
       context.read<CustomerCubit>().updateCustomer(customer);
@@ -103,8 +108,13 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         if (state is CustomerOperationSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.green.shade700,
+              content: Text(
+                state.message,
+                style: TxtStyle.bodyMedium.copyWith(
+                  color: Colorsmanegments.textWhite,
+                ),
+              ),
+              backgroundColor: Colorsmanegments.success,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -117,8 +127,13 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         if (state is CustomerError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.error),
-              backgroundColor: Colors.red.shade700,
+              content: Text(
+                state.error,
+                style: TxtStyle.bodyMedium.copyWith(
+                  color: Colorsmanegments.textWhite,
+                ),
+              ),
+              backgroundColor: Colorsmanegments.danger,
               behavior: SnackBarBehavior.floating,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -128,18 +143,14 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: backgroundColor,
+        backgroundColor: Colorsmanegments.background,
         appBar: AppBar(
-          elevation: appBarElevation,
-          backgroundColor: primaryColor,
-          foregroundColor: Colors.white,
+          elevation: 2,
+          backgroundColor: Colorsmanegments.primary,
+          foregroundColor: Colorsmanegments.textWhite,
           title: Text(
-            widget.customer == null ? addCustomerTitle : editCustomerTitle,
-            style: TextStyle(
-              fontSize: fontSizeTitle,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
+            widget.customer == null ? "إضافة عميل" : "تعديل العميل",
+            style: TxtStyle.headerWhite.copyWith(fontSize: 22),
           ),
           centerTitle: true,
           shape: const RoundedRectangleBorder(
@@ -149,22 +160,21 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           ),
         ),
         body: Padding(
-          padding: EdgeInsets.all(mainPadding),
+          padding: const EdgeInsets.all(24),
           child: Form(
             key: _formKey,
             child: SingleChildScrollView(
               child: Card(
-                elevation: cardElevation,
-                color: cardColor,
+                elevation: 4,
+                color: Colorsmanegments.card,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(cardBorderRadius),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
-                  padding: EdgeInsets.all(mainPadding),
+                  padding: const EdgeInsets.all(24),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // ====== نموذج العميل ======
                       CustomerForm(
                         nameController: nameController,
                         phoneController: phoneController,
@@ -173,29 +183,24 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         notesController: notesController,
                       ),
 
-                      // ====== قسم العناوين ======
                       if (widget.customer != null) ...[
                         const SizedBox(height: 30),
                         Divider(
-                          color: Colors.grey.shade300,
+                          color: Colorsmanegments.border,
                           thickness: 1.5,
                         ),
                         const SizedBox(height: 20),
                         Row(
                           children: [
                             Icon(
-                              Icons.location_on,
-                              color: primaryColor,
+                              Iconss.location,
+                              color: Colorsmanegments.primary,
                               size: 24,
                             ),
                             const SizedBox(width: 10),
                             Text(
-                              customerAddressesLabel,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: secondaryColor,
-                              ),
+                              "عناوين العميل",
+                              style: TxtStyle.titleCard,
                             ),
                           ],
                         ),
@@ -207,17 +212,16 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
                       const SizedBox(height: 30),
 
-                      // ====== زر الحفظ ======
                       SizedBox(
                         width: double.infinity,
                         height: 55,
                         child: ElevatedButton(
                           onPressed: saveCustomer,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
+                            backgroundColor: Colorsmanegments.primary,
+                            foregroundColor: Colorsmanegments.textWhite,
                             elevation: 4,
-                            shadowColor: primaryColor.withOpacity(0.4),
+                            shadowColor: Colorsmanegments.primary.withOpacity(0.4),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(14),
                             ),
@@ -227,19 +231,16 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                             children: [
                               Icon(
                                 widget.customer == null
-                                    ? Icons.person_add
-                                    : Icons.save,
+                                    ? Iconss.personAdd
+                                    : Iconss.save,
                                 size: 24,
                               ),
                               const SizedBox(width: 12),
                               Text(
                                 widget.customer == null
-                                    ? addButtonText
-                                    : editButtonText,
-                                style: TextStyle(
-                                  fontSize: fontSizeButton,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                    ? "إضافة العميل"
+                                    : "حفظ التعديلات",
+                                style: TxtStyle.buttonMedium,
                               ),
                             ],
                           ),
