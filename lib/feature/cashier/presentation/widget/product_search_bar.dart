@@ -23,35 +23,40 @@ class ProductSearchBar extends StatelessWidget {
     return Container(
       height: 52,
       margin: const EdgeInsets.fromLTRB(18, 18, 18, 8),
-      child: TextField(
-        controller: controller,
-        onChanged: onChanged,
-        style: TxtStyle.bodyMedium,
-        decoration: InputDecoration(
-          hintText: "ابحث بالاسم أو الباركود...",
-          hintStyle: TxtStyle.hint,
-          prefixIcon: Icon(
-            Iconss.search,
-            color: Colorsmanegments.primary,
-          ),
-          suffixIcon: Icon(
-            Iconss.qrCode,
-            color: Colorsmanegments.textSecondary,
-          ),
-          filled: true,
-          fillColor: Colorsmanegments.card,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(
-              color: Colorsmanegments.border,
-            ),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide(
+      child: Tooltip(
+        message: "F2 - البحث عن المنتجات",
+        waitDuration: const Duration(milliseconds: 300),
+        child: TextField(
+          controller: controller,
+          onChanged: onChanged,
+          focusNode: focusNode,
+          style: TxtStyle.bodyMedium,
+          decoration: InputDecoration(
+            hintText: "ابحث بالاسم أو الباركود...",
+            hintStyle: TxtStyle.hint,
+            prefixIcon: Icon(
+              Iconss.search,
               color: Colorsmanegments.primary,
-              width: 2,
+            ),
+            suffixIcon: Icon(
+              Iconss.qrCode,
+              color: Colorsmanegments.textSecondary,
+            ),
+            filled: true,
+            fillColor: Colorsmanegments.card,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: Colorsmanegments.border,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(14),
+              borderSide: BorderSide(
+                color: Colorsmanegments.primary,
+                width: 2,
+              ),
             ),
           ),
         ),

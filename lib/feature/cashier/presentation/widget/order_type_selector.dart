@@ -44,51 +44,68 @@ class OrderTypeSelector extends StatelessWidget {
   Widget _buildButton(int index, String label, IconData icon) {
     final isSelected = selectedIndex == index;
 
-    return InkWell(
-      onTap: () => onTypeChanged(index),
-      borderRadius: BorderRadius.circular(10),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeInOut,
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? Colorsmanegments.card : Colorsmanegments.transparent,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: isSelected
-              ? [
-            BoxShadow(
-              color: Colorsmanegments.shadowLight,
-              blurRadius: 4,
-              offset: const Offset(0, 2),
-            )
-          ]
-              : [],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isSelected
-                  ? Colorsmanegments.primary
-                  : Colorsmanegments.textSecondary,
-              size: 20,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: isSelected
-                  ? TxtStyle.buttonPrimary.copyWith(
-                fontSize: 11,
+    return Tooltip(
+      message: _getTooltipMessage(index, label),
+      waitDuration: const Duration(milliseconds: 300),
+      child: InkWell(
+        onTap: () => onTypeChanged(index),
+        borderRadius: BorderRadius.circular(10),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          decoration: BoxDecoration(
+            color: isSelected ? Colorsmanegments.card : Colorsmanegments.transparent,
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: isSelected
+                ? [
+              BoxShadow(
+                color: Colorsmanegments.shadowLight,
+                blurRadius: 4,
+                offset: const Offset(0, 2),
               )
-                  : TxtStyle.bodySmall.copyWith(
-                fontSize: 11,
-                color: Colorsmanegments.textSecondary,
+            ]
+                : [],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                color: isSelected
+                    ? Colorsmanegments.primary
+                    : Colorsmanegments.textSecondary,
+                size: 20,
               ),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: isSelected
+                    ? TxtStyle.buttonPrimary.copyWith(
+                  fontSize: 11,
+                )
+                    : TxtStyle.bodySmall.copyWith(
+                  fontSize: 11,
+                  color: Colorsmanegments.textSecondary,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _getTooltipMessage(int index, String label) {
+    switch (index) {
+      case 0:
+        return "Ctrl + 1 - تيك أواي";
+      case 1:
+        return "Ctrl + 2 - صالة";
+      case 2:
+        return "Ctrl + 3 - دليفري";
+      default:
+        return label;
+    }
   }
 }

@@ -412,21 +412,26 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   }
   Future<void> _printDailySalesReport() async {
+    print("STEP 1");
+
     final cubit = context.read<ReportCubit>();
 
     final sales = cubit.sales;
 
+    print("STEP 2 - Sales Count = ${sales.length}");
+
     if (sales.isEmpty) {
+      print("NO SALES");
       return;
     }
 
-    // إجمالي المبيعات
     final total = sales.fold<double>(
       0,
           (sum, item) => sum + item.total,
     );
 
-    // طرق الدفع
+    print("STEP 3 - Total = $total");
+
     final Map<String, double> payments = {};
 
     for (final sale in sales) {
@@ -434,13 +439,15 @@ class _ReportsScreenState extends State<ReportsScreen> {
           (payments[sale.paymentMethod] ?? 0) + sale.total;
     }
 
-    // المنتجات المباعة في الفترة
+    print("STEP 4");
+
     final shiftProducts = await cubit.repository.getShiftProducts(
       from: cubit.from,
       to: cubit.to,
     );
 
-    // تحويلها للـ JSON المطلوب للطباعة
+    print("STEP 5 - Products = ${shiftProducts.length}");
+
     final products = shiftProducts.map((e) {
       return {
         "name": e.name,
@@ -449,26 +456,21 @@ class _ReportsScreenState extends State<ReportsScreen> {
       };
     }).toList();
 
+    print("STEP 6");
 
     await PrintingManager.instance.printDailyReport(
       storeName: "Modu POS",
       cashier: "Admin",
-
       ordersCount: sales.length,
-
       subTotal: total,
-
       discount: 0,
-
       tax: 0,
-
       delivery: 0,
-
       netSales: total,
-
       paymentSummary: payments,
-
       products: products,
     );
+
+    print("STEP 7");
   }
 }

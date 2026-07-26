@@ -17,33 +17,37 @@ class SettingsFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colorsmanegments.primary,
-          foregroundColor: Colorsmanegments.textWhite,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+    return Tooltip(
+      message: "Ctrl + S - حفظ الإعدادات",
+      waitDuration: const Duration(milliseconds: 300),
+      child: SizedBox(
+        width: double.infinity,
+        height: 56,
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colorsmanegments.primary,
+            foregroundColor: Colorsmanegments.textWhite,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            elevation: 2,
           ),
-          elevation: 2,
-        ),
-        onPressed: onPressed, // 👈 3. ربط الضغطة بالدالة القادمة من SettingsScreen
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Iconss.save,
-              color: Colorsmanegments.textWhite,
-              size: 22,
-            ),
-            const SizedBox(width: 12),
-            Text(
-              'حفظ الإعدادات',
-              style: TxtStyle.buttonLarge,
-            ),
-          ],
+          onPressed: onPressed, // 👈 3. ربط الضغطة بالدالة القادمة من SettingsScreen
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Iconss.save,
+                color: Colorsmanegments.textWhite,
+                size: 22,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'حفظ الإعدادات',
+                style: TxtStyle.buttonLarge,
+              ),
+            ],
+          ),
         ),
       ),
     );

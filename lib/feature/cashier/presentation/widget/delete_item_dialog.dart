@@ -27,24 +27,32 @@ class DeleteItemDialog extends StatelessWidget {
         style: TxtStyle.bodyMedium,
       ),
       actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: Text(
-            "إلغاء",
-            style: TxtStyle.buttonPrimary,
+        Tooltip(
+          message: "Esc - إلغاء",
+          waitDuration: const Duration(milliseconds: 300),
+          child: TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(
+              "إلغاء",
+              style: TxtStyle.buttonPrimary,
+            ),
           ),
         ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colorsmanegments.danger,
-          ),
-          onPressed: () {
-            onDelete();
-            Navigator.pop(context);
-          },
-          child: Text(
-            "حذف",
-            style: TxtStyle.buttonMedium,
+        Tooltip(
+          message: "Enter - حذف",
+          waitDuration: const Duration(milliseconds: 300),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colorsmanegments.danger,
+            ),
+            onPressed: () {
+              onDelete();
+              Navigator.pop(context);
+            },
+            child: Text(
+              "حذف",
+              style: TxtStyle.buttonMedium,
+            ),
           ),
         ),
       ],

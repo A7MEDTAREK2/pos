@@ -16,7 +16,7 @@ class AppDatabase {
 
     _database = await openDatabase(
       path,
-      version: 24, // ✅ رفعناها من 21 لـ 22 عشان جدول drivers
+      version: 25, // ✅ رفعناها من 21 لـ 22 عشان جدول drivers
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -89,6 +89,8 @@ language TEXT DEFAULT 'ar',
 logo TEXT,
 cashier_printer TEXT,
 kitchen_printer TEXT,
+barcode_printer TEXT,
+reports_printer TEXT,
 paper_width INTEGER DEFAULT 80,
 tax_enabled INTEGER DEFAULT 1,
 auto_print_receipt INTEGER DEFAULT 0,
@@ -114,6 +116,8 @@ footer_message TEXT DEFAULT ''
       'logo': '',
       'cashier_printer': '',
       'kitchen_printer': '',
+      'barcode_printer': '',
+      'reports_printer': '',
       'paper_width': 80,
       'tax_enabled': 1,
       'auto_print_receipt': 0,
@@ -773,6 +777,19 @@ CREATE TABLE IF NOT EXISTS shift_session(
           },
         );
       }
+    }
+    if (oldVersion < 25) {
+      try {
+        await db.execute(
+          "ALTER TABLE settings ADD COLUMN barcode_printer TEXT",
+        );
+      } catch (_) {}
+
+      try {
+        await db.execute(
+          "ALTER TABLE settings ADD COLUMN reports_printer TEXT",
+        );
+      } catch (_) {}
     }
 
   }

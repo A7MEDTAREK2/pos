@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/service/printing/service/modu_print_service.dart';
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/icons.dart';
@@ -129,7 +130,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
           paperWidth = response['paperWidth'] ?? paperWidth;
           barcodeSize = response['barcodeSize']?.toString() ?? barcodeSize;
 
-          // تنسيقات أسلوب الخط لعنوان الباركود
+          // تنسيقات خط عنوان الباركود
           if (response['barcodeTitleStyle'] is Map) {
             final bStyle = response['barcodeTitleStyle'];
             barcodeTitleFont = bStyle['font'] ?? barcodeTitleFont;
@@ -139,7 +140,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
             barcodeTitleUnderline = bStyle['underline'] ?? barcodeTitleUnderline;
           }
 
-          // تنسيقات أسلوب الخط لعنوان الصنف
+          // تنسيقات خط عنوان الصنف
           if (response['itemTitleStyle'] is Map) {
             final iStyle = response['itemTitleStyle'];
             itemTitleFont = iStyle['font'] ?? itemTitleFont;
@@ -149,7 +150,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
             itemTitleUnderline = iStyle['underline'] ?? itemTitleUnderline;
           }
 
-          // خيارات العرض للباركود (دعم الهيكلين المسطح والـ Nested)
+          // خيارات عرض الباركود
           if (response['barcodeDisplayOptions'] is Map) {
             final opts = response['barcodeDisplayOptions'];
             showBarcodeValue = opts['showBarcodeValue'] ?? showBarcodeValue;
@@ -163,7 +164,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
             showItemName = response['showItemName'] ?? showItemName;
           }
 
-          // خيارات طباعة النسخ
+          // خيارات طباعة النسخ التلقائية
           if (response['autoPrintCopies'] is Map) {
             final copies = response['autoPrintCopies'];
             printCustomerCopy = copies['customer'] ?? printCustomerCopy;
@@ -217,7 +218,6 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
         "delivery": printDeliveryCopy,
         "tinneke": printTinnekeCopy,
       },
-      // إضافة نسخ مسطحة للتوافق مع السيرفرات التي لا تدعم Nested Map
       "showBarcodeValue": showBarcodeValue,
       "showBarcodeTitle": showBarcodeTitle,
       "showPrice": showPrice,
@@ -229,24 +229,25 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
     };
 
     try {
+      // 1. حفظ الإعدادات محلياً على الجهاز
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('printCustomerCopy', printCustomerCopy);
+      await prefs.setBool('printKitchenCopy', printKitchenCopy);
+      await prefs.setBool('printDeliveryCopy', printDeliveryCopy);
+      await prefs.setBool('printTinnekeCopy', printTinnekeCopy);
+      await prefs.setString('cashierPrinter', cashierPrinter);
+      await prefs.setString('kitchenPrinter', kitchenPrinter);
+      await prefs.setInt('paperWidth', paperWidth);
+
+      // 2. إرسال الإعدادات للسيرفر
       await ModuPrintService().saveSettings(settingsMap);
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("تم حفظ إعدادات الطابعات والتنسيق المتقدمة بنجاح وتحديث السيرفر"),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // تم إزالة SnackBar
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("خطأ أثناء الحفظ بالسيرفر: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // تم إزالة SnackBar
     }
   }
 
@@ -269,6 +270,17 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
           backgroundColor: Colorsmanegments.card,
           foregroundColor: Colorsmanegments.textPrimary,
           elevation: 0,
+          leading: Tooltip(
+            message: "Esc - رجوع",
+            waitDuration: const Duration(milliseconds: 300),
+            child: IconButton(
+              icon: Icon(
+                Iconss.arrowBack,
+                color: Colorsmanegments.textPrimary,
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ),
         ),
         body: isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -365,7 +377,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
 
               const SizedBox(height: 24),
 
-              // ====== 3. تنسيق الخطوط (Bold, Italic, Underline, Font, Size) ======
+              // ====== 3. تنسيق الخطوط ======
               SettingsSection(
                 title: 'تنسيق الخطوط (عنوان الباركود والصنف)',
                 icon: Iconss.settings,
@@ -523,33 +535,27 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
               // ====== أزرار التجربة ======
               SettingsCard(
                 children: [
-                  SettingsActionButton(
-                    label: 'تجربة طباعة الباركود / الفاتورة',
-                    icon: Iconss.print,
-                    color: Colorsmanegments.primary,
-                    onTap: () async {
-                      try {
-                        await ModuPrintService().testPrint(
-                          printerName: cashierPrinter,
-                          paperWidth: paperWidth,
-                        );
-                        if (!mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("تم إرسال أمر التجربة بنجاح"),
-                            backgroundColor: Colors.green,
-                          ),
-                        );
-                      } catch (e) {
-                        if (!mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text("خطأ: $e"),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                      }
-                    },
+                  Tooltip(
+                    message: "Ctrl + T - تجربة الطباعة",
+                    waitDuration: const Duration(milliseconds: 300),
+                    child: SettingsActionButton(
+                      label: 'تجربة طباعة الباركود / الفاتورة',
+                      icon: Iconss.print,
+                      color: Colorsmanegments.primary,
+                      onTap: () async {
+                        try {
+                          await ModuPrintService().testPrint(
+                            printerName: cashierPrinter,
+                            paperWidth: paperWidth,
+                          );
+                          if (!mounted) return;
+                          // تم إزالة SnackBar
+                        } catch (e) {
+                          if (!mounted) return;
+                          // تم إزالة SnackBar
+                        }
+                      },
+                    ),
                   ),
                 ],
               ),
@@ -557,17 +563,21 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
               const SizedBox(height: 32),
 
               // ====== زر الحفظ والربط بالسيرفر ======
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colorsmanegments.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  onPressed: _savePrinterSettings,
-                  child: Text(
-                    'حفظ الإعدادات وإرسالها للسيرفر',
-                    style: TxtStyle.headerLarge,
+              Tooltip(
+                message: "Ctrl + S - حفظ الإعدادات",
+                waitDuration: const Duration(milliseconds: 300),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colorsmanegments.primary,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                    onPressed: _savePrinterSettings,
+                    child: Text(
+                      'حفظ الإعدادات وإرسالها للسيرفر',
+                      style: TxtStyle.headerLarge,
+                    ),
                   ),
                 ),
               ),

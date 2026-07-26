@@ -18,6 +18,9 @@ class Txtfield extends StatefulWidget {
   final int maxLines;
   final bool readOnly;
   final VoidCallback? onTap;
+  final FocusNode? focusNode;
+  final void Function(String)? onFieldSubmitted;
+  final TextInputAction? textInputAction;
 
   const Txtfield({
     super.key,
@@ -32,6 +35,9 @@ class Txtfield extends StatefulWidget {
     this.maxLines = 1,
     this.readOnly = false,
     this.onTap,
+    this.focusNode,
+    this.onFieldSubmitted,
+    this.textInputAction,
   });
 
   @override
@@ -45,6 +51,7 @@ class _TxtfieldState extends State<Txtfield> {
   Widget build(BuildContext context) {
     return TextFormField(
       controller: widget.controller,
+      focusNode: widget.focusNode,
       obscureText: widget.isPassword ? obscureText : false,
       keyboardType: widget.keyboardType,
       validator: widget.validator,
@@ -52,6 +59,8 @@ class _TxtfieldState extends State<Txtfield> {
       maxLines: widget.maxLines,
       readOnly: widget.readOnly,
       onTap: widget.onTap,
+      onFieldSubmitted: widget.onFieldSubmitted,
+      textInputAction: widget.textInputAction ?? TextInputAction.next,
       style: TxtStyle.bodyMedium.copyWith(
         color: Colorsmanegments.textPrimary,
       ),

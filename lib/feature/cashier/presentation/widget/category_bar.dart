@@ -28,32 +28,36 @@ class PosCategoryBar extends StatelessWidget {
             itemBuilder: (context, index) {
               final category = state.categories[index];
 
-              return InkWell(
-                borderRadius: BorderRadius.circular(14),
-                onTap: () {
-                  context.read<ProductCubit>().loadProducts(
-                    filterCategoryId: category.id,
-                  );
-                },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  decoration: BoxDecoration(
-                    color: Colorsmanegments.card,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colorsmanegments.border),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Iconss.restaurant,
-                        color: Colorsmanegments.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        category.name,
-                        style: TxtStyle.labelBold,
-                      ),
-                    ],
+              return Tooltip(
+                message: "Ctrl + ${index + 1} - ${category.name}",
+                waitDuration: const Duration(milliseconds: 300),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () {
+                    context.read<ProductCubit>().loadProducts(
+                      filterCategoryId: category.id,
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    decoration: BoxDecoration(
+                      color: Colorsmanegments.card,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colorsmanegments.border),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Iconss.restaurant,
+                          color: Colorsmanegments.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          category.name,
+                          style: TxtStyle.labelBold,
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

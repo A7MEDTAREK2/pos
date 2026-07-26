@@ -131,30 +131,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget build(BuildContext context) {
     return BlocListener<MaintenanceCubit, MaintenanceState>(
       listener: (context, state) {
+        // تم إزالة جميع SnackBar
         if (state is MaintenanceSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.green,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
           if (state.message.contains("سيتم إعادة تشغيل البرنامج")) {
             Future.delayed(const Duration(seconds: 1), () async {
               await AppRestart.restart();
             });
           }
         }
-
-        if (state is MaintenanceError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Colors.red,
-              behavior: SnackBarBehavior.floating,
-            ),
-          );
-        }
+        // تم إزالة SnackBar للـ MaintenanceError
       },
       child: BlocConsumer<SettingsCubit, SettingsState>(
         listener: (context, state) {
@@ -163,26 +148,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _loaded = true;
             setState(() {});
           }
-
-          if (state is SettingsSaved) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("تم حفظ الإعدادات بنجاح"),
-                backgroundColor: Colors.green,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
-
-          if (state is SettingsError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-                behavior: SnackBarBehavior.floating,
-              ),
-            );
-          }
+          // تم إزالة SnackBar للـ SettingsSaved
+          // تم إزالة SnackBar للـ SettingsError
         },
         builder: (context, state) {
           return Directionality(
@@ -198,12 +165,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 backgroundColor: Colorsmanegments.card,
                 foregroundColor: Colorsmanegments.textPrimary,
                 elevation: 0,
-                leading: IconButton(
-                  icon: Icon(
-                    Iconss.arrowBack,
-                    color: Colorsmanegments.textPrimary,
+                leading: Tooltip(
+                  message: "Esc - رجوع",
+                  waitDuration: const Duration(milliseconds: 300),
+                  child: IconButton(
+                    icon: Icon(
+                      Iconss.arrowBack,
+                      color: Colorsmanegments.textPrimary,
+                    ),
+                    onPressed: () => Navigator.pop(context),
                   ),
-                  onPressed: () => Navigator.pop(context),
                 ),
               ),
               body: SingleChildScrollView(
@@ -270,42 +241,45 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const SizedBox(height: 24),
 
                     // ====== 2. Printing (Navigates to PrinterSettingsScreen) ======
-                    SettingsCard(
-                      children: [
-                        ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          leading: Icon(
-                            Iconss.print,
-                            color: Colorsmanegments.primary,
-                            size: 28,
+                    Tooltip(
+                      message: "Ctrl + P - إعدادات الطابعات",
+                      waitDuration: const Duration(milliseconds: 300),
+                      child: SettingsCard(
+                        children: [
+                          ListTile(
+                            contentPadding: EdgeInsets.zero,
+                            leading: Icon(
+                              Iconss.print,
+                              color: Colorsmanegments.primary,
+                              size: 28,
+                            ),
+                            title: Text(
+                              'إعدادات الطابعات والطباعة',
+                              style: TxtStyle.titleMedium,
+                            ),
+                            subtitle: Text(
+                              'التحكم في طابعة الكاشير، المطبخ، الباركود، التقارير ومقاس الورق',
+                              style: TxtStyle.bodySmall,
+                            ),
+                            trailing: Icon(
+                              Icons.arrow_forward_ios,
+                              size: 16,
+                              color: Colorsmanegments.grey,
+                            ),
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const PrinterSettingsScreen(),
+                                ),
+                              );
+                              if (context.mounted) {
+                                context.read<SettingsCubit>().loadSettings();
+                              }
+                            },
                           ),
-                          title: Text(
-                            'إعدادات الطابعات والطباعة',
-                            style: TxtStyle.titleMedium,
-                          ),
-                          subtitle: Text(
-                            'التحكم في طابعة الكاشير، المطبخ، الباركود، التقارير ومقاس الورق',
-                            style: TxtStyle.bodySmall,
-                          ),
-                          trailing: Icon(
-                            Icons.arrow_forward_ios,
-                            size: 16,
-                            color: Colorsmanegments.grey,
-                          ),
-                          onTap: () async {
-                            // عند العودة من شاشة الطابعات يمكننا إعادة تحميل الإعدادات المحدثة
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (_) => const PrinterSettingsScreen(),
-                              ),
-                            );
-                            if (context.mounted) {
-                              context.read<SettingsCubit>().loadSettings();
-                            }
-                          },
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
 
                     const SizedBox(height: 24),
@@ -447,44 +421,49 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     const SizedBox(height: 24),
 
-                    ListTile(
-                      leading: Icon(
-                        Iconss.driver,
-                        color: Colorsmanegments.primary,
-                        size: 28,
-                      ),
-                      title: Text(
-                        'المندوبين',
-                        style: TxtStyle.titleMedium,
-                      ),
-                      subtitle: Text(
-                        'إدارة المندوبين وإضافة وتعديل وحذف',
-                        style: TxtStyle.bodySmall,
-                      ),
-                      trailing: Icon(
-                        Icons.arrow_forward_ios,
-                        size: 16,
-                        color: Colorsmanegments.grey,
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => BlocProvider(
-                              create: (context) => DriverCubit(
-                                DriverRepository(
-                                  DriverLocalDataSource(),
-                                ),
-                              )..loadDrivers(),
-                              child: const DriverScreen(),
+                    // ====== 7. Drivers ======
+                    Tooltip(
+                      message: "Ctrl + D - إدارة المندوبين",
+                      waitDuration: const Duration(milliseconds: 300),
+                      child: ListTile(
+                        leading: Icon(
+                          Iconss.driver,
+                          color: Colorsmanegments.primary,
+                          size: 28,
+                        ),
+                        title: Text(
+                          'المندوبين',
+                          style: TxtStyle.titleMedium,
+                        ),
+                        subtitle: Text(
+                          'إدارة المندوبين وإضافة وتعديل وحذف',
+                          style: TxtStyle.bodySmall,
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: Colorsmanegments.grey,
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider(
+                                create: (context) => DriverCubit(
+                                  DriverRepository(
+                                    DriverLocalDataSource(),
+                                  ),
+                                )..loadDrivers(),
+                                child: const DriverScreen(),
+                              ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                     const SizedBox(height: 24),
 
-                    // ====== 7. About ======
+                    // ====== 8. About ======
                     SettingsSection(
                       title: 'عن التطبيق',
                       icon: Iconss.info,

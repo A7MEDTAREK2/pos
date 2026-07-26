@@ -169,19 +169,23 @@ class CartItemsList extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          icon: Icon(
-            Iconss.removeCircle,
-            size: 18,
+        Tooltip(
+          message: "Ctrl + - - تقليل الكمية",
+          waitDuration: const Duration(milliseconds: 300),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: Icon(
+              Iconss.removeCircle,
+              size: 18,
+            ),
+            onPressed: () {
+              cubit.decrementItem(
+                item['productId'],
+                size: item['size'],
+              );
+            },
           ),
-          onPressed: () {
-            cubit.decrementItem(
-              item['productId'],
-              size: item['size'],
-            );
-          },
         ),
         const SizedBox(width: 4),
         Text(
@@ -189,20 +193,24 @@ class CartItemsList extends StatelessWidget {
           style: TxtStyle.tableRowBold,
         ),
         const SizedBox(width: 4),
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          icon: Icon(
-            Iconss.addCircle,
-            color: Colorsmanegments.primary,
-            size: 18,
+        Tooltip(
+          message: "Ctrl + + - زيادة الكمية",
+          waitDuration: const Duration(milliseconds: 300),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            icon: Icon(
+              Iconss.addCircle,
+              color: Colorsmanegments.primary,
+              size: 18,
+            ),
+            onPressed: () {
+              cubit.incrementItem(
+                item['productId'],
+                size: item['size'],
+              );
+            },
           ),
-          onPressed: () {
-            cubit.incrementItem(
-              item['productId'],
-              size: item['size'],
-            );
-          },
         ),
       ],
     );
@@ -212,31 +220,39 @@ class CartItemsList extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          tooltip: "ملاحظة",
-          onPressed: () {
-            _showNotesDialog(context, item);
-          },
-          icon: Icon(
-            Iconss.noteOutline,
-            color: Colorsmanegments.orange,
-            size: 16,
+        Tooltip(
+          message: "Ctrl + N - إضافة ملاحظة",
+          waitDuration: const Duration(milliseconds: 300),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            tooltip: "ملاحظة",
+            onPressed: () {
+              _showNotesDialog(context, item);
+            },
+            icon: Icon(
+              Iconss.noteOutline,
+              color: Colorsmanegments.orange,
+              size: 16,
+            ),
           ),
         ),
         const SizedBox(width: 8),
-        IconButton(
-          padding: EdgeInsets.zero,
-          constraints: const BoxConstraints(),
-          tooltip: "حذف",
-          onPressed: () {
-            _showDeleteDialog(context, item);
-          },
-          icon: Icon(
-            Iconss.delete,
-            color: Colorsmanegments.danger,
-            size: 16,
+        Tooltip(
+          message: "Delete - حذف العنصر",
+          waitDuration: const Duration(milliseconds: 300),
+          child: IconButton(
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            tooltip: "حذف",
+            onPressed: () {
+              _showDeleteDialog(context, item);
+            },
+            icon: Icon(
+              Iconss.delete,
+              color: Colorsmanegments.danger,
+              size: 16,
+            ),
           ),
         ),
       ],

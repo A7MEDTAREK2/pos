@@ -1,9 +1,6 @@
 import 'package:sqflite/sqflite.dart';
-
 import '../../../data_base/pos_database.dart';
-
 import '../printing_manager.dart';
-
 
 class ShiftClosingService {
   Future<void> resetShift() async {
@@ -23,11 +20,8 @@ class ShiftClosingService {
   final Future<Database> _database =
       AppDatabase.instance.database;
 
-
   Future<void> printShiftReport() async {
-
     final db = await _database;
-
 
     // ============================
     // Sales Summary
@@ -50,34 +44,25 @@ class ShiftClosingService {
       ],
     );
 
-
     final sale = salesResult.first;
-
 
     final ordersCount =
         (sale['orders_count'] as int?) ?? 0;
 
-
     final subtotal =
         (sale['subtotal'] as num?)?.toDouble() ?? 0;
-
 
     final discount =
         (sale['discount'] as num?)?.toDouble() ?? 0;
 
-
     final tax =
         (sale['tax'] as num?)?.toDouble() ?? 0;
-
 
     final delivery =
         (sale['delivery'] as num?)?.toDouble() ?? 0;
 
-
     final total =
         (sale['total'] as num?)?.toDouble() ?? 0;
-
-
 
     // ============================
     // Payments
@@ -88,11 +73,8 @@ class ShiftClosingService {
       SELECT
         payment_method,
         SUM(total) AS amount
-
       FROM sales
-
       WHERE DATE(created_at) = DATE(?)
-
       GROUP BY payment_method
       ''',
       [
@@ -100,25 +82,17 @@ class ShiftClosingService {
       ],
     );
 
+    final Map<String, double> payments = {};
 
-    final Map<String,double> payments = {};
-
-
-    for(final row in paymentRows){
-
+    for (final row in paymentRows) {
       final method =
           row['payment_method']?.toString() ?? "Other";
-
 
       final amount =
           (row['amount'] as num?)?.toDouble() ?? 0;
 
-
       payments[method] = amount;
-
     }
-
-
 
     // ============================
     // Products
@@ -127,82 +101,44 @@ class ShiftClosingService {
     final productRows = await db.rawQuery(
       '''
       SELECT
-    sale_items.product_name,
-    SUM(sale_items.quantity) AS quantity,
-    SUM(sale_items.total) AS total
-
-FROM sale_items
-
-INNER JOIN sales
-ON sales.id = sale_items.sale_id
-
-WHERE DATE(sales.created_at) = DATE(?)
-
-GROUP BY sale_items.product_name
-
-ORDER BY quantity DESC
-
+        sale_items.product_name,
+        SUM(sale_items.quantity) AS quantity,
+        SUM(sale_items.total) AS total
+      FROM sale_items
+      INNER JOIN sales
+      ON sales.id = sale_items.sale_id
+      WHERE DATE(sales.created_at) = DATE(?)
+      GROUP BY sale_items.product_name
+      ORDER BY quantity DESC
       ''',
       [
         DateTime.now().toIso8601String(),
       ],
     );
 
-
-    final products = productRows.map((e){
-
+    final products = productRows.map((e) {
       return {
-
-        "name":
-        e['product_name'] ?? "",
-
-
-        "quantitySold":
-        e['quantity'] ?? 0,
-
-
-        "totalSales":
-        (e['total'] as num?)?.toDouble() ?? 0,
-
+        "name": e['product_name'] ?? "",
+        "quantity": e['quantity'] ?? 0,
+        "total": (e['total'] as num?)?.toDouble() ?? 0,
       };
-
     }).toList();
-
-
 
     // ============================
     // Print
     // ============================
 
-
     await PrintingManager.instance.printDailyReport(
-
       storeName: "Modu POS",
-
       cashier: "Admin",
-
       ordersCount: ordersCount,
-
-
       subTotal: subtotal,
-
       discount: discount,
-
       tax: tax,
-
       delivery: delivery,
-
       netSales: total,
-
-
       paymentSummary: payments,
-
-
       products: products,
-
     );
-
   }
-
-
 }

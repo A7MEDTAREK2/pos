@@ -29,8 +29,9 @@ class ReceiptMapper {
       "printerName": printerName,
       "paperWidth": settings?.paperWidth ?? 80,
       "storeName": settings?.storeName?.isNotEmpty == true ? settings!.storeName : "Modu POS",
-      "phone": settings?.phone ?? "",
-      "address": settings?.address ?? "",
+      "storePhone": settings?.phone ?? "",
+      "secondaryPhone": "",
+      "storeAddress": settings?.address ?? "",
       "taxNumber": settings?.taxNumber ?? "",
       "currency": settings?.currency ?? "ج.م",
 
@@ -110,6 +111,10 @@ class ReceiptMapper {
       "customerName": order.customerName ?? "",
       "customerPhone": order.customerPhone ?? "",
       "deliveryAddress": order.customerAddress ?? "",
+
+      // تم الربط هنا بالاسم الصحيح الموجود في الـ OrderModel
+      "deliverymanName": order.driverName ?? "",
+
       "orderType": "دليفري",
       "paymentMethod": order.paymentMethod ?? "Cash",
 

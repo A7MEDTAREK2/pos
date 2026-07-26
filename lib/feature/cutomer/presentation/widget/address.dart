@@ -69,25 +69,29 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                   ),
                   const Spacer(),
                   if (!widget.selectable)
-                    TextButton.icon(
-                      onPressed: () => _openAddressDialog(context),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 4,
+                    Tooltip(
+                      message: "Ctrl + A - إضافة عنوان",
+                      waitDuration: const Duration(milliseconds: 300),
+                      child: TextButton.icon(
+                        onPressed: () => _openAddressDialog(context),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                        icon: Icon(
+                          Iconss.add,
+                          size: 16,
+                          color: Colorsmanegments.primary,
                         ),
-                      ),
-                      icon: Icon(
-                        Iconss.add,
-                        size: 16,
-                        color: Colorsmanegments.primary,
-                      ),
-                      label: Text(
-                        "إضافة عنوان",
-                        style: TxtStyle.buttonPrimary.copyWith(fontSize: 13),
+                        label: Text(
+                          "إضافة عنوان",
+                          style: TxtStyle.buttonPrimary.copyWith(fontSize: 13),
+                        ),
                       ),
                     ),
                 ],
@@ -125,187 +129,207 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
                 ),
 
               // ====== Addresses List ======
-              ...cubit.addresses.map((address) {
+              ...cubit.addresses.asMap().entries.map((entry) {
+                final index = entry.key;
+                final address = entry.value;
                 final isSelected = widget.selectable &&
                     cubit.selectedAddress?.id == address.id;
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 10),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: isSelected
-                          ? Colorsmanegments.primaryLight
-                          : Colorsmanegments.card,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
+                  child: Tooltip(
+                    message: widget.selectable
+                        ? "Ctrl + ${index + 1} - ${address.title ?? 'عنوان'}"
+                        : "",
+                    waitDuration: const Duration(milliseconds: 300),
+                    child: Container(
+                      decoration: BoxDecoration(
                         color: isSelected
-                            ? Colorsmanegments.primary
-                            : Colorsmanegments.border,
-                        width: isSelected ? 1.5 : 1,
-                      ),
-                      boxShadow: [
-                        if (!isSelected)
-                          BoxShadow(
-                            color: Colorsmanegments.shadowLight,
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                      ],
-                    ),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: widget.selectable
-                          ? () {
-                        context
-                            .read<CustomerAddressCubit>()
-                            .selectAddress(address);
-                        widget.onAddressSelected?.call(address);
-                      }
-                          : null,
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: isSelected
-                                    ? Colorsmanegments.primary.withOpacity(0.12)
-                                    : Colorsmanegments.background,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Iconss.location,
-                                size: 20,
-                                color: isSelected
-                                    ? Colorsmanegments.primary
-                                    : Colorsmanegments.textSecondary,
-                              ),
+                            ? Colorsmanegments.primaryLight
+                            : Colorsmanegments.card,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: isSelected
+                              ? Colorsmanegments.primary
+                              : Colorsmanegments.border,
+                          width: isSelected ? 1.5 : 1,
+                        ),
+                        boxShadow: [
+                          if (!isSelected)
+                            BoxShadow(
+                              color: Colorsmanegments.shadowLight,
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
                             ),
-                            const SizedBox(width: 12),
+                        ],
+                      ),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: widget.selectable
+                            ? () {
+                          context
+                              .read<CustomerAddressCubit>()
+                              .selectAddress(address);
+                          widget.onAddressSelected?.call(address);
+                        }
+                            : null,
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? Colorsmanegments.primary.withOpacity(0.12)
+                                      : Colorsmanegments.background,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Iconss.location,
+                                  size: 20,
+                                  color: isSelected
+                                      ? Colorsmanegments.primary
+                                      : Colorsmanegments.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
 
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Flexible(
-                                        child: Text(
-                                          address.title ?? "عنوان غير مسمى",
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TxtStyle.tableRowBold,
-                                        ),
-                                      ),
-                                      if (address.isDefault) ...[
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 3,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colorsmanegments.success
-                                                .withOpacity(0.1),
-                                            borderRadius:
-                                            BorderRadius.circular(6),
-                                          ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Flexible(
                                           child: Text(
-                                            "افتراضي",
-                                            style: TxtStyle.badgeSmall.copyWith(
-                                              color: Colorsmanegments.success,
+                                            address.title ?? "عنوان غير مسمى",
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TxtStyle.tableRowBold,
+                                          ),
+                                        ),
+                                        if (address.isDefault) ...[
+                                          const SizedBox(width: 8),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 3,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colorsmanegments.success
+                                                  .withOpacity(0.1),
+                                              borderRadius:
+                                              BorderRadius.circular(6),
+                                            ),
+                                            child: Text(
+                                              "افتراضي",
+                                              style: TxtStyle.badgeSmall.copyWith(
+                                                color: Colorsmanegments.success,
+                                              ),
                                             ),
                                           ),
-                                        ),
+                                        ],
                                       ],
-                                    ],
-                                  ),
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    address.area,
-                                    style: TxtStyle.bodySmall.copyWith(
-                                      fontWeight: FontWeight.w600,
                                     ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  Text(
-                                    address.address,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TxtStyle.bodySmall,
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(width: 8),
-
-                            // ====== Trailing Actions ======
-                            if (widget.selectable)
-                              if (isSelected)
-                                Icon(
-                                  Iconss.check,
-                                  color: Colorsmanegments.success,
-                                  size: 22,
-                                )
-                              else
-                                const SizedBox.shrink()
-                            else
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  if (!address.isDefault)
-                                    IconButton(
-                                      constraints: const BoxConstraints(),
-                                      tooltip: "تعيين كافتراضي",
-                                      icon: Icon(
-                                        Iconss.star,
-                                        size: 20,
-                                        color: Colorsmanegments.warning,
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      address.area,
+                                      style: TxtStyle.bodySmall.copyWith(
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      onPressed: () {
-                                        context
-                                            .read<CustomerAddressCubit>()
-                                            .setDefaultAddress(
-                                          address.id!,
-                                          widget.customerId,
-                                        );
-                                      },
                                     ),
-                                  const SizedBox(width: 8),
-                                  IconButton(
-                                    constraints: const BoxConstraints(),
-                                    tooltip: "تعديل",
-                                    icon: Icon(
-                                      Iconss.edit,
-                                      size: 20,
-                                      color: Colorsmanegments.primary,
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      address.address,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TxtStyle.bodySmall,
                                     ),
-                                    onPressed: () => _openAddressDialog(
-                                      context,
-                                      address: address,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  IconButton(
-                                    constraints: const BoxConstraints(),
-                                    tooltip: "حذف",
-                                    icon: Icon(
-                                      Iconss.delete,
-                                      size: 20,
-                                      color: Colorsmanegments.danger,
-                                    ),
-                                    onPressed: () {
-                                      cubit.deleteAddress(
-                                        address.id!,
-                                        address.customerId,
-                                      );
-                                    },
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                          ],
+
+                              const SizedBox(width: 8),
+
+                              // ====== Trailing Actions ======
+                              if (widget.selectable)
+                                if (isSelected)
+                                  Icon(
+                                    Iconss.check,
+                                    color: Colorsmanegments.success,
+                                    size: 22,
+                                  )
+                                else
+                                  const SizedBox.shrink()
+                              else
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    if (!address.isDefault)
+                                      Tooltip(
+                                        message: "Ctrl + S - تعيين كافتراضي",
+                                        waitDuration: const Duration(milliseconds: 300),
+                                        child: IconButton(
+                                          constraints: const BoxConstraints(),
+                                          tooltip: "تعيين كافتراضي",
+                                          icon: Icon(
+                                            Iconss.star,
+                                            size: 20,
+                                            color: Colorsmanegments.warning,
+                                          ),
+                                          onPressed: () {
+                                            context
+                                                .read<CustomerAddressCubit>()
+                                                .setDefaultAddress(
+                                              address.id!,
+                                              widget.customerId,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    const SizedBox(width: 8),
+                                    Tooltip(
+                                      message: "Ctrl + E - تعديل",
+                                      waitDuration: const Duration(milliseconds: 300),
+                                      child: IconButton(
+                                        constraints: const BoxConstraints(),
+                                        tooltip: "تعديل",
+                                        icon: Icon(
+                                          Iconss.edit,
+                                          size: 20,
+                                          color: Colorsmanegments.primary,
+                                        ),
+                                        onPressed: () => _openAddressDialog(
+                                          context,
+                                          address: address,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Tooltip(
+                                      message: "Delete - حذف",
+                                      waitDuration: const Duration(milliseconds: 300),
+                                      child: IconButton(
+                                        constraints: const BoxConstraints(),
+                                        tooltip: "حذف",
+                                        icon: Icon(
+                                          Iconss.delete,
+                                          size: 20,
+                                          color: Colorsmanegments.danger,
+                                        ),
+                                        onPressed: () {
+                                          cubit.deleteAddress(
+                                            address.id!,
+                                            address.customerId,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -316,26 +340,30 @@ class _CustomerAddressesSectionState extends State<CustomerAddressesSection> {
               // ====== Add Button (Selectable Mode) ======
               if (widget.selectable) ...[
                 const SizedBox(height: 6),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    onPressed: () => _openAddressDialog(context),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: Colorsmanegments.primary,
-                      side: BorderSide(color: Colorsmanegments.primary, width: 1.2),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                Tooltip(
+                  message: "Ctrl + A - إضافة عنوان جديد",
+                  waitDuration: const Duration(milliseconds: 300),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => _openAddressDialog(context),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colorsmanegments.primary,
+                        side: BorderSide(color: Colorsmanegments.primary, width: 1.2),
+                        padding: const EdgeInsets.symmetric(vertical: 14),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                    ),
-                    icon: Icon(
-                      Iconss.addLocation,
-                      size: 20,
-                      color: Colorsmanegments.primary,
-                    ),
-                    label: Text(
-                      "إضافة عنوان جديد",
-                      style: TxtStyle.buttonPrimary,
+                      icon: Icon(
+                        Iconss.addLocation,
+                        size: 20,
+                        color: Colorsmanegments.primary,
+                      ),
+                      label: Text(
+                        "إضافة عنوان جديد",
+                        style: TxtStyle.buttonPrimary,
+                      ),
                     ),
                   ),
                 ),
@@ -386,6 +414,11 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
   final addressController = TextEditingController();
   final notesController = TextEditingController();
 
+  final FocusNode _titleFocusNode = FocusNode();
+  final FocusNode _areaFocusNode = FocusNode();
+  final FocusNode _addressFocusNode = FocusNode();
+  final FocusNode _notesFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -404,6 +437,10 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
     areaController.dispose();
     addressController.dispose();
     notesController.dispose();
+    _titleFocusNode.dispose();
+    _areaFocusNode.dispose();
+    _addressFocusNode.dispose();
+    _notesFocusNode.dispose();
     super.dispose();
   }
 
@@ -487,15 +524,19 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                       style: TxtStyle.headerWhite.copyWith(fontSize: 16),
                     ),
                     const Spacer(),
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(
-                        Iconss.close,
-                        color: Colorsmanegments.textWhite,
-                        size: 22,
+                    Tooltip(
+                      message: "Esc - إغلاق",
+                      waitDuration: const Duration(milliseconds: 300),
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(
+                          Iconss.close,
+                          color: Colorsmanegments.textWhite,
+                          size: 22,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
                       ),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
                     ),
                   ],
                 ),
@@ -514,6 +555,8 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                           controller: titleController,
                           label: "اسم العنوان (مثال: المنزل، العمل)",
                           icon: Iconss.label,
+                          focusNode: _titleFocusNode,
+                          nextFocusNode: _areaFocusNode,
                           validator: (v) =>
                           v == null || v.isEmpty ? "برجاء إدخال اسم العنوان" : null,
                         ),
@@ -522,6 +565,8 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                           controller: areaController,
                           label: "المنطقة",
                           icon: Iconss.map,
+                          focusNode: _areaFocusNode,
+                          nextFocusNode: _addressFocusNode,
                           validator: (v) =>
                           v == null || v.isEmpty ? "برجاء إدخال المنطقة" : null,
                         ),
@@ -530,6 +575,8 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                           controller: addressController,
                           label: "العنوان بالتفصيل",
                           icon: Iconss.location,
+                          focusNode: _addressFocusNode,
+                          nextFocusNode: _notesFocusNode,
                           maxLines: 2,
                           validator: (v) =>
                           v == null || v.isEmpty ? "برجاء إدخال العنوان" : null,
@@ -539,6 +586,7 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                           controller: notesController,
                           label: "ملاحظات (اختياري)",
                           icon: Iconss.note,
+                          focusNode: _notesFocusNode,
                           maxLines: 2,
                         ),
                       ],
@@ -553,38 +601,46 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
                 child: Row(
                   children: [
                     Expanded(
-                      child: OutlinedButton(
-                        onPressed: () => Navigator.pop(context),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      child: Tooltip(
+                        message: "Esc - إلغاء",
+                        waitDuration: const Duration(milliseconds: 300),
+                        child: OutlinedButton(
+                          onPressed: () => Navigator.pop(context),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            side: BorderSide(color: Colorsmanegments.border),
+                            foregroundColor: Colorsmanegments.textSecondary,
                           ),
-                          side: BorderSide(color: Colorsmanegments.border),
-                          foregroundColor: Colorsmanegments.textSecondary,
-                        ),
-                        child: Text(
-                          "إلغاء",
-                          style: TxtStyle.buttonPrimary,
+                          child: Text(
+                            "إلغاء",
+                            style: TxtStyle.buttonPrimary,
+                          ),
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: save,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colorsmanegments.primary,
-                          foregroundColor: Colorsmanegments.textWhite,
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                      child: Tooltip(
+                        message: "Enter - ${widget.address == null ? 'حفظ العنوان' : 'تحديث الآن'}",
+                        waitDuration: const Duration(milliseconds: 300),
+                        child: ElevatedButton(
+                          onPressed: save,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colorsmanegments.primary,
+                            foregroundColor: Colorsmanegments.textWhite,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 0,
                           ),
-                          elevation: 0,
-                        ),
-                        child: Text(
-                          widget.address == null ? "حفظ العنوان" : "تحديث الآن",
-                          style: TxtStyle.buttonMedium,
+                          child: Text(
+                            widget.address == null ? "حفظ العنوان" : "تحديث الآن",
+                            style: TxtStyle.buttonMedium,
+                          ),
                         ),
                       ),
                     ),
@@ -602,51 +658,80 @@ class _AddAddressDialogState extends State<AddAddressDialog> {
     required TextEditingController controller,
     required String label,
     required IconData icon,
+    required FocusNode focusNode,
+    FocusNode? nextFocusNode,
     int maxLines = 1,
     String? Function(String?)? validator,
   }) {
-    return TextFormField(
-      controller: controller,
-      maxLines: maxLines,
-      validator: validator,
-      textDirection: TextDirection.rtl,
-      style: TxtStyle.bodyMedium,
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: TxtStyle.labelMedium,
-        prefixIcon: Icon(
-          icon,
-          size: 20,
-          color: Colorsmanegments.primary,
-        ),
-        filled: true,
-        fillColor: Colorsmanegments.background,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colorsmanegments.border),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
+    return Tooltip(
+      message: _getFieldTooltip(label),
+      waitDuration: const Duration(milliseconds: 300),
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        maxLines: maxLines,
+        validator: validator,
+        textDirection: TextDirection.rtl,
+        style: TxtStyle.bodyMedium,
+        onFieldSubmitted: (_) {
+          if (nextFocusNode != null) {
+            FocusScope.of(context).requestFocus(nextFocusNode);
+          } else {
+            save();
+          }
+        },
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: TxtStyle.labelMedium,
+          prefixIcon: Icon(
+            icon,
+            size: 20,
             color: Colorsmanegments.primary,
-            width: 1.5,
           ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Colorsmanegments.danger,
+          filled: true,
+          fillColor: Colorsmanegments.background,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colorsmanegments.border),
           ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Colorsmanegments.danger,
-            width: 1.5,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: Colorsmanegments.primary,
+              width: 1.5,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: Colorsmanegments.danger,
+            ),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: Colorsmanegments.danger,
+              width: 1.5,
+            ),
           ),
         ),
       ),
     );
+  }
+
+  String _getFieldTooltip(String label) {
+    switch (label) {
+      case "اسم العنوان (مثال: المنزل، العمل)":
+        return "Ctrl + 1 - اسم العنوان";
+      case "المنطقة":
+        return "Ctrl + 2 - المنطقة";
+      case "العنوان بالتفصيل":
+        return "Ctrl + 3 - العنوان بالتفصيل";
+      case "ملاحظات (اختياري)":
+        return "Ctrl + 4 - ملاحظات";
+      default:
+        return label;
+    }
   }
 }

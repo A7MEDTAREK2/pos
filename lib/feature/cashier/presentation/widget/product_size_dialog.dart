@@ -62,14 +62,18 @@ class ProductSizeDialog extends StatelessWidget {
                         ),
                       ),
                       const Spacer(),
-                      IconButton(
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onPressed: () => Navigator.pop(context),
-                        icon: Icon(
-                          Iconss.close,
-                          color: Colorsmanegments.textWhite,
-                          size: 20,
+                      Tooltip(
+                        message: "Esc - إغلاق",
+                        waitDuration: const Duration(milliseconds: 300),
+                        child: IconButton(
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(
+                            Iconss.close,
+                            color: Colorsmanegments.textWhite,
+                            size: 20,
+                          ),
                         ),
                       ),
                     ],
@@ -91,61 +95,67 @@ class ProductSizeDialog extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
-                children: product.sizes!.map((size) {
+                children: product.sizes!.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final size = entry.value;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 10),
-                    child: InkWell(
-                      borderRadius: BorderRadius.circular(12),
-                      onTap: () {
-                        Navigator.pop(context);
-                        onSizeSelected(size);
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 14,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colorsmanegments.background,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colorsmanegments.border,
+                    child: Tooltip(
+                      message: "Ctrl + ${index + 1} - ${size.sizeName}",
+                      waitDuration: const Duration(milliseconds: 300),
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          Navigator.pop(context);
+                          onSizeSelected(size);
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 14,
                           ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: Colorsmanegments.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Icon(
-                                Iconss.food,
-                                color: Colorsmanegments.primary,
-                                size: 18,
-                              ),
+                          decoration: BoxDecoration(
+                            color: Colorsmanegments.background,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: Colorsmanegments.border,
                             ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                size.sizeName,
-                                style: TxtStyle.titleSmall,
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Colorsmanegments.primary.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  Iconss.food,
+                                  color: Colorsmanegments.primary,
+                                  size: 18,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "${size.price.toStringAsFixed(2)} ج.م",
-                              style: TxtStyle.buttonPrimary.copyWith(
-                                fontSize: 15,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  size.sizeName,
+                                  style: TxtStyle.titleSmall,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Iconss.arrowForward,
-                              color: Colorsmanegments.textSecondary,
-                              size: 20,
-                            ),
-                          ],
+                              Text(
+                                "${size.price.toStringAsFixed(2)} ج.م",
+                                style: TxtStyle.buttonPrimary.copyWith(
+                                  fontSize: 15,
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Icon(
+                                Iconss.arrowForward,
+                                color: Colorsmanegments.textSecondary,
+                                size: 20,
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

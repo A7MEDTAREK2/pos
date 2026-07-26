@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/service/export/print_service.dart';
-import '../../../../core/service/printing/mapper/dlivry.dart';
+import '../../../../core/service/printing/mapper/receipt_mapper.dart';
+import '../../../setting/data/model/settings_model.dart';
+import '../../../setting/logic/set_cubit.dart';
 import '../../logic/pos_cubit.dart';
 
 import '../../data/model/pos_model.dart';
@@ -101,23 +104,27 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                   const SizedBox(height: 8),
-                  TextField(
-                    controller: amountController,
-                    keyboardType: TextInputType.number,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF0D53FC),
-                    ),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.white,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        borderSide: BorderSide.none,
+                  Tooltip(
+                    message: "Ctrl + A - تعديل المبلغ",
+                    waitDuration: const Duration(milliseconds: 300),
+                    child: TextField(
+                      controller: amountController,
+                      keyboardType: TextInputType.number,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0D53FC),
                       ),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                      onChanged: _calculateChange,
                     ),
-                    onChanged: _calculateChange,
                   ),
                   const SizedBox(height: 16),
                   Wrap(
@@ -160,14 +167,18 @@ class _PaymentDialogState extends State<PaymentDialog> {
                             fontFamily: 'Cairo',
                           ),
                         ),
-                        IconButton(
-                          onPressed: _isProcessing
-                              ? null
-                              : () {
-                            context.read<OrderCubit>().clearCart();
-                            Navigator.pop(context);
-                          },
-                          icon: const Icon(Icons.close_rounded),
+                        Tooltip(
+                          message: "Esc - إغلاق",
+                          waitDuration: const Duration(milliseconds: 300),
+                          child: IconButton(
+                            onPressed: _isProcessing
+                                ? null
+                                : () {
+                              context.read<OrderCubit>().clearCart();
+                              Navigator.pop(context);
+                            },
+                            icon: const Icon(Icons.close_rounded),
+                          ),
                         ),
                       ],
                     ),
@@ -199,33 +210,37 @@ class _PaymentDialogState extends State<PaymentDialog> {
                       },
                     ),
                     const Spacer(),
-                    SizedBox(
-                      width: double.infinity,
-                      height: 55,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF0D53FC),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                    Tooltip(
+                      message: "Enter - تأكيد الدفع",
+                      waitDuration: const Duration(milliseconds: 300),
+                      child: SizedBox(
+                        width: double.infinity,
+                        height: 55,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF0D53FC),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
-                        ),
-                        onPressed: _isProcessing ? null : _processPayment,
-                        child: _isProcessing
-                            ? const SizedBox(
-                          height: 24,
-                          width: 24,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Colors.white,
-                          ),
-                        )
-                            : const Text(
-                          'تأكيد وسداد الفاتورة',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            fontFamily: 'Cairo',
+                          onPressed: _isProcessing ? null : _processPayment,
+                          child: _isProcessing
+                              ? const SizedBox(
+                            height: 24,
+                            width: 24,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                              : const Text(
+                            'تأكيد وسداد الفاتورة',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Cairo',
+                            ),
                           ),
                         ),
                       ),
@@ -245,14 +260,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
     final paid = double.tryParse(amountController.text) ?? 0;
 
     if (paid < widget.totalAmount) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            "المبلغ المدفوع أقل من إجمالي الفاتورة",
-          ),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // تم إزالة SnackBar
       return;
     }
 
@@ -268,8 +276,8 @@ class _PaymentDialogState extends State<PaymentDialog> {
 
       if (!context.mounted) return;
 
-      // ====== 2. طباعة الفواتير ======
-      //await _printReceipts(cubit);
+      // ====== 2. تجهيز وطباعة الفواتير عبر الـ API ======
+      await _printReceipts(cubit);
 
       if (!context.mounted) return;
 
@@ -277,213 +285,139 @@ class _PaymentDialogState extends State<PaymentDialog> {
       Navigator.pop(context);
       widget.onPrintFinalReceipt();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('تم الدفع بنجاح'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      // تم إزالة SnackBar
     } catch (e) {
       setState(() {
         _isProcessing = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('حدث خطأ: ${e.toString()}'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      // تم إزالة SnackBar
     }
   }
 
-  // ====== طباعة الفواتير ======
+  // ====== طباعة الفواتير مع ربط إعدادات الشاشة والبيانات الحقيقية ======
   Future<void> _printReceipts(OrderCubit cubit) async {
     final currentOrder = cubit.currentOrder;
-
     if (currentOrder == null) return;
 
-    // ====== فاتورة العميل ======
-    final customerReceipt = _formatCustomerReceipt(currentOrder);
+    // 1. جلب الإعدادات المحفوظة من SharedPreferences (حالة الأزرار وأسماء الطابعات)
+    final prefs = await SharedPreferences.getInstance();
+    bool printCustomer = prefs.getBool('printCustomerCopy') ?? true;
+    bool printDelivery = prefs.getBool('printDeliveryCopy') ?? false;
+    String cashierPrinterName =
+        prefs.getString('cashierPrinter') ?? "DefaultPrinter";
 
-    // ====== فاتورة المندوب (إذا كان التوصيل) ======
-    String? deliveryReceipt;
-    if (currentOrder.orderType == OrderType.delivery &&
-        currentOrder.driverName != null &&
-        currentOrder.driverName!.isNotEmpty) {
-      deliveryReceipt = DeliveryFormatter.formatDeliveryReceipt(
-        driverName: currentOrder.driverName!,
-        orderNumber: currentOrder.orderNumber.toString(),
-        date: DateTime.now(),
-        customerName: currentOrder.customerName ?? '',
-        customerPhone: currentOrder.customerPhone ?? '',
-        customerAddress: currentOrder.customerAddress ?? '',
-        customerArea: currentOrder.customerArea ?? '',
-        paymentMethod: currentOrder.paymentMethod ?? 'نقدي',
-        totalAmount: currentOrder.totalAmount,
-        items: currentOrder.items,
-        notes: null,
+    // 2. جلب إعدادات المتجر الحقيقية (العنوان، الهاتف، اسم المتجر) من الـ SettingsCubit
+    SettingsModel? currentSettings;
+    try {
+      currentSettings = context.read<SettingsCubit>().settings;
+    } catch (_) {
+      // احتياطياً في حال عدم توفر الـ Cubit في سياق الشاشة الحالي
+    }
+
+    // 3. تجهيز بايلود الكاشير مع تمرير البيانات الحقيقية
+    Map<String, dynamic>? cashierPayload;
+    if (printCustomer) {
+      cashierPayload = ReceiptMapper.toCashierPayload(
+        order: currentOrder,
+        settings: currentSettings, // تم تمرير الإعدادات الحقيقية هنا
+        printerName: cashierPrinterName,
       );
     }
 
-    // ====== طباعة الفواتير ======
-    await PrintService.printOrderReceipts(
-      customerReceipt: customerReceipt,
-      deliveryReceipt: deliveryReceipt,
-      orderType: currentOrder.orderType.name,
-    );
-  }
+    // 4. تجهيز بايلود الدليفري مع تمرير البيانات الحقيقية
+    Map<String, dynamic>? deliveryPayload;
+    if (currentOrder.orderType == OrderType.delivery &&
+        currentOrder.driverName != null &&
+        currentOrder.driverName!.isNotEmpty &&
+        printDelivery) {
+      deliveryPayload = ReceiptMapper.toDeliveryPayload(
+        order: currentOrder,
+        settings: currentSettings, // تم تمرير الإعدادات الحقيقية هنا
+        printerName: cashierPrinterName,
+      );
 
-  // ====== تنسيق فاتورة العميل ======
-  String _formatCustomerReceipt(OrderModel order) {
-    final buffer = StringBuffer();
-
-    // Header
-    buffer.writeln('=' * 48);
-    buffer.writeln('           فاتورة العميل');
-    buffer.writeln('=' * 48);
-    buffer.writeln();
-
-    // معلومات الطلب
-    buffer.writeln('رقم الطلب: ${order.orderNumber}');
-    buffer.writeln('التاريخ: ${_formatDate(DateTime.now())}');
-    buffer.writeln('نوع الطلب: ${_getOrderTypeText(order.orderType)}');
-    buffer.writeln();
-
-    // معلومات العميل
-    if (order.customerName != null && order.customerName!.isNotEmpty) {
-      buffer.writeln('العميل: ${order.customerName}');
-    }
-    if (order.customerPhone != null && order.customerPhone!.isNotEmpty) {
-      buffer.writeln('الهاتف: ${order.customerPhone}');
-    }
-    if (order.customerAddress != null && order.customerAddress!.isNotEmpty) {
-      buffer.writeln('العنوان: ${order.customerAddress}');
-    }
-    if (order.customerArea != null && order.customerArea!.isNotEmpty) {
-      buffer.writeln('المنطقة: ${order.customerArea}');
-    }
-    buffer.writeln();
-
-    // الأصناف
-    buffer.writeln('-' * 48);
-    buffer.writeln('الصنف      الكمية      السعر');
-    buffer.writeln('-' * 48);
-
-    for (var item in order.items) {
-      final name = item['product_name'] ?? '';
-      final quantity = item['quantity'] ?? 0;
-      final price = item['price'] ?? 0;
-      final total = quantity * price;
-      buffer.writeln(
-          '${_padRight(name, 15)} ${_padRight(quantity.toString(), 10)} ${total.toStringAsFixed(2)}');
+      // تفعيل طباعة نسختين
+      deliveryPayload['copies'] = 2;
     }
 
-    buffer.writeln('-' * 48);
-
-    // الإجماليات
-    buffer.writeln('الإجمالي: ${order.totalAmount.toStringAsFixed(2)}');
-    if (order.discount != null && order.discount! > 0) {
-      buffer.writeln('الخصم: ${order.discount!.toStringAsFixed(2)}');
-    }
-    if (order.tax != null && order.tax! > 0) {
-      buffer.writeln('الضريبة: ${order.tax!.toStringAsFixed(2)}');
-    }
-    if (order.deliveryFee != null && order.deliveryFee! > 0) {
-      buffer.writeln('رسوم التوصيل: ${order.deliveryFee!.toStringAsFixed(2)}');
-    }
-    buffer.writeln('المبلغ الإجمالي: ${order.totalAmount.toStringAsFixed(2)}');
-    buffer.writeln();
-
-    // طريقة الدفع
-    if (order.paymentMethod != null) {
-      buffer.writeln('طريقة الدفع: ${order.paymentMethod}');
-    }
-
-    buffer.writeln();
-    buffer.writeln('=' * 48);
-    buffer.writeln('           شكراً لتسوقكم معنا');
-    buffer.writeln('=' * 48);
-
-    return buffer.toString();
-  }
-
-  String _getOrderTypeText(OrderType type) {
-    switch (type) {
-      case OrderType.takeAway:
-        return 'طلبية خارجية';
-      case OrderType.dineIn:
-        return 'طلبية داخلية';
-      case OrderType.delivery:
-        return 'توصيل';
-    }
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.year}/${date.month}/${date.day} ${date.hour}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  String _padRight(String text, int width) {
-    if (text.length >= width) return text.substring(0, width);
-    return text.padRight(width);
+    // 5. استدعاء خدمة الطباعة لإرسال الداتا للـ API والسيرفر
+    // await PrintService.printOrderViaApi(cashierPayload, deliveryPayload);
   }
 
   // ====== باقي الدوال المساعدة ======
   Widget _buildPaymentMethod(int index, String label, IconData icon) {
     final selected = selectedPaymentIndex == index;
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(18),
-      onTap: _isProcessing
-          ? null
-          : () {
-        final methods = ['Cash', 'Visa', 'Instapay', 'Wallet'];
-        context.read<OrderCubit>().setPaymentMethod(
-          methods[index],
-        );
+    return Tooltip(
+      message: _getPaymentMethodTooltip(index, label),
+      waitDuration: const Duration(milliseconds: 300),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(18),
+        onTap: _isProcessing
+            ? null
+            : () {
+          final methods = ['Cash', 'Visa', 'Instapay', 'Wallet'];
+          context.read<OrderCubit>().setPaymentMethod(
+            methods[index],
+          );
 
-        setState(() {
-          selectedPaymentIndex = index;
-        });
-
-        context.read<OrderCubit>().setPaymentMethod(methods[index]);
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xff2563EB) : Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: selected ? const Color(0xff2563EB) : Colors.grey.shade300,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(.05),
-              blurRadius: 8,
-              offset: const Offset(0, 4),
+          setState(() {
+            selectedPaymentIndex = index;
+          });
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          decoration: BoxDecoration(
+            color: selected ? const Color(0xff2563EB) : Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(
+              color: selected ? const Color(0xff2563EB) : Colors.grey.shade300,
             ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 42,
-              color: selected ? Colors.white : const Color(0xff2563EB),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: selected ? Colors.white : Colors.black87,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(.05),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 42,
+                color: selected ? Colors.white : const Color(0xff2563EB),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: selected ? Colors.white : Colors.black87,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _getPaymentMethodTooltip(int index, String label) {
+    switch (index) {
+      case 0:
+        return "Ctrl + 1 - نقدًا";
+      case 1:
+        return "Ctrl + 2 - فيزا";
+      case 2:
+        return "Ctrl + 3 - انستا باي";
+      case 3:
+        return "Ctrl + 4 - محفظة";
+      default:
+        return label;
+    }
   }
 
   Widget _buildSummaryItem(
@@ -517,43 +451,63 @@ class _PaymentDialogState extends State<PaymentDialog> {
   Widget _quickAmountButton(double amount) {
     final isExact = amount == widget.totalAmount;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: _isProcessing
-            ? null
-            : () {
-          amountController.text = amount.toStringAsFixed(2);
-          _calculateChange(amountController.text);
-        },
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          decoration: BoxDecoration(
-            color: isExact ? const Color(0xFF2563EB) : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isExact ? const Color(0xFF2563EB) : Colors.grey.shade300,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (isExact)
-                const Icon(Icons.done, color: Colors.white, size: 16),
-              if (isExact) const SizedBox(width: 6),
-              Text(
-                isExact ? "مطابق" : "${amount.toStringAsFixed(0)} ج.م",
-                style: TextStyle(
-                  color: isExact ? Colors.white : Colors.black87,
-                  fontWeight: FontWeight.bold,
-                ),
+    return Tooltip(
+      message: "Ctrl + ${_getQuickAmountShortcut(amount)} - ${amount.toStringAsFixed(0)} ج.م",
+      waitDuration: const Duration(milliseconds: 300),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(12),
+          onTap: _isProcessing
+              ? null
+              : () {
+            amountController.text = amount.toStringAsFixed(2);
+            _calculateChange(amountController.text);
+          },
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+            decoration: BoxDecoration(
+              color: isExact ? const Color(0xFF2563EB) : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isExact ? const Color(0xFF2563EB) : Colors.grey.shade300,
               ),
-            ],
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (isExact)
+                  const Icon(Icons.done, color: Colors.white, size: 16),
+                if (isExact) const SizedBox(width: 6),
+                Text(
+                  isExact ? "مطابق" : "${amount.toStringAsFixed(0)} ج.م",
+                  style: TextStyle(
+                    color: isExact ? Colors.white : Colors.black87,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  String _getQuickAmountShortcut(double amount) {
+    if (amount == widget.totalAmount) return "E";
+    switch (amount.toInt()) {
+      case 50:
+        return "5";
+      case 100:
+        return "6";
+      case 200:
+        return "7";
+      case 500:
+        return "8";
+      default:
+        return "";
+    }
   }
 
   Color _changeColor() {

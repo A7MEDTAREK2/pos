@@ -38,34 +38,38 @@ class CustomerList extends StatelessWidget {
 
         return Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            transform: Matrix4.identity()..scale(isSelected ? 1.02 : 1.0),
-            child: Material(
-              elevation: isSelected ? 5 : 3,
-              borderRadius: BorderRadius.circular(14),
-              color: isSelected
-                  ? Colorsmanegments.primary.withOpacity(0.08)
-                  : Colorsmanegments.card,
-              child: InkWell(
-                onTap: () {
-                  if (onCustomerTap != null) {
-                    onCustomerTap!(customer);
-                  }
-                },
+          child: Tooltip(
+            message: "Ctrl + ${index + 1} - ${customer.name}",
+            waitDuration: const Duration(milliseconds: 300),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              transform: Matrix4.identity()..scale(isSelected ? 1.02 : 1.0),
+              child: Material(
+                elevation: isSelected ? 5 : 3,
                 borderRadius: BorderRadius.circular(14),
-                splashColor: Colorsmanegments.primary.withOpacity(0.1),
-                highlightColor: Colorsmanegments.primary.withOpacity(0.05),
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: CustomerItem(
-                    customer: customer,
-                    onTap: () {
-                      if (onCustomerTap != null) {
-                        onCustomerTap!(customer);
-                      }
-                    },
+                color: isSelected
+                    ? Colorsmanegments.primary.withOpacity(0.08)
+                    : Colorsmanegments.card,
+                child: InkWell(
+                  onTap: () {
+                    if (onCustomerTap != null) {
+                      onCustomerTap!(customer);
+                    }
+                  },
+                  borderRadius: BorderRadius.circular(14),
+                  splashColor: Colorsmanegments.primary.withOpacity(0.1),
+                  highlightColor: Colorsmanegments.primary.withOpacity(0.05),
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: CustomerItem(
+                      customer: customer,
+                      onTap: () {
+                        if (onCustomerTap != null) {
+                          onCustomerTap!(customer);
+                        }
+                      },
+                    ),
                   ),
                 ),
               ),
@@ -99,23 +103,27 @@ class CustomerList extends StatelessWidget {
             style: TxtStyle.emptySubtitle,
           ),
           const SizedBox(height: 30),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.primary,
-              foregroundColor: Colorsmanegments.textWhite,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          Tooltip(
+            message: "Ctrl + N - إضافة عميل جديد",
+            waitDuration: const Duration(milliseconds: 300),
+            child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colorsmanegments.primary,
+                foregroundColor: Colorsmanegments.textWhite,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-            onPressed: () {},
-            icon: Icon(
-              Iconss.add,
-              color: Colorsmanegments.textWhite,
-            ),
-            label: Text(
-              "إضافة عميل جديد",
-              style: TxtStyle.buttonMedium,
+              onPressed: () {},
+              icon: Icon(
+                Iconss.add,
+                color: Colorsmanegments.textWhite,
+              ),
+              label: Text(
+                "إضافة عميل جديد",
+                style: TxtStyle.buttonMedium,
+              ),
             ),
           ),
         ],

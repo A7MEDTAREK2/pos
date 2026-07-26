@@ -184,39 +184,43 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
             ],
           ),
           const SizedBox(height: 10),
-          DropdownButtonFormField<String>(
-            value: cubit.tableNumber ?? "طاولة 1",
-            style: TxtStyle.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            decoration: InputDecoration(
-              filled: true,
-              fillColor: Colorsmanegments.background,
-              prefixIcon: Icon(
-                Iconss.tableBar,
-                color: Colorsmanegments.primary,
-                size: 20,
+          Tooltip(
+            message: "Ctrl + T - اختيار الطاولة",
+            waitDuration: const Duration(milliseconds: 300),
+            child: DropdownButtonFormField<String>(
+              value: cubit.tableNumber ?? "طاولة 1",
+              style: TxtStyle.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colorsmanegments.borderLight),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colorsmanegments.background,
+                prefixIcon: Icon(
+                  Iconss.tableBar,
                   color: Colorsmanegments.primary,
-                  width: 1.5,
+                  size: 20,
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(color: Colorsmanegments.borderLight),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide(
+                    color: Colorsmanegments.primary,
+                    width: 1.5,
+                  ),
                 ),
               ),
+              items: ['طاولة 1', 'طاولة 2', 'طاولة 3', 'طاولة 4'].map((table) {
+                return DropdownMenuItem(value: table, child: Text(table));
+              }).toList(),
+              onChanged: (value) {
+                cubit.tableNumber = value;
+                setState(() {});
+              },
             ),
-            items: ['طاولة 1', 'طاولة 2', 'طاولة 3', 'طاولة 4'].map((table) {
-              return DropdownMenuItem(value: table, child: Text(table));
-            }).toList(),
-            onChanged: (value) {
-              cubit.tableNumber = value;
-              setState(() {});
-            },
           ),
         ],
       ),
@@ -284,65 +288,69 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     VoidCallback? onSubmitted,
   }) {
     final customer = context.read<OrderCubit>().selectedCustomer;
-    return TextFormField(
-      controller: controller,
-      onChanged: onChanged,
-      onFieldSubmitted: (_) {
-        if (onSubmitted != null) {
-          onSubmitted();
-        }
-      },
-      keyboardType: TextInputType.phone,
-      textDirection: TextDirection.ltr,
-      style: TxtStyle.bodyMedium.copyWith(
-        fontWeight: FontWeight.w600,
-        letterSpacing: 0.5,
-      ),
-      decoration: InputDecoration(
-        errorText: phoneErrorText,
-        suffixIcon: customerFound && customer != null
-            ? AddressPopup(
-          customerId: customer.id!,
-          onSelected: (address) {
-            context.read<OrderCubit>().setAddress(address);
-            setState(() {
-              customerAddressValue = address.address; // 🌟 تحديث العنوان عند اختياره من القائمة
-              customerAddressController.text = address.address;
-            });
-          },
-        )
-            : null,
-        hintText: hint,
-        hintStyle: TxtStyle.hintSmall,
-        prefixIcon: Icon(
-          icon,
-          size: 18,
-          color: Colorsmanegments.primary,
+    return Tooltip(
+      message: "Ctrl + P - البحث عن عميل",
+      waitDuration: const Duration(milliseconds: 300),
+      child: TextFormField(
+        controller: controller,
+        onChanged: onChanged,
+        onFieldSubmitted: (_) {
+          if (onSubmitted != null) {
+            onSubmitted();
+          }
+        },
+        keyboardType: TextInputType.phone,
+        textDirection: TextDirection.ltr,
+        style: TxtStyle.bodyMedium.copyWith(
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
         ),
-        filled: true,
-        fillColor: Colorsmanegments.background,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colorsmanegments.borderLight),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
+        decoration: InputDecoration(
+          errorText: phoneErrorText,
+          suffixIcon: customerFound && customer != null
+              ? AddressPopup(
+            customerId: customer.id!,
+            onSelected: (address) {
+              context.read<OrderCubit>().setAddress(address);
+              setState(() {
+                customerAddressValue = address.address; // 🌟 تحديث العنوان عند اختياره من القائمة
+                customerAddressController.text = address.address;
+              });
+            },
+          )
+              : null,
+          hintText: hint,
+          hintStyle: TxtStyle.hintSmall,
+          prefixIcon: Icon(
+            icon,
+            size: 18,
             color: Colorsmanegments.primary,
-            width: 1.5,
           ),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.red, width: 1.5),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: Colors.red, width: 1.5),
+          filled: true,
+          fillColor: Colorsmanegments.background,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 12,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(color: Colorsmanegments.borderLight),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide(
+              color: Colorsmanegments.primary,
+              width: 1.5,
+            ),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.red, width: 1.5),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: const BorderSide(color: Colors.red, width: 1.5),
+          ),
         ),
       ),
     );

@@ -23,19 +23,23 @@ class PosTopAppBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () => Navigator.pop(context),
-            child: Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(
-                color: Colorsmanegments.grey100,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                Iconss.arrowBack,
-                size: 20,
-                color: Colorsmanegments.textSecondary,
+          Tooltip(
+            message: "Esc - الرجوع للخلف",
+            waitDuration: const Duration(milliseconds: 300),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colorsmanegments.grey100,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  Iconss.arrowBack,
+                  size: 20,
+                  color: Colorsmanegments.textSecondary,
+                ),
               ),
             ),
           ),

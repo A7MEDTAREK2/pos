@@ -25,19 +25,7 @@ class CategoriesScreen extends StatelessWidget {
         padding: const EdgeInsets.all(32.0),
         child: BlocConsumer<CategoryCubit, CategoryState>(
           listener: (context, state) {
-            if (state is CategoryError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    state.message,
-                    style: TxtStyle.bodyMedium.copyWith(
-                      color: Colorsmanegments.textWhite,
-                    ),
-                  ),
-                  backgroundColor: Colorsmanegments.danger,
-                ),
-              );
-            }
+            // تم إزالة SnackBar
           },
           builder: (context, state) {
             return Column(
@@ -64,13 +52,17 @@ class CategoriesScreen extends StatelessWidget {
   Widget _buildHeader(BuildContext context, CategoryState state) {
     return Row(
       children: [
-        IconButton(
-          icon: Icon(
-            Iconss.arrowBack,
-            size: 28,
-            color: Colorsmanegments.textPrimary,
+        Tooltip(
+          message: "Esc - رجوع",
+          waitDuration: const Duration(milliseconds: 300),
+          child: IconButton(
+            icon: Icon(
+              Iconss.arrowBack,
+              size: 28,
+              color: Colorsmanegments.textPrimary,
+            ),
+            onPressed: () => Navigator.pop(context),
           ),
-          onPressed: () => Navigator.pop(context),
         ),
         const SizedBox(width: 16),
         Column(
@@ -116,7 +108,7 @@ class CategoriesScreen extends StatelessWidget {
       ),
       itemBuilder: (gridContext, index) {
         if (index == categories.length) return _buildCreateNewCard(context);
-        return _buildCategoryCard(context, categories[index]);
+        return _buildCategoryCard(context, categories[index], index);
       },
     );
   }
@@ -124,105 +116,109 @@ class CategoriesScreen extends StatelessWidget {
   // ============================================================
   // Category Card
   // ============================================================
-  Widget _buildCategoryCard(BuildContext context, CategoryModel category) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colorsmanegments.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colorsmanegments.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colorsmanegments.blackOpacity10,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colorsmanegments.background,
-                  borderRadius: BorderRadius.circular(12),
+  Widget _buildCategoryCard(BuildContext context, CategoryModel category, int index) {
+    return Tooltip(
+      message: "Ctrl + ${index + 1} - ${category.name}",
+      waitDuration: const Duration(milliseconds: 300),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colorsmanegments.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colorsmanegments.border),
+          boxShadow: [
+            BoxShadow(
+              color: Colorsmanegments.blackOpacity10,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colorsmanegments.background,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    Iconss.restaurant,
+                    color: Colorsmanegments.textPrimary,
+                  ),
                 ),
-                child: Icon(
-                  Iconss.restaurant,
-                  color: Colorsmanegments.textPrimary,
-                ),
-              ),
-              PopupMenuButton<String>(
-                icon: Icon(
-                  Iconss.more,
-                  color: Colorsmanegments.textSecondary,
-                ),
-                onSelected: (value) {
-                  if (value == 'edit') _openEditCategoryDialog(context, category);
-                  else if (value == 'delete') _showDeleteConfirmation(context, category);
-                },
-                itemBuilder: (BuildContext context) => [
-                  const PopupMenuItem(
-                    value: 'edit',
-                    child: Row(
-                      children: [
-                        Icon(Iconss.edit, color: Colors.blue, size: 18),
-                        SizedBox(width: 8),
-                        Text('تعديل'),
-                      ],
+                PopupMenuButton<String>(
+                  icon: Icon(
+                    Iconss.more,
+                    color: Colorsmanegments.textSecondary,
+                  ),
+                  onSelected: (value) {
+                    if (value == 'edit') _openEditCategoryDialog(context, category);
+                    else if (value == 'delete') _showDeleteConfirmation(context, category);
+                  },
+                  itemBuilder: (BuildContext context) => [
+                    const PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(Iconss.edit, color: Colors.blue, size: 18),
+                          SizedBox(width: 8),
+                          Text('تعديل'),
+                        ],
+                      ),
                     ),
-                  ),
-                  PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(
-                          Iconss.delete,
-                          color: Colorsmanegments.danger,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          'حذف',
-                          style: TxtStyle.danger,
-                        ),
-                      ],
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Iconss.delete,
+                            color: Colorsmanegments.danger,
+                            size: 18,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'حذف',
+                            style: TxtStyle.danger,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                category.name,
-                style: TxtStyle.titleSmall,
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                  Icon(
-                    Iconss.success,
-                    size: 8,
-                    color: Colorsmanegments.success,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    "قسم مفعل",
-                    style: TxtStyle.bodySmall,
-                  ),
-                ],
-              ),
-            ],
-          )
-        ],
+                  ],
+                ),
+              ],
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  category.name,
+                  style: TxtStyle.titleSmall,
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Icon(
+                      Iconss.success,
+                      size: 8,
+                      color: Colorsmanegments.success,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      "قسم مفعل",
+                      style: TxtStyle.bodySmall,
+                    ),
+                  ],
+                ),
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
@@ -231,37 +227,41 @@ class CategoriesScreen extends StatelessWidget {
   // Create New Card
   // ============================================================
   Widget _buildCreateNewCard(BuildContext context) {
-    return InkWell(
-      onTap: () => _openAddCategoryDialog(context),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colorsmanegments.card.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: Colorsmanegments.primary.withOpacity(0.4),
-            width: 1.5,
+    return Tooltip(
+      message: "Ctrl + N - إضافة قسم جديد",
+      waitDuration: const Duration(milliseconds: 300),
+      child: InkWell(
+        onTap: () => _openAddCategoryDialog(context),
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colorsmanegments.card.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: Colorsmanegments.primary.withOpacity(0.4),
+              width: 1.5,
+            ),
           ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Iconss.addCircle,
-              size: 40,
-              color: Colorsmanegments.primary.withOpacity(0.7),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "إضافة قسم",
-              style: TxtStyle.titleSmall,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "إنشاء تصنيف جديد",
-              style: TxtStyle.bodySmall,
-            ),
-          ],
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Iconss.addCircle,
+                size: 40,
+                color: Colorsmanegments.primary.withOpacity(0.7),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                "إضافة قسم",
+                style: TxtStyle.titleSmall,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "إنشاء تصنيف جديد",
+                style: TxtStyle.bodySmall,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -310,24 +310,32 @@ class CategoriesScreen extends StatelessWidget {
           style: TxtStyle.bodyMedium,
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'إلغاء',
-              style: TxtStyle.buttonPrimary,
+          Tooltip(
+            message: "Esc - إلغاء",
+            waitDuration: const Duration(milliseconds: 300),
+            child: TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(
+                'إلغاء',
+                style: TxtStyle.buttonPrimary,
+              ),
             ),
           ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.danger,
-            ),
-            onPressed: () {
-              context.read<CategoryCubit>().deleteCategory(category.id!);
-              Navigator.pop(dialogContext);
-            },
-            child: Text(
-              'حذف',
-              style: TxtStyle.buttonMedium,
+          Tooltip(
+            message: "Enter - حذف",
+            waitDuration: const Duration(milliseconds: 300),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colorsmanegments.danger,
+              ),
+              onPressed: () {
+                context.read<CategoryCubit>().deleteCategory(category.id!);
+                Navigator.pop(dialogContext);
+              },
+              child: Text(
+                'حذف',
+                style: TxtStyle.buttonMedium,
+              ),
             ),
           ),
         ],
@@ -347,40 +355,52 @@ class CategoriesScreen extends StatelessWidget {
           'تعديل اسم القسم',
           style: TxtStyle.headerSmall,
         ),
-        content: TextFormField(
-          controller: controller,
-          style: TxtStyle.bodyMedium,
-          decoration: InputDecoration(
-            hintText: 'اسم القسم',
-            hintStyle: TxtStyle.hint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colorsmanegments.border),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colorsmanegments.primary, width: 2),
+        content: Tooltip(
+          message: "Ctrl + E - تعديل الاسم",
+          waitDuration: const Duration(milliseconds: 300),
+          child: TextFormField(
+            controller: controller,
+            style: TxtStyle.bodyMedium,
+            decoration: InputDecoration(
+              hintText: 'اسم القسم',
+              hintStyle: TxtStyle.hint,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colorsmanegments.border),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: Colorsmanegments.primary, width: 2),
+              ),
             ),
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              'إلغاء',
-              style: TxtStyle.buttonPrimary,
+          Tooltip(
+            message: "Esc - إلغاء",
+            waitDuration: const Duration(milliseconds: 300),
+            child: TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(
+                'إلغاء',
+                style: TxtStyle.buttonPrimary,
+              ),
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              context.read<CategoryCubit>().updateExistingCategory(
-                CategoryModel(id: category.id, name: controller.text),
-              );
-              Navigator.pop(dialogContext);
-            },
-            child: Text(
-              'حفظ',
-              style: TxtStyle.buttonMedium,
+          Tooltip(
+            message: "Enter - حفظ",
+            waitDuration: const Duration(milliseconds: 300),
+            child: ElevatedButton(
+              onPressed: () {
+                context.read<CategoryCubit>().updateExistingCategory(
+                  CategoryModel(id: category.id, name: controller.text),
+                );
+                Navigator.pop(dialogContext);
+              },
+              child: Text(
+                'حفظ',
+                style: TxtStyle.buttonMedium,
+              ),
             ),
           ),
         ],

@@ -3,12 +3,41 @@ import '../../../../../core/theming/txt_style.dart';
 import '../../../product/data/model/product_model.dart' hide OrderType;
 import '../../data/model/pos_model.dart';
 import '../../logic/pos_cubit.dart';
+import '../screen/holding_orders_screen.dart';
+import '../widget/payment_method_selector.dart';
 import '../widget/product_size_dialog.dart';
 
+
 class PosHelpers {
-  static void showSnackBar(BuildContext context, String msg, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: color),
+  // تم إزالة showSnackBar بالكامل
+
+  static Future<void> showPaymentDialog(
+      BuildContext context,
+      OrderCubit cubit,
+      double totalAmount,
+      OrderType orderType,
+      ) async {
+    final order = cubit.currentOrder;
+
+    if (order == null) return;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => PaymentDialog(
+        totalAmount: totalAmount,
+        orderId: order.id,
+        onPrintFinalReceipt: () {},
+      ),
+    );
+  }
+
+  static Future<void> showPendingOrdersDialog(
+      BuildContext context,
+      ) async {
+    await showDialog(
+      context: context,
+      builder: (_) => const HoldingOrdersScreen(),
     );
   }
 
@@ -32,7 +61,6 @@ class PosHelpers {
               'size': size.sizeName,
               'categoryName': product.categoryId,
               'categoryName': product.categoryName ?? "General",
-
             });
           },
         ),
@@ -46,8 +74,6 @@ class PosHelpers {
         'note': "",
         'categoryName': product.categoryId,
         'categoryName': product.categoryName ?? "General",
-
-
       });
     }
   }

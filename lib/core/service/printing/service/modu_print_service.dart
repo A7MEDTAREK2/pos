@@ -144,7 +144,17 @@ class ModuPrintService {
   // Daily Report (/api/printer/daily-report)
   // =============================
   Future<void> printDailyReport(Map<String, dynamic> request) async {
-    await _dio.post("/api/printer/daily-report", data: request);
+    print("📤 DAILY REPORT REQUEST:");
+    print(request);
+
+    final response = await _dio.post(
+      "/api/printer/daily-report",
+      data: request,
+    );
+
+    print("📥 DAILY REPORT RESPONSE:");
+    print(response.statusCode);
+    print(response.data);
   }
 
   // =============================

@@ -252,7 +252,9 @@ class MyApp extends StatelessWidget {
         // ===== Users =====
         BlocProvider<UserCubit>(
           create: (_) => UserCubit(
-            UserRepository(),
+            UserRepository(
+              UserLocalDataSource(),
+            ),
           )..loadUsers(),
         ),
         BlocProvider<DriverCubit>(

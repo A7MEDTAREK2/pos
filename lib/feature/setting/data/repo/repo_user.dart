@@ -2,7 +2,9 @@ import '../datasorce/UserLocalDataSource.dart';
 import '../model/users_model.dart';
 
 class UserRepository {
-  final UserLocalDataSource _localDataSource = UserLocalDataSource();
+  final UserLocalDataSource _localDataSource;
+
+  UserRepository(this._localDataSource);
 
   Future<List<UserModel>> getUsers() async {
     return await _localDataSource.getUsers();
@@ -27,13 +29,12 @@ class UserRepository {
   Future<void> deleteUser(int id) async {
     await _localDataSource.deleteUser(id);
   }
+
+
   Future<UserModel?> login(
       String username,
       String password,
       ) async {
-    return await _localDataSource.login(
-      username,
-      password,
-    );
+    return await _localDataSource.login(username, password);
   }
 }

@@ -102,24 +102,28 @@ class _CustomerScreenState extends State<CustomerScreen> {
             style: TxtStyle.emptySubtitle,
           ),
           const SizedBox(height: 30),
-          ElevatedButton.icon(
-            onPressed: _navigateToAddCustomer,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.primary,
-              foregroundColor: Colorsmanegments.textWhite,
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          Tooltip(
+            message: "Ctrl + N - إضافة عميل",
+            waitDuration: const Duration(milliseconds: 300),
+            child: ElevatedButton.icon(
+              onPressed: _navigateToAddCustomer,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colorsmanegments.primary,
+                foregroundColor: Colorsmanegments.textWhite,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-            ),
-            icon: Icon(
-              Iconss.add,
-              color: Colorsmanegments.textWhite,
-            ),
-            label: Text(
-              "إضافة عميل",
-              style: TxtStyle.buttonMedium,
+              icon: Icon(
+                Iconss.add,
+                color: Colorsmanegments.textWhite,
+              ),
+              label: Text(
+                "إضافة عميل",
+                style: TxtStyle.buttonMedium,
+              ),
             ),
           ),
         ],
@@ -167,26 +171,30 @@ class _CustomerScreenState extends State<CustomerScreen> {
             ),
           ),
           const SizedBox(height: 25),
-          ElevatedButton.icon(
-            onPressed: () {
-              context.read<CustomerCubit>().loadCustomers();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.primary,
-              foregroundColor: Colorsmanegments.textWhite,
-              elevation: 2,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          Tooltip(
+            message: "Ctrl + R - إعادة المحاولة",
+            waitDuration: const Duration(milliseconds: 300),
+            child: ElevatedButton.icon(
+              onPressed: () {
+                context.read<CustomerCubit>().loadCustomers();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colorsmanegments.primary,
+                foregroundColor: Colorsmanegments.textWhite,
+                elevation: 2,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
-            ),
-            icon: Icon(
-              Iconss.refresh,
-              color: Colorsmanegments.textWhite,
-            ),
-            label: Text(
-              "إعادة المحاولة",
-              style: TxtStyle.buttonMedium,
+              icon: Icon(
+                Iconss.refresh,
+                color: Colorsmanegments.textWhite,
+              ),
+              label: Text(
+                "إعادة المحاولة",
+                style: TxtStyle.buttonMedium,
+              ),
             ),
           ),
         ],
@@ -269,28 +277,36 @@ class _CustomerScreenState extends State<CustomerScreen> {
             style: TxtStyle.bodyMedium,
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              style: TextButton.styleFrom(
-                foregroundColor: Colorsmanegments.textSecondary,
-              ),
-              child: Text(
-                "إلغاء",
-                style: TxtStyle.buttonPrimary,
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colorsmanegments.danger,
-                foregroundColor: Colorsmanegments.textWhite,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Tooltip(
+              message: "Esc - إلغاء",
+              waitDuration: const Duration(milliseconds: 300),
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colorsmanegments.textSecondary,
+                ),
+                child: Text(
+                  "إلغاء",
+                  style: TxtStyle.buttonPrimary,
                 ),
               ),
-              child: Text(
-                "حذف",
-                style: TxtStyle.buttonMedium,
+            ),
+            Tooltip(
+              message: "Enter - حذف",
+              waitDuration: const Duration(milliseconds: 300),
+              child: ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colorsmanegments.danger,
+                  foregroundColor: Colorsmanegments.textWhite,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Text(
+                  "حذف",
+                  style: TxtStyle.buttonMedium,
+                ),
               ),
             ),
           ],
@@ -306,17 +322,21 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
       appBar: const CustomerAppBar(),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddCustomer,
-        backgroundColor: Colorsmanegments.primary,
-        foregroundColor: Colorsmanegments.textWhite,
-        elevation: 6,
-        child: Icon(
-          Iconss.personAdd,
-          size: 30,
+      floatingActionButton: Tooltip(
+        message: "Ctrl + N - إضافة عميل",
+        waitDuration: const Duration(milliseconds: 300),
+        child: FloatingActionButton(
+          onPressed: _navigateToAddCustomer,
+          backgroundColor: Colorsmanegments.primary,
+          foregroundColor: Colorsmanegments.textWhite,
+          elevation: 6,
+          child: Icon(
+            Iconss.personAdd,
+            size: 30,
+          ),
+          shape: const CircleBorder(),
+          tooltip: 'إضافة عميل',
         ),
-        shape: const CircleBorder(),
-        tooltip: 'إضافة عميل',
       ),
 
       body: Padding(

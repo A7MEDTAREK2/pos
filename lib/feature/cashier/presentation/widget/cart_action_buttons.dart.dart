@@ -36,39 +36,43 @@ class CartActionButtons extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: SizedBox(
-                height: 50,
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colorsmanegments.warning.withOpacity(0.1),
-                    foregroundColor: Colorsmanegments.warning,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      side: BorderSide(color: Colorsmanegments.warning.withOpacity(0.2)),
-                    ),
-                  ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: context.read<OrderCubit>(),
-                          child: const HoldingOrdersScreen(),
-                        ),
+              child: Tooltip(
+                message: "F4 - حفظ الأوردر",
+                waitDuration: const Duration(milliseconds: 300),
+                child: SizedBox(
+                  height: 50,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colorsmanegments.warning.withOpacity(0.1),
+                      foregroundColor: Colorsmanegments.warning,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                        side: BorderSide(color: Colorsmanegments.warning.withOpacity(0.2)),
                       ),
-                    );
-                  },
-                  icon: Icon(
-                    Iconss.bookmark,
-                    size: 18,
-                    color: Colorsmanegments.warning,
-                  ),
-                  label: Text(
-                    "حفظ الأوردر",
-                    style: TxtStyle.buttonSmall.copyWith(
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                            value: context.read<OrderCubit>(),
+                            child: const HoldingOrdersScreen(),
+                          ),
+                        ),
+                      );
+                    },
+                    icon: Icon(
+                      Iconss.bookmark,
+                      size: 18,
                       color: Colorsmanegments.warning,
-                      fontWeight: FontWeight.bold,
+                    ),
+                    label: Text(
+                      "حفظ الأوردر",
+                      style: TxtStyle.buttonSmall.copyWith(
+                        color: Colorsmanegments.warning,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -76,27 +80,31 @@ class CartActionButtons extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: SizedBox(
-                height: 50,
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colorsmanegments.danger,
-                    side: BorderSide(color: Colorsmanegments.danger),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
+              child: Tooltip(
+                message: "Ctrl + X - مسح السلة",
+                waitDuration: const Duration(milliseconds: 300),
+                child: SizedBox(
+                  height: 50,
+                  child: OutlinedButton.icon(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colorsmanegments.danger,
+                      side: BorderSide(color: Colorsmanegments.danger),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
-                  ),
-                  onPressed: () => context.read<OrderCubit>().clearCart(),
-                  icon: Icon(
-                    Iconss.delete,
-                    size: 18,
-                    color: Colorsmanegments.danger,
-                  ),
-                  label: Text(
-                    "مسح السلة",
-                    style: TxtStyle.buttonSmall.copyWith(
+                    onPressed: () => context.read<OrderCubit>().clearCart(),
+                    icon: Icon(
+                      Iconss.delete,
+                      size: 18,
                       color: Colorsmanegments.danger,
-                      fontWeight: FontWeight.bold,
+                    ),
+                    label: Text(
+                      "مسح السلة",
+                      style: TxtStyle.buttonSmall.copyWith(
+                        color: Colorsmanegments.danger,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -107,40 +115,44 @@ class CartActionButtons extends StatelessWidget {
         const SizedBox(height: 5),
 
         // ====== 2. إنهاء الدفع ======
-        SizedBox(
-          width: double.infinity,
-          height: 60,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.success,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+        Tooltip(
+          message: "F1 - إنهاء الطلب",
+          waitDuration: const Duration(milliseconds: 300),
+          child: SizedBox(
+            width: double.infinity,
+            height: 60,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colorsmanegments.success,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                elevation: 3,
               ),
-              elevation: 3,
-            ),
-            onPressed: () => _openPaymentPopup(context),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Iconss.print,
-                  color: Colorsmanegments.textWhite,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'إنهاء الدفع',
-                  style: TxtStyle.buttonLarge.copyWith(
+              onPressed: () => _openPaymentPopup(context),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Iconss.print,
                     color: Colorsmanegments.textWhite,
                   ),
-                ),
-                const Spacer(),
-                Text(
-                  '${totalAmount.toStringAsFixed(2)} ج.م',
-                  style: TxtStyle.buttonLarge.copyWith(
-                    color: Colorsmanegments.textWhite,
+                  const SizedBox(width: 8),
+                  Text(
+                    'إنهاء الدفع',
+                    style: TxtStyle.buttonLarge.copyWith(
+                      color: Colorsmanegments.textWhite,
+                    ),
                   ),
-                ),
-              ],
+                  const Spacer(),
+                  Text(
+                    '${totalAmount.toStringAsFixed(2)} ج.م',
+                    style: TxtStyle.buttonLarge.copyWith(
+                      color: Colorsmanegments.textWhite,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

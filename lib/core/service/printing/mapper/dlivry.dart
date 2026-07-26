@@ -1,4 +1,4 @@
-class DeliveryFormatter {
+/*class DeliveryFormatter {
   static String formatDeliveryReceipt({
     required String driverName,
     required String orderNumber,
@@ -95,4 +95,4 @@ class DeliveryFormatter {
     if (text.length >= width) return text.substring(0, width);
     return text.padRight(width);
   }
-}
+}*/

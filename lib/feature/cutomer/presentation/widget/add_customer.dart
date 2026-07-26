@@ -39,6 +39,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
   final areaController = TextEditingController();
   final notesController = TextEditingController();
 
+  final FocusNode _nameFocusNode = FocusNode();
+  final FocusNode _phoneFocusNode = FocusNode();
+  final FocusNode _addressFocusNode = FocusNode();
+  final FocusNode _areaFocusNode = FocusNode();
+  final FocusNode _notesFocusNode = FocusNode();
+
   @override
   void dispose() {
     nameController.dispose();
@@ -46,6 +52,11 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     addressController.dispose();
     areaController.dispose();
     notesController.dispose();
+    _nameFocusNode.dispose();
+    _phoneFocusNode.dispose();
+    _addressFocusNode.dispose();
+    _areaFocusNode.dispose();
+    _notesFocusNode.dispose();
     super.dispose();
   }
 
@@ -106,40 +117,12 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     return BlocListener<CustomerCubit, CustomerState>(
       listener: (context, state) {
         if (state is CustomerOperationSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                state.message,
-                style: TxtStyle.bodyMedium.copyWith(
-                  color: Colorsmanegments.textWhite,
-                ),
-              ),
-              backgroundColor: Colorsmanegments.success,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          );
+          // تم إزالة SnackBar
           Navigator.pop(context);
         }
 
         if (state is CustomerError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                state.error,
-                style: TxtStyle.bodyMedium.copyWith(
-                  color: Colorsmanegments.textWhite,
-                ),
-              ),
-              backgroundColor: Colorsmanegments.danger,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-          );
+          // تم إزالة SnackBar
         }
       },
       child: Scaffold(
@@ -156,6 +139,14 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.vertical(
               bottom: Radius.circular(16),
+            ),
+          ),
+          leading: Tooltip(
+            message: "Esc - رجوع",
+            waitDuration: const Duration(milliseconds: 300),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () => Navigator.pop(context),
             ),
           ),
         ),
@@ -181,6 +172,11 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                         addressController: addressController,
                         areaController: areaController,
                         notesController: notesController,
+                        nameFocusNode: _nameFocusNode,
+                        phoneFocusNode: _phoneFocusNode,
+                        addressFocusNode: _addressFocusNode,
+                        areaFocusNode: _areaFocusNode,
+                        notesFocusNode: _notesFocusNode,
                       ),
 
                       if (widget.customer != null) ...[
@@ -212,37 +208,41 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
                       const SizedBox(height: 30),
 
-                      SizedBox(
-                        width: double.infinity,
-                        height: 55,
-                        child: ElevatedButton(
-                          onPressed: saveCustomer,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colorsmanegments.primary,
-                            foregroundColor: Colorsmanegments.textWhite,
-                            elevation: 4,
-                            shadowColor: Colorsmanegments.primary.withOpacity(0.4),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                      Tooltip(
+                        message: "Enter - ${widget.customer == null ? 'إضافة العميل' : 'حفظ التعديلات'}",
+                        waitDuration: const Duration(milliseconds: 300),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 55,
+                          child: ElevatedButton(
+                            onPressed: saveCustomer,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colorsmanegments.primary,
+                              foregroundColor: Colorsmanegments.textWhite,
+                              elevation: 4,
+                              shadowColor: Colorsmanegments.primary.withOpacity(0.4),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
                             ),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(
-                                widget.customer == null
-                                    ? Iconss.personAdd
-                                    : Iconss.save,
-                                size: 24,
-                              ),
-                              const SizedBox(width: 12),
-                              Text(
-                                widget.customer == null
-                                    ? "إضافة العميل"
-                                    : "حفظ التعديلات",
-                                style: TxtStyle.buttonMedium,
-                              ),
-                            ],
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  widget.customer == null
+                                      ? Iconss.personAdd
+                                      : Iconss.save,
+                                  size: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  widget.customer == null
+                                      ? "إضافة العميل"
+                                      : "حفظ التعديلات",
+                                  style: TxtStyle.buttonMedium,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

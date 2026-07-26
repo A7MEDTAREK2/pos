@@ -18,36 +18,53 @@ class EditableSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(5),
-        decoration: BoxDecoration(
-          color: Colorsmanegments.background,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colorsmanegments.border),
-        ),
-        child: Column(
-          children: [
-            Icon(
-              icon,
-              color: Colorsmanegments.primary,
-              size: 18,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              title,
-              style: TxtStyle.labelSmall,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              "${value.toStringAsFixed(2)} ج.م",
-              style: TxtStyle.tableRowBold,
-            ),
-          ],
+    return Tooltip(
+      message: _getTooltipMessage(title),
+      waitDuration: const Duration(milliseconds: 300),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.all(5),
+          decoration: BoxDecoration(
+            color: Colorsmanegments.background,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colorsmanegments.border),
+          ),
+          child: Column(
+            children: [
+              Icon(
+                icon,
+                color: Colorsmanegments.primary,
+                size: 18,
+              ),
+              const SizedBox(height: 6),
+              Text(
+                title,
+                style: TxtStyle.labelSmall,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                "${value.toStringAsFixed(2)} ج.م",
+                style: TxtStyle.tableRowBold,
+              ),
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  String _getTooltipMessage(String title) {
+    switch (title) {
+      case "الضريبة":
+        return "Ctrl + T - تعديل الضريبة";
+      case "التوصيل":
+        return "Ctrl + r - تعديل رسوم التوصيل";
+      case "الخصم":
+        return "Ctrl + C - تعديل الخصم";
+      default:
+        return title;
+    }
   }
 }

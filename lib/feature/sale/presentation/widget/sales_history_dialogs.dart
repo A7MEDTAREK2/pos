@@ -9,7 +9,6 @@ import '../../../../core/theming/txt_style.dart';
 class SalesHistoryDialogs {
   SalesHistoryDialogs._();
 
-
   static Future<bool?> showConfirmDialog({
     required BuildContext context,
     required String title,
@@ -43,25 +42,33 @@ class SalesHistoryDialogs {
             style: TxtStyle.bodyMedium,
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text(
-                cancelText,
-                style: TxtStyle.buttonPrimary,
-              ),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: color,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            Tooltip(
+              message: "Esc - إلغاء",
+              waitDuration: const Duration(milliseconds: 300),
+              child: TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: Text(
+                  cancelText,
+                  style: TxtStyle.buttonPrimary,
                 ),
               ),
-              onPressed: () => Navigator.pop(context, true),
-              child: Text(
-                confirmText,
-                style: TxtStyle.buttonMedium.copyWith(
-                  color: Colorsmanegments.textWhite,
+            ),
+            Tooltip(
+              message: "Enter - تأكيد",
+              waitDuration: const Duration(milliseconds: 300),
+              child: FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: color,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () => Navigator.pop(context, true),
+                child: Text(
+                  confirmText,
+                  style: TxtStyle.buttonMedium.copyWith(
+                    color: Colorsmanegments.textWhite,
+                  ),
                 ),
               ),
             ),
@@ -71,27 +78,5 @@ class SalesHistoryDialogs {
     );
   }
 
-  static void showSnackBar({
-    required BuildContext context,
-    required String message,
-    required Color color,
-  }) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(
-            message,
-            style: TxtStyle.bodyMedium.copyWith(
-              color: Colorsmanegments.textWhite,
-            ),
-          ),
-          backgroundColor: color,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-        ),
-      );
-  }
+// تم إزالة showSnackBar بالكامل
 }

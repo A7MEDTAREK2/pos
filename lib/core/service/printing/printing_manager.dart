@@ -139,14 +139,34 @@ class PrintingManager {
     if (printerName.isEmpty) return;
 
     // 🎯 الاعتماد على ReceiptMapper لتوليد الـ Payload الخاص بالكاشير
-    final requestData = ReceiptMapper.toCashierPayload(
+    final requestData =
+    order.orderType == OrderType.delivery
+        ? ReceiptMapper.toDeliveryPayload(
+      order: order,
+      settings: settings,
+      printerName: printerName,
+    )
+        : ReceiptMapper.toCashierPayload(
       order: order,
       settings: settings,
       printerName: printerName,
     );
 
+    print("🚚 DELIVERY PAYLOAD:");
+    print(requestData);
+
     try {
       await _service.printReceipt(requestData);
+
+      print("ORDER TYPE => ${order.orderType}");
+
+      if (order.orderType == OrderType.delivery) {
+        print("PRINTING SECOND DELIVERY RECEIPT");
+
+        await Future.delayed(const Duration(milliseconds: 500));
+        await _service.printReceipt(requestData);
+      }
+
     } catch (e) {
       await _savePrintJob(
         type: "receipt",
@@ -167,7 +187,17 @@ class PrintingManager {
   }) async {
     final settings = await _getSettings();
 
-    final String printerName = settings?.barcodePrinter ?? settings?.cashierPrinter ?? "XP-80C";
+    String printerName = settings?.reportsPrinter ?? "";
+
+    if (printerName.isEmpty || printerName == "طابعة 1") {
+      printerName = settings?.cashierPrinter ?? "";
+    }
+
+    if (printerName.isEmpty || printerName == "طابعة 1") {
+      printerName = "XP-80C";
+    }
+
+    print("🖨 Reports Printer = $printerName");
 
     final requestData = {
       "printerName": printerName,
@@ -218,7 +248,18 @@ class PrintingManager {
   }) async {
     final settings = await _getSettings();
 
-    final String printerName = settings?.reportsPrinter ?? settings?.cashierPrinter ?? "XP-80C";
+    String printerName = settings?.reportsPrinter ?? "";
+
+    if (printerName.isEmpty || printerName == "طابعة 1") {
+      printerName = settings?.cashierPrinter ?? "";
+    }
+
+    if (printerName.isEmpty || printerName == "طابعة 1") {
+      printerName = "XP-80C";
+    }
+
+    print("🖨 Daily Report Printer = $printerName");
+
     final int paperWidth = settings?.paperWidth ?? 80;
 
     final requestData = {
@@ -237,6 +278,9 @@ class PrintingManager {
       "products": products,
     };
 
+    print("📤 DAILY REPORT REQUEST:");
+    print(requestData);
+
     try {
       await _service.printDailyReport(requestData);
     } catch (e) {
@@ -247,14 +291,23 @@ class PrintingManager {
       print("❌ Daily Report Print Failed: $e");
     }
   }
-
   // =============================
   // THERMAL REPORT PRINT
   // =============================
   Future<void> printReport(ReportExportModel report) async {
     final settings = await _getSettings();
 
-    final String printerName = settings?.reportsPrinter ?? settings?.cashierPrinter ?? "XP-80C";
+    String printerName = settings?.reportsPrinter ?? "";
+
+    if (printerName.isEmpty || printerName == "طابعة 1") {
+      printerName = settings?.cashierPrinter ?? "";
+    }
+
+    if (printerName.isEmpty || printerName == "طابعة 1") {
+      printerName = "XP-80C";
+    }
+
+    print("🖨 Reports Printer = $printerName");
     final int paperWidth = settings?.paperWidth ?? 80;
 
     final request = {

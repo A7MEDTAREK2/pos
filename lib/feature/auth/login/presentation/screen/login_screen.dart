@@ -1,6 +1,7 @@
 // lib/feature/auth/presentation/screen/login_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // ====== Core ======
@@ -41,6 +42,9 @@ class _LoginScreenState extends State<LoginScreen>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
 
+  final FocusNode _usernameFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +72,8 @@ class _LoginScreenState extends State<LoginScreen>
     _controller.dispose();
     username.dispose();
     password.dispose();
+    _usernameFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -77,9 +83,9 @@ class _LoginScreenState extends State<LoginScreen>
       create: (_) => AuthCubit(
         AuthRepository(
           UserRepository(
-            )
-
+            UserLocalDataSource(),
           ),
+        ),
       ),
       child: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -103,145 +109,150 @@ class _LoginScreenState extends State<LoginScreen>
                 ),
               ),
             );
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  "مرحباً ${state.user.username}",
-                  style: TxtStyle.bodyMedium.copyWith(
-                    color: Colorsmanegments.textWhite,
-                  ),
-                ),
-                backgroundColor: Colorsmanegments.success,
-              ),
-            );
           }
 
           if (state is AuthError) {
             Navigator.of(context).pop();
-
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  state.message,
-                  style: TxtStyle.bodyMedium.copyWith(
-                    color: Colorsmanegments.textWhite,
-                  ),
-                ),
-                backgroundColor: Colorsmanegments.danger,
-              ),
-            );
           }
         },
         child: Scaffold(
           backgroundColor: Colorsmanegments.background,
-          body: Center(
-            child: Container(
-              width: 820,
-              height: 500,
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                color: Colorsmanegments.card,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colorsmanegments.border,
-                  width: 1,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colorsmanegments.blackOpacity10,
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+          body: SafeArea(
+            child: Center(
+              child: Container(
+                width: 820,
+                height: 500,
+                padding: const EdgeInsets.all(28),
+                decoration: BoxDecoration(
+                  color: Colorsmanegments.card,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colorsmanegments.border,
+                    width: 1,
                   ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  // ====== Logo ======
-                  Expanded(
-                    child: Center(
-                      child: ScaleTransition(
-                        scale: _scaleAnimation,
-                        child: Image.asset(
-                          "assets/image/icons/logo.png",
-                          width: 280,
-                          height: 280,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colorsmanegments.blackOpacity10,
+                      blurRadius: 20,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: Focus(
+                  autofocus: true,
+                  child: Row(
+                    children: [
+                      // ====== Logo ======
+                      Expanded(
+                        child: Center(
+                          child: ScaleTransition(
+                            scale: _scaleAnimation,
+                            child: Image.asset(
+                              "assets/image/icons/logo.png",
+                              width: 280,
+                              height: 280,
+                            ),
+                          ),
                         ),
                       ),
-                    ),
+
+                      const SizedBox(width: 30),
+
+                      // ====== Login Form ======
+                      Expanded(
+                        child: Builder(
+                          builder: (blocContext) {
+                            return Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "مرحباً بعودتك",
+                                  style: TxtStyle.headerMedium,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  "سجل الدخول للمتابعة",
+                                  style: TxtStyle.bodyMedium.copyWith(
+                                    color: Colorsmanegments.textSecondary,
+                                  ),
+                                ),
+                                const SizedBox(height: 25),
+
+                                // ====== Username Field ======
+                                Tooltip(
+                                  message: "Ctrl + U - اسم المستخدم",
+                                  waitDuration: const Duration(milliseconds: 300),
+                                  child: Txtfield(
+                                    hintText: "اسم المستخدم",
+                                    prefixIcon: Icon(
+                                      Iconss.person,
+                                      color: Colorsmanegments.primary,
+                                      size: 22,
+                                    ),
+                                    controller: username,
+                                    isPassword: false,
+                                    focusNode: _usernameFocusNode,
+                                    onFieldSubmitted: (_) {
+                                      _passwordFocusNode.requestFocus();
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 12),
+
+                                // ====== Password Field ======
+                                Tooltip(
+                                  message: "Ctrl + P - كلمة المرور",
+                                  waitDuration: const Duration(milliseconds: 300),
+                                  child: Txtfield(
+                                    hintText: "كلمة المرور",
+                                    prefixIcon: Icon(
+                                      Iconss.lock,
+                                      color: Colorsmanegments.primary,
+                                      size: 22,
+                                    ),
+                                    controller: password,
+                                    isPassword: true,
+                                    focusNode: _passwordFocusNode,
+                                    onFieldSubmitted: (_) {
+                                      _login(blocContext);
+                                    },
+                                  ),
+                                ),
+                                const SizedBox(height: 22),
+
+                                // ====== Login Button ======
+                                Tooltip(
+                                  message: "Enter - تسجيل الدخول",
+                                  waitDuration: const Duration(milliseconds: 300),
+                                  child: AppBotton(
+                                    width: double.infinity,
+                                    txt: "تسجيل الدخول",
+                                    onTap: () {
+                                      _login(blocContext);
+                                    },
+                                  ),
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-
-                  const SizedBox(width: 30),
-
-                  // ====== Login Form ======
-                  Expanded(
-                    child: Builder(
-                      builder: (blocContext) {
-                        return Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "مرحباً بعودتك",
-                              style: TxtStyle.headerMedium,
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              "سجل الدخول للمتابعة",
-                              style: TxtStyle.bodyMedium.copyWith(
-                                color: Colorsmanegments.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 25),
-
-                            // ====== Username Field ======
-                            Txtfield(
-                              hintText: "اسم المستخدم",
-                              prefixIcon: Icon(
-                                Iconss.person,
-                                color: Colorsmanegments.primary,
-                                size: 22,
-                              ),
-                              controller: username,
-                              isPassword: false,
-                            ),
-                            const SizedBox(height: 12),
-
-                            // ====== Password Field ======
-                            Txtfield(
-                              hintText: "كلمة المرور",
-                              prefixIcon: Icon(
-                                Iconss.lock,
-                                color: Colorsmanegments.primary,
-                                size: 22,
-                              ),
-                              controller: password,
-                              isPassword: true,
-                            ),
-                            const SizedBox(height: 22),
-
-                            // ====== Login Button ======
-                            AppBotton(
-                              width: double.infinity,
-                              txt: "تسجيل الدخول",
-                              onTap: () {
-                                blocContext.read<AuthCubit>().login(
-                                  username.text.trim(),
-                                  password.text.trim(),
-                                );
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
+                ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+
+  void _login(BuildContext context) {
+    context.read<AuthCubit>().login(
+      username.text.trim(),
+      password.text.trim(),
     );
   }
 }

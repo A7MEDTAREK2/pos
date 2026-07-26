@@ -45,9 +45,9 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(title: const Text("سجل المبيعات"), centerTitle: true),
-      body: BlocListener<SalesHistoryCubit, SalesHistoryState>(
-        listener: _listener,
-        child: Stack(
+      body:
+
+         Stack(
           children: [
             Column(
               children: [
@@ -194,27 +194,9 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
             ),
           ],
         ),
-      ),
+
     );
   }
 
-  void _listener(BuildContext context, SalesHistoryState state) {
-    if (state is! SalesHistorySuccess) return;
 
-    if (state.successMessage != null) {
-      SalesHistoryDialogs.showSnackBar(
-        context: context,
-        message: state.successMessage!,
-        color: Colors.green,
-      );
-    }
-
-    if (state.errorMessage != null) {
-      SalesHistoryDialogs.showSnackBar(
-        context: context,
-        message: state.errorMessage!,
-        color: Colors.red,
-      );
-    }
-  }
 }
