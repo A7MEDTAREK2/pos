@@ -14,17 +14,21 @@ class DeleteItemDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return AlertDialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       title: Text(
         "حذف المنتج",
-        style: TxtStyle.headerSmall,
+        style: theme.textTheme.titleLarge,
       ),
       content: Text(
         "هل تريد حذف $itemName من الأوردر؟",
-        style: TxtStyle.bodyMedium,
+        style: theme.textTheme.bodyMedium,
       ),
       actions: [
         Tooltip(
@@ -34,7 +38,9 @@ class DeleteItemDialog extends StatelessWidget {
             onPressed: () => Navigator.pop(context),
             child: Text(
               "إلغاء",
-              style: TxtStyle.buttonPrimary,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+              ),
             ),
           ),
         ),
@@ -43,7 +49,8 @@ class DeleteItemDialog extends StatelessWidget {
           waitDuration: const Duration(milliseconds: 300),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.danger,
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
             onPressed: () {
               onDelete();
@@ -51,7 +58,9 @@ class DeleteItemDialog extends StatelessWidget {
             },
             child: Text(
               "حذف",
-              style: TxtStyle.buttonMedium,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: Colors.white,
+              ),
             ),
           ),
         ),

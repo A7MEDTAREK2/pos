@@ -20,21 +20,24 @@ class SalesChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocBuilder<DashboardCubit, DashboardState>(
       builder: (context, state) {
         if (state is DashboardLoading) {
           return _buildChartCard(
+            context,
             child: const Center(
-              child: CircularProgressIndicator(
-                color: Colorsmanegments.primary,
-              ),
+              child: CircularProgressIndicator(),
             ),
           );
         }
 
         if (state is DashboardError) {
           return _buildChartCard(
-            child: _buildErrorContent(state.message, context),
+            context,
+            child: _buildErrorContent(context, state.message),
           );
         }
 
@@ -43,7 +46,8 @@ class SalesChartCard extends StatelessWidget {
 
           if (data.isEmpty) {
             return _buildChartCard(
-              child: _buildEmptyContent(),
+              context,
+              child: _buildEmptyContent(context),
             );
           }
 
@@ -53,7 +57,14 @@ class SalesChartCard extends StatelessWidget {
           final highestPoint = _getHighestPoint(data);
 
           return _buildChartCard(
-            child: _buildContent(data, totalSales, average, highestPoint),
+            context,
+            child: _buildContent(
+              context,
+              data,
+              totalSales,
+              average,
+              highestPoint,
+            ),
           );
         }
 
@@ -62,15 +73,16 @@ class SalesChartCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Content
-  // ============================================================
   Widget _buildContent(
+      BuildContext context,
       List<SalesChartModel> data,
       double totalSales,
       double average,
       SalesChartModel? highestPoint,
       ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -82,12 +94,16 @@ class SalesChartCard extends StatelessWidget {
                 children: [
                   Text(
                     'تحليل المبيعات',
-                    style: TxtStyle.headerSmall,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     'يعرض أداء المبيعات خلال الفترة المحددة',
-                    style: TxtStyle.bodySmall,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.6),
+                    ),
                   ),
                 ],
               ),
@@ -97,32 +113,35 @@ class SalesChartCard extends StatelessWidget {
         const SizedBox(height: 20),
         SizedBox(
           height: 280,
-          child: _buildLineChart(data),
+          child: _buildLineChart(context, data),
         ),
         const SizedBox(height: 24),
         Row(
           children: [
             _buildSummaryCard(
+              context,
               icon: Iconss.sales,
               title: 'إجمالي المبيعات',
               value: '${_formatNumber(totalSales)} ج.م',
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
             ),
             const SizedBox(width: 12),
             _buildSummaryCard(
+              context,
               icon: Iconss.trendingUp,
               title: 'متوسط اليوم',
               value: '${_formatNumber(average)} ج.م',
-              color: Colorsmanegments.success,
+              color: Colors.green,
             ),
             const SizedBox(width: 12),
             _buildSummaryCard(
+              context,
               icon: Iconss.event,
               title: 'أعلى يوم',
               value: highestPoint == null
                   ? "-"
                   : _formatDateLabel(highestPoint.label),
-              color: Colorsmanegments.warning,
+              color: Colors.amber,
               showIcon: false,
             ),
           ],
@@ -131,19 +150,19 @@ class SalesChartCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Widget: Chart Card Container
-  // ============================================================
-  Widget _buildChartCard({required Widget child}) {
+  Widget _buildChartCard(BuildContext context, {required Widget child}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colorsmanegments.border),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.shadowLight,
+            color: colorScheme.shadow.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -153,10 +172,10 @@ class SalesChartCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Error Content
-  // ============================================================
-  Widget _buildErrorContent(String message, BuildContext context) {
+  Widget _buildErrorContent(BuildContext context, String message) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -164,13 +183,13 @@ class SalesChartCard extends StatelessWidget {
           Icon(
             Iconss.error,
             size: 48,
-            color: Colorsmanegments.danger.withOpacity(0.5),
+            color: Colors.red.withOpacity(0.5),
           ),
           const SizedBox(height: 12),
           Text(
             message,
-            style: TxtStyle.bodySmall.copyWith(
-              color: Colorsmanegments.textSecondary,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.6),
             ),
             textAlign: TextAlign.center,
           ),
@@ -182,11 +201,13 @@ class SalesChartCard extends StatelessWidget {
             icon: Icon(
               Iconss.refresh,
               size: 18,
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
             ),
             label: Text(
               'إعادة المحاولة',
-              style: TxtStyle.buttonPrimary,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+              ),
             ),
           ),
         ],
@@ -194,10 +215,10 @@ class SalesChartCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Empty Content
-  // ============================================================
-  Widget _buildEmptyContent() {
+  Widget _buildEmptyContent(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -205,13 +226,13 @@ class SalesChartCard extends StatelessWidget {
           Icon(
             Iconss.chart,
             size: 48,
-            color: Colorsmanegments.textSecondary.withOpacity(0.3),
+            color: colorScheme.onSurface.withOpacity(0.2),
           ),
           const SizedBox(height: 12),
           Text(
             'لا توجد بيانات مبيعات',
-            style: TxtStyle.bodyMedium.copyWith(
-              color: Colorsmanegments.textSecondary,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ],
@@ -219,10 +240,10 @@ class SalesChartCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Widget: Line Chart
-  // ============================================================
-  Widget _buildLineChart(List<SalesChartModel> data) {
+  Widget _buildLineChart(BuildContext context, List<SalesChartModel> data) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final maxValue = data.isEmpty
         ? 1000
         : data.map((e) => e.amount).reduce((a, b) => a > b ? a : b);
@@ -234,7 +255,7 @@ class SalesChartCard extends StatelessWidget {
           drawVerticalLine: false,
           getDrawingHorizontalLine: (value) {
             return FlLine(
-              color: Colorsmanegments.border,
+              color: colorScheme.outlineVariant,
               strokeWidth: 1,
               dashArray: [5, 5],
             );
@@ -259,7 +280,7 @@ class SalesChartCard extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8),
                     child: Text(
                       _formatDateLabel(data[index].label),
-                      style: TxtStyle.labelSmall,
+                      style: theme.textTheme.labelSmall,
                     ),
                   );
                 }
@@ -274,7 +295,7 @@ class SalesChartCard extends StatelessWidget {
               getTitlesWidget: (value, meta) {
                 return Text(
                   _formatYAxisValue(value),
-                  style: TxtStyle.labelSmall,
+                  style: theme.textTheme.labelSmall,
                 );
               },
             ),
@@ -288,21 +309,21 @@ class SalesChartCard extends StatelessWidget {
             }).toList(),
             isCurved: true,
             curveSmoothness: 0.4,
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
             barWidth: 3,
             isStrokeCapRound: true,
             belowBarData: BarAreaData(
               show: true,
-              color: Colorsmanegments.primary.withOpacity(0.08),
+              color: colorScheme.primary.withOpacity(0.08),
             ),
             dotData: FlDotData(
               show: true,
               getDotPainter: (spot, percent, barData, index) {
                 return FlDotCirclePainter(
                   radius: 4,
-                  color: Colorsmanegments.card,
+                  color: colorScheme.surface,
                   strokeWidth: 2,
-                  strokeColor: Colorsmanegments.primary,
+                  strokeColor: colorScheme.primary,
                 );
               },
             ),
@@ -314,23 +335,24 @@ class SalesChartCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Widget: Summary Card
-  // ============================================================
-  Widget _buildSummaryCard({
-    required IconData icon,
-    required String title,
-    required String value,
-    required Color color,
-    bool showIcon = true,
-  }) {
+  Widget _buildSummaryCard(
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required String value,
+        required Color color,
+        bool showIcon = true,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colorsmanegments.background,
+          color: colorScheme.background,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colorsmanegments.border),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Row(
           children: [
@@ -348,11 +370,16 @@ class SalesChartCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TxtStyle.labelSmall),
+                  Text(
+                    title,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: colorScheme.onSurface.withOpacity(0.6),
+                    ),
+                  ),
                   const SizedBox(height: 2),
                   Text(
                     value,
-                    style: TxtStyle.totalSmall.copyWith(
+                    style: theme.textTheme.titleSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                     maxLines: 1,
@@ -367,9 +394,7 @@ class SalesChartCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
   // Helper Functions
-  // ============================================================
   double _calculateTotal(List<SalesChartModel> data) {
     return data.fold(0, (sum, item) => sum + item.amount);
   }

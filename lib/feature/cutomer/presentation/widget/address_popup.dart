@@ -26,6 +26,9 @@ class AddressPopup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocBuilder<CustomerAddressCubit, CustomerAddressState>(
       builder: (context, state) {
         final cubit = context.read<CustomerAddressCubit>();
@@ -36,7 +39,7 @@ class AddressPopup extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          color: Colorsmanegments.card,
+          color: colorScheme.surface,
           itemBuilder: (context) {
             return [
               ...cubit.addresses.map(
@@ -50,13 +53,14 @@ class AddressPopup extends StatelessWidget {
                           Icon(
                             Iconss.location,
                             size: 18,
-                            color: Colorsmanegments.primary,
+                            color: colorScheme.primary,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             address.title ?? "بدون عنوان",
-                            style: TxtStyle.labelBold.copyWith(
-                              color: Colorsmanegments.primary,
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ],
@@ -69,12 +73,12 @@ class AddressPopup extends StatelessWidget {
                           children: [
                             Text(
                               address.area,
-                              style: TxtStyle.bodySmall,
+                              style: theme.textTheme.bodySmall,
                             ),
                             const SizedBox(height: 2),
                             Text(
                               address.address,
-                              style: TxtStyle.bodySmall,
+                              style: theme.textTheme.bodySmall,
                             ),
                           ],
                         ),
@@ -92,12 +96,15 @@ class AddressPopup extends StatelessWidget {
                   children: [
                     Icon(
                       Iconss.addLocation,
-                      color: Colorsmanegments.primary,
+                      color: colorScheme.primary,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       "إضافة عنوان جديد",
-                      style: TxtStyle.buttonPrimary,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -125,12 +132,12 @@ class AddressPopup extends StatelessWidget {
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colorsmanegments.border,
+              color: colorScheme.outlineVariant,
             ),
             child: Icon(
               Iconss.arrowForward,
               size: 22,
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
             ),
           ),
         );

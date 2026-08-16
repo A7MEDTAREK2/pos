@@ -33,37 +33,41 @@ class _EditAmountDialogState extends State<EditAmountDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return AlertDialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
       title: Text(
         widget.title,
-        style: TxtStyle.headerSmall,
+        style: theme.textTheme.titleLarge,
       ),
       content: TextField(
         controller: controller,
         keyboardType: TextInputType.number,
-        style: TxtStyle.bodyMedium,
+        style: theme.textTheme.bodyMedium,
         decoration: InputDecoration(
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colorsmanegments.border),
+            borderSide: BorderSide(color: colorScheme.outlineVariant),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
               width: 2,
             ),
           ),
           prefixIcon: Icon(
             Iconss.edit,
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
             size: 20,
           ),
           filled: true,
-          fillColor: Colorsmanegments.background,
+          fillColor: colorScheme.background,
         ),
       ),
       actions: [
@@ -71,13 +75,15 @@ class _EditAmountDialogState extends State<EditAmountDialog> {
           onPressed: () => Navigator.pop(context),
           child: Text(
             "إلغاء",
-            style: TxtStyle.buttonPrimary,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: colorScheme.primary,
+            ),
           ),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colorsmanegments.primary,
-            foregroundColor: Colorsmanegments.textWhite,
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
@@ -90,7 +96,9 @@ class _EditAmountDialogState extends State<EditAmountDialog> {
           },
           child: Text(
             "حفظ",
-            style: TxtStyle.buttonMedium,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: colorScheme.onPrimary,
+            ),
           ),
         ),
       ],

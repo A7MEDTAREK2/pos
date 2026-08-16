@@ -8,10 +8,13 @@ class CustomerTableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: colorScheme.background,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(14),
         ),
@@ -21,27 +24,29 @@ class CustomerTableHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _headerCell('#', flex: 1),
-          _headerCell('اسم العميل', flex: 3),
-          _headerCell('رقم الهاتف', flex: 2),
-          _headerCell('عدد الطلبات', flex: 2),
-          _headerCell('إجمالي المشتريات', flex: 3),
-          _headerCell('آخر عملية شراء', flex: 2),
+          _headerCell(context, '#', flex: 1),
+          _headerCell(context, 'اسم العميل', flex: 3),
+          _headerCell(context, 'رقم الهاتف', flex: 2),
+          _headerCell(context, 'عدد الطلبات', flex: 2),
+          _headerCell(context, 'إجمالي المشتريات', flex: 3),
+          _headerCell(context, 'آخر عملية شراء', flex: 2),
         ],
       ),
     );
   }
 
-  Widget _headerCell(String text, {int flex = 1}) {
+  Widget _headerCell(BuildContext context, String text, {int flex = 1}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Expanded(
       flex: flex,
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: GoogleFonts.cairo(
-          fontSize: 13,
+        style: theme.textTheme.labelLarge?.copyWith(
           fontWeight: FontWeight.w600,
-          color: const Color(0xFF6B7280),
+          color: colorScheme.onSurface.withOpacity(0.6),
         ),
       ),
     );

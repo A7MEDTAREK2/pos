@@ -8,10 +8,13 @@ class ProductTableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: colorScheme.background,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(14),
         ),
@@ -21,26 +24,28 @@ class ProductTableHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _headerCell('#', flex: 1),
-          _headerCell('اسم المنتج', flex: 4),
-          _headerCell('عدد مرات البيع', flex: 2),
-          _headerCell('الكمية المباعة', flex: 2),
-          _headerCell('إجمالي الإيراد', flex: 3),
+          _headerCell(context, '#', flex: 1),
+          _headerCell(context, 'اسم المنتج', flex: 4),
+          _headerCell(context, 'عدد مرات البيع', flex: 2),
+          _headerCell(context, 'الكمية المباعة', flex: 2),
+          _headerCell(context, 'إجمالي الإيراد', flex: 3),
         ],
       ),
     );
   }
 
-  Widget _headerCell(String text, {int flex = 1}) {
+  Widget _headerCell(BuildContext context, String text, {int flex = 1}) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Expanded(
       flex: flex,
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: GoogleFonts.cairo(
-          fontSize: 13,
+        style: theme.textTheme.labelLarge?.copyWith(
           fontWeight: FontWeight.w600,
-          color: const Color(0xFF6B7280),
+          color: colorScheme.onSurface.withOpacity(0.6),
         ),
       ),
     );

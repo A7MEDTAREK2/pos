@@ -79,6 +79,9 @@ class _LoginScreenState extends State<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocProvider(
       create: (_) => AuthCubit(
         AuthRepository(
@@ -116,7 +119,7 @@ class _LoginScreenState extends State<LoginScreen>
           }
         },
         child: Scaffold(
-          backgroundColor: Colorsmanegments.background,
+          backgroundColor: colorScheme.background,
           body: SafeArea(
             child: Center(
               child: Container(
@@ -124,15 +127,15 @@ class _LoginScreenState extends State<LoginScreen>
                 height: 500,
                 padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
-                  color: Colorsmanegments.card,
+                  color: colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(
-                    color: Colorsmanegments.border,
+                    color: colorScheme.outlineVariant,
                     width: 1,
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: Colorsmanegments.blackOpacity10,
+                      color: colorScheme.shadow.withOpacity(0.1),
                       blurRadius: 20,
                       offset: const Offset(0, 10),
                     ),
@@ -168,13 +171,15 @@ class _LoginScreenState extends State<LoginScreen>
                               children: [
                                 Text(
                                   "مرحباً بعودتك",
-                                  style: TxtStyle.headerMedium,
+                                  style: theme.textTheme.headlineMedium?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   "سجل الدخول للمتابعة",
-                                  style: TxtStyle.bodyMedium.copyWith(
-                                    color: Colorsmanegments.textSecondary,
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                                   ),
                                 ),
                                 const SizedBox(height: 25),
@@ -187,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     hintText: "اسم المستخدم",
                                     prefixIcon: Icon(
                                       Iconss.person,
-                                      color: Colorsmanegments.primary,
+                                      color: colorScheme.primary,
                                       size: 22,
                                     ),
                                     controller: username,
@@ -208,7 +213,7 @@ class _LoginScreenState extends State<LoginScreen>
                                     hintText: "كلمة المرور",
                                     prefixIcon: Icon(
                                       Iconss.lock,
-                                      color: Colorsmanegments.primary,
+                                      color: colorScheme.primary,
                                       size: 22,
                                     ),
                                     controller: password,

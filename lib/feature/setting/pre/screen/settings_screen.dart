@@ -129,9 +129,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocListener<MaintenanceCubit, MaintenanceState>(
       listener: (context, state) {
-        // تم إزالة جميع SnackBar
         if (state is MaintenanceSuccess) {
           if (state.message.contains("سيتم إعادة تشغيل البرنامج")) {
             Future.delayed(const Duration(seconds: 1), () async {
@@ -139,7 +141,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
             });
           }
         }
-        // تم إزالة SnackBar للـ MaintenanceError
       },
       child: BlocConsumer<SettingsCubit, SettingsState>(
         listener: (context, state) {
@@ -148,22 +149,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _loaded = true;
             setState(() {});
           }
-          // تم إزالة SnackBar للـ SettingsSaved
-          // تم إزالة SnackBar للـ SettingsError
         },
         builder: (context, state) {
           return Directionality(
             textDirection: TextDirection.rtl,
             child: Scaffold(
-              backgroundColor: Colorsmanegments.background,
+              backgroundColor: colorScheme.background,
               appBar: AppBar(
                 title: Text(
                   'الإعدادات',
-                  style: TxtStyle.headerMedium,
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 centerTitle: true,
-                backgroundColor: Colorsmanegments.card,
-                foregroundColor: Colorsmanegments.textPrimary,
+                backgroundColor: colorScheme.surface,
+                foregroundColor: theme.textTheme.bodyLarge?.color,
                 elevation: 0,
                 leading: Tooltip(
                   message: "Esc - رجوع",
@@ -171,7 +172,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   child: IconButton(
                     icon: Icon(
                       Iconss.arrowBack,
-                      color: Colorsmanegments.textPrimary,
+                      color: theme.textTheme.bodyLarge?.color,
                     ),
                     onPressed: () => Navigator.pop(context),
                   ),
@@ -240,7 +241,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
                     const SizedBox(height: 24),
 
-                    // ====== 2. Printing (Navigates to PrinterSettingsScreen) ======
+                    // ====== 2. Printing ======
                     Tooltip(
                       message: "Ctrl + P - إعدادات الطابعات",
                       waitDuration: const Duration(milliseconds: 300),
@@ -250,21 +251,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             contentPadding: EdgeInsets.zero,
                             leading: Icon(
                               Iconss.print,
-                              color: Colorsmanegments.primary,
+                              color: colorScheme.primary,
                               size: 28,
                             ),
                             title: Text(
                               'إعدادات الطابعات والطباعة',
-                              style: TxtStyle.titleMedium,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                             subtitle: Text(
                               'التحكم في طابعة الكاشير، المطبخ، الباركود، التقارير ومقاس الورق',
-                              style: TxtStyle.bodySmall,
+                              style: theme.textTheme.bodySmall,
                             ),
                             trailing: Icon(
                               Icons.arrow_forward_ios,
                               size: 16,
-                              color: Colorsmanegments.grey,
+                              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                             ),
                             onTap: () async {
                               await Navigator.push(
@@ -383,7 +386,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           SettingsActionButton(
                             label: 'إنشاء نسخة احتياطية',
                             icon: Iconss.backup,
-                            color: Colorsmanegments.success,
+                            color: Colors.green,
                             onTap: () {
                               context.read<MaintenanceCubit>().backupDatabase();
                             },
@@ -392,7 +395,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           SettingsActionButton(
                             label: 'استعادة نسخة احتياطية',
                             icon: Iconss.restore,
-                            color: Colorsmanegments.danger,
+                            color: Colors.red,
                             onTap: () {
                               context.read<MaintenanceCubit>().restoreDatabase();
                             },
@@ -401,7 +404,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           SettingsActionButton(
                             label: 'إعادة تهيئة البيانات',
                             icon: Iconss.deleteForever,
-                            color: Colorsmanegments.danger,
+                            color: Colors.red,
                             onTap: () {
                               showDialog(
                                 context: context,
@@ -428,21 +431,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: ListTile(
                         leading: Icon(
                           Iconss.driver,
-                          color: Colorsmanegments.primary,
+                          color: colorScheme.primary,
                           size: 28,
                         ),
                         title: Text(
                           'المندوبين',
-                          style: TxtStyle.titleMedium,
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         subtitle: Text(
                           'إدارة المندوبين وإضافة وتعديل وحذف',
-                          style: TxtStyle.bodySmall,
+                          style: theme.textTheme.bodySmall,
                         ),
                         trailing: Icon(
                           Icons.arrow_forward_ios,
                           size: 16,
-                          color: Colorsmanegments.grey,
+                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                         ),
                         onTap: () {
                           Navigator.push(
@@ -469,11 +474,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       icon: Iconss.info,
                       child: SettingsCard(
                         children: [
-                          _buildAboutItem('اسم التطبيق', 'Modu POS'),
-                          _buildAboutItem('الإصدار', '1.0.0'),
-                          _buildAboutItem('المطور','Ahmed Tarek'),
-                          _buildAboutItem('التواصل','01092400184'),
-                          _buildAboutItem('Email','modytareq225@gmail.com'),
+                          _buildAboutItem(context, 'اسم التطبيق', 'Modu POS'),
+                          _buildAboutItem(context, 'الإصدار', '1.0.0'),
+                          _buildAboutItem(context, 'المطور','Ahmed Tarek'),
+                          _buildAboutItem(context, 'التواصل','01092400184'),
+                          _buildAboutItem(context, 'Email','modytareq225@gmail.com'),
                         ],
                       ),
                     ),
@@ -509,10 +514,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           logo: '',
                         );
 
-                        // 🎯 1. الحفظ في الـ Cubit
                         context.read<SettingsCubit>().saveSettings(settings);
 
-                        // 🎯 2. إرسال الإعدادات لسيرفر الطباعة
                         ModuPrintService().saveSettings(settings.toMap()).catchError((e) {
                           debugPrint("خطأ في إرسال الإعدادات لسيرفر الطباعة: $e");
                         });
@@ -530,19 +533,23 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildAboutItem(String label, String value) {
+  Widget _buildAboutItem(BuildContext context, String label, String value) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           Text(
             '$label:',
-            style: TxtStyle.labelBold,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(width: 12),
           Text(
             value,
-            style: TxtStyle.bodyMedium,
+            style: theme.textTheme.bodyMedium,
           ),
           const Spacer(),
         ],

@@ -12,6 +12,8 @@ class EmptySalesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -19,19 +21,21 @@ class EmptySalesWidget extends StatelessWidget {
           Icon(
             Iconss.orderEmpty,
             size: 80,
-            color: Colorsmanegments.textSecondary.withOpacity(0.3),
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
           ),
           const SizedBox(height: 16),
           Text(
             'لا توجد فواتير',
-            style: TxtStyle.emptyTitle.copyWith(
-              color: Colorsmanegments.textSecondary,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'قم بإتمام عملية بيع لظهور الفواتير هنا',
-            style: TxtStyle.emptySubtitle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            ),
           ),
         ],
       ),

@@ -25,8 +25,11 @@ class CustomerList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     if (customers.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context);
     }
 
     return ListView.builder(
@@ -49,8 +52,8 @@ class CustomerList extends StatelessWidget {
                 elevation: isSelected ? 5 : 3,
                 borderRadius: BorderRadius.circular(14),
                 color: isSelected
-                    ? Colorsmanegments.primary.withOpacity(0.08)
-                    : Colorsmanegments.card,
+                    ? colorScheme.primary.withOpacity(0.08)
+                    : colorScheme.surface,
                 child: InkWell(
                   onTap: () {
                     if (onCustomerTap != null) {
@@ -58,8 +61,8 @@ class CustomerList extends StatelessWidget {
                     }
                   },
                   borderRadius: BorderRadius.circular(14),
-                  splashColor: Colorsmanegments.primary.withOpacity(0.1),
-                  highlightColor: Colorsmanegments.primary.withOpacity(0.05),
+                  splashColor: colorScheme.primary.withOpacity(0.1),
+                  highlightColor: colorScheme.primary.withOpacity(0.05),
                   child: Padding(
                     padding: const EdgeInsets.all(4),
                     child: CustomerItem(
@@ -80,7 +83,10 @@ class CustomerList extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -88,19 +94,21 @@ class CustomerList extends StatelessWidget {
           Icon(
             Iconss.people,
             size: 80,
-            color: Colorsmanegments.textSecondary.withOpacity(0.3),
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
           ),
           const SizedBox(height: 16),
           Text(
             "لا يوجد عملاء",
-            style: TxtStyle.emptyTitle.copyWith(
-              color: Colorsmanegments.textSecondary,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             "قم بإضافة عميل جديد",
-            style: TxtStyle.emptySubtitle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            ),
           ),
           const SizedBox(height: 30),
           Tooltip(
@@ -108,8 +116,8 @@ class CustomerList extends StatelessWidget {
             waitDuration: const Duration(milliseconds: 300),
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colorsmanegments.primary,
-                foregroundColor: Colorsmanegments.textWhite,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -118,11 +126,14 @@ class CustomerList extends StatelessWidget {
               onPressed: () {},
               icon: Icon(
                 Iconss.add,
-                color: Colorsmanegments.textWhite,
+                color: colorScheme.onPrimary,
               ),
               label: Text(
                 "إضافة عميل جديد",
-                style: TxtStyle.buttonMedium,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

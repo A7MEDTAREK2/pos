@@ -13,21 +13,23 @@ import '../../logic/dash_cubit.dart';
 import '../../logic/dash_state.dart';
 import 'dashboard_card.dart';
 
-
 class RecentSalesCard extends StatelessWidget {
   const RecentSalesCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return DashboardCard(
       child: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return _buildLoadingState();
+            return _buildLoadingState(context);
           }
 
           if (state is DashboardError) {
-            return _buildErrorState(state.message);
+            return _buildErrorState(context, state.message);
           }
 
           if (state is! DashboardSuccess) {
@@ -37,77 +39,82 @@ class RecentSalesCard extends StatelessWidget {
           final sales = state.dashboard.recentSales;
 
           if (sales.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
 
-          return _buildContent(sales);
+          return _buildContent(context, sales);
         },
       ),
     );
   }
 
-  // ============================================================
-  // Loading State
-  // ============================================================
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context) {
     return const SizedBox(
       height: 250,
       child: Center(
-        child: CircularProgressIndicator(
-          color: Colorsmanegments.primary,
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }
 
-  // ============================================================
-  // Error State
-  // ============================================================
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(BuildContext context, String message) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       height: 250,
       child: Center(
         child: Text(
           message,
-          style: TxtStyle.danger,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: Colors.red,
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // Empty State
-  // ============================================================
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return SizedBox(
       height: 250,
       child: Center(
         child: Text(
           "لا توجد فواتير",
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface.withOpacity(0.6),
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // Content
-  // ============================================================
-  Widget _buildContent(List<dynamic> sales) {
+  Widget _buildContent(BuildContext context, List<dynamic> sales) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionTitle(title: 'آخر الفواتير'),
+        Text(
+          'آخر الفواتير',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 12),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           child: DataTable(
             columnSpacing: 24,
             headingRowColor: WidgetStateProperty.all(
-              Colorsmanegments.background,
+              colorScheme.background,
             ),
-            headingTextStyle: TxtStyle.tableHeader,
-            dataTextStyle: TxtStyle.tableRow,
+            headingTextStyle: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            dataTextStyle: theme.textTheme.bodyMedium,
             columns: const [
               DataColumn(label: Text('رقم الفاتورة')),
               DataColumn(label: Text('العميل')),
@@ -120,7 +127,9 @@ class RecentSalesCard extends StatelessWidget {
                   DataCell(
                     Text(
                       '#${sale.orderNumber}',
-                      style: TxtStyle.tableRowBold,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   DataCell(
@@ -129,8 +138,9 @@ class RecentSalesCard extends StatelessWidget {
                   DataCell(
                     Text(
                       '${sale.total.toStringAsFixed(2)} ج.م',
-                      style: TxtStyle.tableRowBold.copyWith(
-                        color: Colorsmanegments.success,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

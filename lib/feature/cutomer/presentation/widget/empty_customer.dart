@@ -12,6 +12,8 @@ class EmptyCustomer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -19,13 +21,13 @@ class EmptyCustomer extends StatelessWidget {
           Icon(
             Iconss.people,
             size: 80,
-            color: Colorsmanegments.textSecondary.withOpacity(0.3),
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
           ),
           const SizedBox(height: 10),
           Text(
             "لا يوجد عملاء",
-            style: TxtStyle.emptyTitle.copyWith(
-              color: Colorsmanegments.textSecondary,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
           ),
         ],

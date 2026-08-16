@@ -9,12 +9,14 @@ import '../../../logic/report/order_type_report_state.dart';
 import 'orderType_table_header.dart';
 import 'orderType_table_row.dart';
 
-
 class OrderTypeReportTable extends StatelessWidget {
   const OrderTypeReportTable({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocBuilder<OrderTypeReportCubit, OrderTypeReportState>(
       builder: (context, state) {
         if (state is! OrderTypeReportLoaded) {
@@ -26,15 +28,15 @@ class OrderTypeReportTable extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: const Color(0xFFE5E7EB),
+              color: colorScheme.outlineVariant,
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: colorScheme.shadow.withOpacity(0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -45,7 +47,7 @@ class OrderTypeReportTable extends StatelessWidget {
               const OrderTypeTableHeader(),
               Container(
                 height: 1,
-                color: const Color(0xFFE5E7EB),
+                color: colorScheme.outlineVariant,
               ),
               Expanded(
                 child: ListView.separated(
@@ -68,13 +70,13 @@ class OrderTypeReportTable extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: colorScheme.background,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(14),
                     bottomRight: Radius.circular(14),
                   ),
                   border: Border(
-                    top: BorderSide(color: const Color(0xFFE5E7EB)),
+                    top: BorderSide(color: colorScheme.outlineVariant),
                   ),
                 ),
                 child: Row(
@@ -82,12 +84,10 @@ class OrderTypeReportTable extends StatelessWidget {
                   children: [
                     Text(
                       'إجمالي النتائج: ${cubit.totalCount}',
-                      style: GoogleFonts.cairo(
-                        fontSize: 13,
-                        color: const Color(0xFF6B7280),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -97,6 +97,4 @@ class OrderTypeReportTable extends StatelessWidget {
       },
     );
   }
-
-
 }

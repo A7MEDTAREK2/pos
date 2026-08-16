@@ -12,7 +12,7 @@ class SettingsTextField extends StatelessWidget {
   final IconData icon;
   final String? initialValue;
   final bool readOnly;
-  final TextEditingController? controller; // 👈 1. حفظ الكنترولر هنا
+  final TextEditingController? controller;
 
   const SettingsTextField({
     super.key,
@@ -21,34 +21,39 @@ class SettingsTextField extends StatelessWidget {
     required this.icon,
     this.initialValue,
     this.readOnly = false,
-    this.controller, // 👈 2. استلام الكنترولر اختياري أو إجباري
+    this.controller,
   });
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TxtStyle.labelMedium,
+          style: theme.textTheme.labelMedium,
         ),
         const SizedBox(height: 6),
         TextFormField(
-          controller: controller, // 👈 3. ربطه بـ TextFormField (مهم جداً!)
-          initialValue: controller == null ? initialValue : null, // لا يُستخدم initialValue مع controller
+          controller: controller,
+          initialValue: controller == null ? initialValue : null,
           readOnly: readOnly,
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TxtStyle.hint,
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            ),
             prefixIcon: Icon(
               icon,
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
               size: 20,
             ),
             filled: true,
-            fillColor: Colorsmanegments.background,
+            fillColor: colorScheme.background,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
@@ -56,19 +61,19 @@ class SettingsTextField extends StatelessWidget {
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: Colorsmanegments.border,
+                color: colorScheme.outlineVariant,
               ),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: Colorsmanegments.border,
+                color: colorScheme.outlineVariant,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 width: 2,
               ),
             ),

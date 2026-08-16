@@ -30,7 +30,7 @@ class DynamicOrderFields extends StatefulWidget {
 class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
   bool customerFound = false;
   String customerName = "";
-  String customerAddressValue = ""; // 🌟 تم تعديل المتجر ليكون للعنوان بدلاً من المنطقة
+  String customerAddressValue = "";
   final customerNameController = TextEditingController();
   final customerPhoneController = TextEditingController();
   final customerAddressController = TextEditingController();
@@ -51,7 +51,6 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
           final addressCubit = context.read<CustomerAddressCubit>();
           final orderCubit = context.read<OrderCubit>();
 
-          // 1. إضافة العميل الجديد
           final customerId = await customerCubit.addCustomer(
             CustomerModel(
               id: 0,
@@ -62,7 +61,6 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
           );
 
           if (customerId != null) {
-            // 2. إنشاء وحفظ العنوان المرتبط بالعميل الجديد
             final newAddress = CustomerAddressModel(
               customerId: customerId,
               title: "المنزل",
@@ -82,7 +80,6 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
               createdAt: DateTime.now(),
             );
 
-            // 3. ربط العميل والعنوان فوراً بـ OrderCubit
             orderCubit.setCustomer(createdCustomer);
 
             if (addressCubit.addresses.isNotEmpty) {
@@ -94,7 +91,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
                 customerFound = true;
                 customerName = name;
                 customerPhoneController.text = phone;
-                customerAddressValue = savedAddress.address; // 🌟 تعيين العنوان الجديد
+                customerAddressValue = savedAddress.address;
                 customerAddressController.text = savedAddress.address;
                 phoneErrorText = null;
               });
@@ -146,21 +143,21 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     return _buildDeliveryFields();
   }
 
-  // ============================================================
-  // Dine In Fields
-  // ============================================================
   Widget _buildDineInFields(OrderCubit cubit) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(top: 12, left: 4, right: 4),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colorsmanegments.borderLight),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.shadowLight,
+            color: colorScheme.shadow.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -173,13 +170,13 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
             children: [
               Icon(
                 Iconss.tableRestaurant,
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 size: 18,
               ),
               const SizedBox(width: 8),
               Text(
                 "بيانات الطاولة",
-                style: TxtStyle.titleSmall,
+                style: theme.textTheme.titleMedium,
               ),
             ],
           ),
@@ -189,26 +186,26 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
             waitDuration: const Duration(milliseconds: 300),
             child: DropdownButtonFormField<String>(
               value: cubit.tableNumber ?? "طاولة 1",
-              style: TxtStyle.bodyMedium.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w600,
               ),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colorsmanegments.background,
+                fillColor: colorScheme.background,
                 prefixIcon: Icon(
                   Iconss.tableBar,
-                  color: Colorsmanegments.primary,
+                  color: colorScheme.primary,
                   size: 20,
                 ),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide(color: Colorsmanegments.borderLight),
+                  borderSide: BorderSide(color: colorScheme.outlineVariant),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(10),
                   borderSide: BorderSide(
-                    color: Colorsmanegments.primary,
+                    color: colorScheme.primary,
                     width: 1.5,
                   ),
                 ),
@@ -227,22 +224,22 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
-  // ============================================================
-  // Delivery Fields
-  // ============================================================
   Widget _buildDeliveryFields() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
         margin: const EdgeInsets.only(top: 12, left: 4, right: 4),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colorsmanegments.card,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colorsmanegments.borderLight),
+          border: Border.all(color: colorScheme.outlineVariant),
           boxShadow: [
             BoxShadow(
-              color: Colorsmanegments.shadowLight,
+              color: colorScheme.shadow.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -277,9 +274,6 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
-  // ============================================================
-  // Compact Text Field
-  // ============================================================
   Widget _buildCompactTextField({
     required TextEditingController controller,
     required String hint,
@@ -287,7 +281,10 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     required ValueChanged<String> onChanged,
     VoidCallback? onSubmitted,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final customer = context.read<OrderCubit>().selectedCustomer;
+
     return Tooltip(
       message: "Ctrl + P - البحث عن عميل",
       waitDuration: const Duration(milliseconds: 300),
@@ -301,7 +298,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
         },
         keyboardType: TextInputType.phone,
         textDirection: TextDirection.ltr,
-        style: TxtStyle.bodyMedium.copyWith(
+        style: theme.textTheme.bodyMedium?.copyWith(
           fontWeight: FontWeight.w600,
           letterSpacing: 0.5,
         ),
@@ -313,33 +310,35 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
             onSelected: (address) {
               context.read<OrderCubit>().setAddress(address);
               setState(() {
-                customerAddressValue = address.address; // 🌟 تحديث العنوان عند اختياره من القائمة
+                customerAddressValue = address.address;
                 customerAddressController.text = address.address;
               });
             },
           )
               : null,
           hintText: hint,
-          hintStyle: TxtStyle.hintSmall,
+          hintStyle: theme.textTheme.bodySmall?.copyWith(
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+          ),
           prefixIcon: Icon(
             icon,
             size: 18,
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
           ),
           filled: true,
-          fillColor: Colorsmanegments.background,
+          fillColor: colorScheme.background,
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 14,
             vertical: 12,
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
-            borderSide: BorderSide(color: Colorsmanegments.borderLight),
+            borderSide: BorderSide(color: colorScheme.outlineVariant),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide(
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
               width: 1.5,
             ),
           ),
@@ -356,18 +355,18 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
-  // ============================================================
-  // Customer Card (عرض العنوان بدلاً من المنطقة)
-  // ============================================================
   Widget _buildCustomerCard() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colorsmanegments.primaryLight,
+        color: colorScheme.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colorsmanegments.primary.withOpacity(0.3),
+          color: colorScheme.primary.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -384,7 +383,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
           Container(
             width: 1,
             height: 32,
-            color: Colorsmanegments.primary.withOpacity(0.2),
+            color: colorScheme.primary.withOpacity(0.2),
             margin: const EdgeInsets.symmetric(horizontal: 4),
           ),
           Expanded(
@@ -397,14 +396,14 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
           Container(
             width: 1,
             height: 32,
-            color: Colorsmanegments.primary.withOpacity(0.2),
+            color: colorScheme.primary.withOpacity(0.2),
             margin: const EdgeInsets.symmetric(horizontal: 4),
           ),
           Expanded(
             child: _buildLabeledValue(
               icon: Iconss.location,
-              label: "العنوان", // 🌟 تغيير التسمية من المنطقة إلى العنوان
-              value: customerAddressValue.isNotEmpty ? customerAddressValue : "اختر العنوان", // 🌟 عرض تفاصيل العنوان
+              label: "العنوان",
+              value: customerAddressValue.isNotEmpty ? customerAddressValue : "اختر العنوان",
               isHighlight: true,
             ),
           ),
@@ -413,15 +412,15 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
-  // ============================================================
-  // Labeled Value
-  // ============================================================
   Widget _buildLabeledValue({
     required IconData icon,
     required String label,
     required String value,
     bool isHighlight = false,
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -431,14 +430,14 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
               icon,
               size: 13,
               color: isHighlight
-                  ? Colorsmanegments.primary
-                  : Colorsmanegments.textSecondary,
+                  ? colorScheme.primary
+                  : theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
             const SizedBox(width: 4),
             Text(
               label,
-              style: TxtStyle.labelSmall.copyWith(
-                color: Colorsmanegments.textSecondary,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
               ),
             ),
           ],
@@ -446,11 +445,12 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
         const SizedBox(height: 4),
         Text(
           value,
-          style: TxtStyle.labelBold.copyWith(
+          style: theme.textTheme.labelLarge?.copyWith(
             fontSize: 12,
             color: isHighlight
-                ? Colorsmanegments.primary
-                : Colorsmanegments.textPrimary,
+                ? colorScheme.primary
+                : theme.textTheme.bodyLarge?.color,
+            fontWeight: FontWeight.bold,
           ),
           overflow: TextOverflow.ellipsis,
           maxLines: 1,
@@ -459,9 +459,6 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
-  // ============================================================
-  // Search Customer
-  // ============================================================
   Future<void> _searchCustomer() async {
     final phone = customerPhoneController.text.trim();
 
@@ -497,7 +494,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
         addressCubit.selectAddress(addressCubit.addresses.first);
         orderCubit.setAddress(addressCubit.addresses.first);
 
-        customerAddressValue = addressCubit.addresses.first.address; // 🌟 جلب وعرض تفاصيل العنوان
+        customerAddressValue = addressCubit.addresses.first.address;
         customerAddressController.text = addressCubit.addresses.first.address;
       }
 
@@ -532,7 +529,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
       setState(() {
         customerFound = true;
         customerName = orderCubit.customerName ?? "";
-        customerAddressValue = address.address; // 🌟 تعيين العنوان للـ UI
+        customerAddressValue = address.address;
         customerAddressController.text = address.address;
       });
     }

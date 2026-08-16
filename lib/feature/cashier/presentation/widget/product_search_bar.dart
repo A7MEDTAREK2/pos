@@ -20,6 +20,9 @@ class ProductSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       height: 52,
       margin: const EdgeInsets.fromLTRB(18, 18, 18, 8),
@@ -30,31 +33,33 @@ class ProductSearchBar extends StatelessWidget {
           controller: controller,
           onChanged: onChanged,
           focusNode: focusNode,
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium,
           decoration: InputDecoration(
             hintText: "ابحث بالاسم أو الباركود...",
-            hintStyle: TxtStyle.hint,
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            ),
             prefixIcon: Icon(
               Iconss.search,
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
             ),
             suffixIcon: Icon(
               Iconss.qrCode,
-              color: Colorsmanegments.textSecondary,
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
             ),
             filled: true,
-            fillColor: Colorsmanegments.card,
+            fillColor: colorScheme.surface,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: Colorsmanegments.border,
+                color: colorScheme.outlineVariant,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(14),
               borderSide: BorderSide(
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 width: 2,
               ),
             ),

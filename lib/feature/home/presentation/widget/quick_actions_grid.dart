@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:home/feature/setting/pre/screen/settings_screen.dart';
 
 // ====== Core ======
 import '../../../../core/service/printing/service/shift_closing_service.dart';
@@ -51,6 +50,7 @@ import '../../../setting/data/datasorce/local_data.dart';
 import '../../../setting/data/model/users_model.dart';
 import '../../../setting/data/repo/repo.dart';
 import '../../../setting/logic/set_cubit.dart';
+import '../../../setting/pre/screen/settings_screen.dart';
 
 class QuickActionsGrid extends StatelessWidget {
   final UserModel user;
@@ -64,7 +64,9 @@ class QuickActionsGrid extends StatelessWidget {
   // WORKFLOW 1: End Shift Workflow
   // ============================================================
   Future<bool> _handleEndShiftWorkflow(BuildContext context) async {
-    // 1. Show RTL Confirmation Dialog
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final confirm = await showDialog<bool>(
       context: context,
       barrierDismissible: false,
@@ -72,24 +74,41 @@ class QuickActionsGrid extends StatelessWidget {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            title: const Text("إنهاء الشيفت"),
-            content: const Text(
+            backgroundColor: colorScheme.surface,
+            title: Text(
+              "إنهاء الشيفت",
+              style: theme.textTheme.titleLarge,
+            ),
+            content: Text(
               "سيتم تنفيذ العمليات التالية:\n\n"
                   "• طباعة تقرير نهاية الشيفت\n"
                   "• إعادة تعيين عداد الفواتير\n"
                   "• بدء شيفت جديد",
+              style: theme.textTheme.bodyMedium,
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, false),
-                child: const Text("إلغاء"),
+                child: Text(
+                  "إلغاء",
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.primary,
+                  ),
+                ),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colorsmanegments.primary,
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
                 ),
                 onPressed: () => Navigator.pop(dialogContext, true),
-                child: const Text("إنهاء الشيفت"),
+                child: Text(
+                  "إنهاء الشيفت",
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
@@ -99,19 +118,22 @@ class QuickActionsGrid extends StatelessWidget {
 
     if (confirm != true) return false;
 
-    // 2. Show Responsive Loading Dialog
     if (!context.mounted) return false;
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const Directionality(
+      builder: (_) => Directionality(
         textDirection: TextDirection.rtl,
         child: AlertDialog(
+          backgroundColor: colorScheme.surface,
           content: Row(
             children: [
-              CircularProgressIndicator(),
-              SizedBox(width: 20),
-              Text("جاري إنهاء الشيفت وطباعة التقرير..."),
+              const CircularProgressIndicator(),
+              const SizedBox(width: 20),
+              Text(
+                "جاري إنهاء الشيفت وطباعة التقرير...",
+                style: theme.textTheme.bodyMedium,
+              ),
             ],
           ),
         ),
@@ -119,39 +141,48 @@ class QuickActionsGrid extends StatelessWidget {
     );
 
     try {
-      // 3. Print Shift Report (Wait until completely finished)
       await ShiftClosingService().printShiftReport();
-
-      // 4. Reset Shift in Database (ONLY executed if printing succeeds)
       await ShiftClosingService().resetShift();
 
-      // 5. Refresh Order Counter in OrderCubit if available
       if (context.mounted) {
         try {
           await context.read<OrderCubit>().refreshNextOrderNumber();
-        } catch (_) {
-          // Safe catch if OrderCubit is not in current context tree
-        }
+        } catch (_) {}
       }
 
-      // 6. Close Loading Dialog
       if (context.mounted) {
         Navigator.pop(context);
       }
 
-      // 7. Show Success Dialog
       if (context.mounted) {
         await showDialog(
           context: context,
           builder: (_) => Directionality(
             textDirection: TextDirection.rtl,
             child: AlertDialog(
-              title: const Text("تم بنجاح"),
-              content: const Text("تم إنهاء الشيفت وبدء شيفت جديد."),
+              backgroundColor: colorScheme.surface,
+              title: Text(
+                "تم بنجاح",
+                style: theme.textTheme.titleLarge,
+              ),
+              content: Text(
+                "تم إنهاء الشيفت وبدء شيفت جديد.",
+                style: theme.textTheme.bodyMedium,
+              ),
               actions: [
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                  ),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("موافق"),
+                  child: Text(
+                    "موافق",
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -160,23 +191,37 @@ class QuickActionsGrid extends StatelessWidget {
       }
       return true;
     } catch (e) {
-      // Error Handling: Close Loading Dialog & Show Error Dialog
       if (context.mounted) {
-        Navigator.pop(context); // Close loading dialog
+        Navigator.pop(context);
 
         await showDialog(
           context: context,
           builder: (_) => Directionality(
             textDirection: TextDirection.rtl,
             child: AlertDialog(
-              title: const Text("خطأ في إنهاء الشيفت"),
+              backgroundColor: colorScheme.surface,
+              title: Text(
+                "خطأ في إنهاء الشيفت",
+                style: theme.textTheme.titleLarge,
+              ),
               content: Text(
                 "فشلت عملية طباعة تقرير الشيفت. لم يتم إنهاء الشيفت أو إعادة تعيين العداد.\n\nالتفاصيل: $e",
+                style: theme.textTheme.bodyMedium,
               ),
               actions: [
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: colorScheme.primary,
+                    foregroundColor: colorScheme.onPrimary,
+                  ),
                   onPressed: () => Navigator.pop(context),
-                  child: const Text("حسناً"),
+                  child: Text(
+                    "حسناً",
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colorScheme.onPrimary,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -191,6 +236,9 @@ class QuickActionsGrid extends StatelessWidget {
   // WORKFLOW 2: Exit Application Workflow
   // ============================================================
   Future<void> _handleExitAppWorkflow(BuildContext context) async {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final action = await showDialog<String>(
       context: context,
       barrierDismissible: false,
@@ -198,24 +246,48 @@ class QuickActionsGrid extends StatelessWidget {
         return Directionality(
           textDirection: TextDirection.rtl,
           child: AlertDialog(
-            title: const Text("إغلاق البرنامج"),
-            content: const Text("هل تريد إنهاء الشيفت قبل إغلاق البرنامج؟"),
+            backgroundColor: colorScheme.surface,
+            title: Text(
+              "إغلاق البرنامج",
+              style: theme.textTheme.titleLarge,
+            ),
+            content: Text(
+              "هل تريد إنهاء الشيفت قبل إغلاق البرنامج؟",
+              style: theme.textTheme.bodyMedium,
+            ),
             actionsAlignment: MainAxisAlignment.spaceBetween,
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(dialogContext, "cancel"),
-                child: const Text("إلغاء"),
+                child: Text(
+                  "إلغاء",
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.primary,
+                  ),
+                ),
               ),
               OutlinedButton(
                 onPressed: () => Navigator.pop(dialogContext, "exit_only"),
-                child: const Text("إغلاق فقط"),
+                child: Text(
+                  "إغلاق فقط",
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.primary,
+                  ),
+                ),
               ),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colorsmanegments.primary,
+                  backgroundColor: colorScheme.primary,
+                  foregroundColor: colorScheme.onPrimary,
                 ),
                 onPressed: () => Navigator.pop(dialogContext, "end_and_exit"),
-                child: const Text("إنهاء الشيفت ثم إغلاق"),
+                child: Text(
+                  "إنهاء الشيفت ثم إغلاق",
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.onPrimary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ],
           ),
@@ -235,13 +307,11 @@ class QuickActionsGrid extends StatelessWidget {
     }
   }
 
-  // 🎯 إغلاق الداتابيز والخروج القياسي بدون حزم خارجية
   Future<void> _closeDatabaseAndExit() async {
     try {
       await AppDatabase.instance.close();
     } catch (_) {}
 
-    // الخروج النظيف المدمج في Dart/Flutter للـ Desktop
     try {
       await SystemNavigator.pop();
     } catch (_) {}
@@ -251,103 +321,34 @@ class QuickActionsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final List<Map<String, dynamic>> actions = [
-      {
-        "title": "الكاشير",
-        "subtitle": "فاتورة جديدة",
-        "icon": Iconss.pos,
-        "isActive": true,
-      },
-      {
-        "title": "سجل المبيعات",
-        "subtitle": "الفواتير السابقة",
-        "icon": Iconss.order,
-        "isActive": false,
-      },
-      {
-        "title": "المنتجات",
-        "subtitle": "إدارة وتعديل",
-        "icon": Iconss.product,
-        "isActive": false,
-      },
-      {
-        "title": "الأقسام",
-        "subtitle": "تنظيم الأصناف",
-        "icon": Iconss.category,
-        "isActive": false,
-      },
-      {
-        "title": "العملاء",
-        "subtitle": "إدارة الحسابات",
-        "icon": Iconss.customer,
-        "isActive": false,
-      },
-      {
-        "title": "الموردين",
-        "subtitle": "دليل البيانات",
-        "icon": Iconss.supplier,
-        "isActive": false,
-      },
-      {
-        "title": "المشتريات",
-        "subtitle": "طلبات وتوريد",
-        "icon": Iconss.purchase,
-        "isActive": false,
-      },
-      {
-        "title": "المخزن",
-        "subtitle": "مستوى النواقص",
-        "icon": Iconss.warehouse,
-        "isActive": false,
-      },
-      {
-        "title": "التقارير",
-        "subtitle": "تحليل الأرباح",
-        "icon": Iconss.barChart,
-        "isActive": false,
-      },
-      {
-        "title": "الإعدادات",
-        "subtitle": "تهيئة النظام",
-        "icon": Iconss.settings,
-        "isActive": false,
-      },
-      {
-        "title": "إنهاء الشيفت",
-        "subtitle": "طباعة تقرير الشيفت",
-        "icon": Icons.print_outlined,
-        "isActive": false,
-      },
-      {
-        "title": "إغلاق Modu",
-        "subtitle": "إغلاق الابلكيشن",
-        "icon": Icons.close,
-        "isActive": false,
-      },
+      {"title": "الكاشير", "subtitle": "فاتورة جديدة", "icon": Iconss.pos, "isActive": true},
+      {"title": "سجل المبيعات", "subtitle": "الفواتير السابقة", "icon": Iconss.order, "isActive": false},
+      {"title": "المنتجات", "subtitle": "إدارة وتعديل", "icon": Iconss.product, "isActive": false},
+      {"title": "الأقسام", "subtitle": "تنظيم الأصناف", "icon": Iconss.category, "isActive": false},
+      {"title": "العملاء", "subtitle": "إدارة الحسابات", "icon": Iconss.customer, "isActive": false},
+      {"title": "الموردين", "subtitle": "دليل البيانات", "icon": Iconss.supplier, "isActive": false},
+      {"title": "المشتريات", "subtitle": "طلبات وتوريد", "icon": Iconss.purchase, "isActive": false},
+      {"title": "المخزن", "subtitle": "مستوى النواقص", "icon": Iconss.warehouse, "isActive": false},
+      {"title": "التقارير", "subtitle": "تحليل الأرباح", "icon": Iconss.barChart, "isActive": false},
+      {"title": "الإعدادات", "subtitle": "تهيئة النظام", "icon": Iconss.settings, "isActive": false},
+      {"title": "إنهاء الشيفت", "subtitle": "طباعة تقرير الشيفت", "icon": Icons.print_outlined, "isActive": false},
+      {"title": "إغلاق Modu", "subtitle": "إغلاق الابلكيشن", "icon": Icons.close, "isActive": false},
     ];
 
     final filteredActions = actions.where((action) {
       switch (action["title"]) {
-        case "المنتجات":
-          return user.canManageProducts;
-        case "الأقسام":
-          return user.canManageCategories;
-        case "العملاء":
-          return user.canManageCustomers;
-        case "الموردين":
-          return user.canManageSuppliers;
-        case "المخزن":
-          return user.canManageInventory;
-        case "التقارير":
-          return user.canManageReports;
-        case "الإعدادات":
-          return user.canManageSettings;
-        case "الكاشير":
-          return true;
-        case "سجل المبيعات":
-          return true;
-        default:
-          return true;
+        case "المنتجات": return user.canManageProducts;
+        case "الأقسام": return user.canManageCategories;
+        case "العملاء": return user.canManageCustomers;
+        case "الموردين": return user.canManageSuppliers;
+        case "المخزن": return user.canManageInventory;
+        case "التقارير": return user.canManageReports;
+        case "الإعدادات": return user.canManageSettings;
+        default: return true;
       }
     }).toList();
 
@@ -356,7 +357,9 @@ class QuickActionsGrid extends StatelessWidget {
       children: [
         Text(
           "الوصول السريع",
-          style: TxtStyle.titleCard,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 16),
         Directionality(
@@ -384,14 +387,8 @@ class QuickActionsGrid extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => BlocProvider(
-                          create: (_) => CategoryCubit(
-                            CategoryRepository(
-                              CategoryLocalDataSource(
-                                AppDatabase.instance.database,
-                              ),
-                            ),
-                          )..loadCategories(),
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<CategoryCubit>(),
                           child: const CategoriesScreen(),
                         ),
                       ),
@@ -526,6 +523,9 @@ class _ActionCardState extends State<ActionCard> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onEnter: (_) => setState(() => _isHovered = true),
@@ -541,18 +541,18 @@ class _ActionCardState extends State<ActionCard> {
               : Matrix4.identity(),
           decoration: BoxDecoration(
             color: _isHovered
-                ? Colorsmanegments.primary.withOpacity(0.04)
-                : Colorsmanegments.card,
+                ? colorScheme.primary.withOpacity(0.04)
+                : colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: _isHovered
-                  ? Colorsmanegments.primary
-                  : Colorsmanegments.border,
+                  ? colorScheme.primary
+                  : colorScheme.outlineVariant,
             ),
             boxShadow: _isHovered
                 ? [
               BoxShadow(
-                color: Colorsmanegments.primary.withOpacity(0.1),
+                color: colorScheme.primary.withOpacity(0.1),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -566,23 +566,24 @@ class _ActionCardState extends State<ActionCard> {
                 widget.icon,
                 size: 28,
                 color: _isHovered
-                    ? Colorsmanegments.primary
-                    : Colorsmanegments.textPrimary,
+                    ? colorScheme.primary
+                    : theme.textTheme.bodyLarge?.color,
               ),
               const SizedBox(height: 12),
               Text(
                 widget.title,
-                style: TxtStyle.labelBold.copyWith(
+                style: theme.textTheme.titleSmall?.copyWith(
                   color: widget.isActive
-                      ? Colorsmanegments.success
-                      : Colorsmanegments.textPrimary,
+                      ? Colors.green
+                      : theme.textTheme.bodyLarge?.color,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 widget.subtitle,
-                style: TxtStyle.bodySmall.copyWith(
-                  color: Colorsmanegments.textSecondary,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                 ),
               ),
             ],

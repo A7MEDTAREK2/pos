@@ -31,12 +31,16 @@ class _AddUserDialogState extends State<AddUserDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
         width: 520,
         constraints: const BoxConstraints(
-          maxHeight: 620, // ✅ تحديد أقصى ارتفاع
+          maxHeight: 620,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -46,7 +50,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
@@ -55,13 +59,17 @@ class _AddUserDialogState extends State<AddUserDialog> {
                 children: [
                   Icon(
                     Iconss.personAdd,
-                    color: Colorsmanegments.textWhite,
+                    color: colorScheme.onPrimary,
                     size: 24,
                   ),
                   const SizedBox(width: 10),
                   Text(
                     'إضافة مستخدم جديد',
-                    style: TxtStyle.headerWhite.copyWith(fontSize: 20),
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onPrimary,
+                    ),
                   ),
                   const Spacer(),
                   IconButton(
@@ -70,7 +78,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     },
                     icon: Icon(
                       Iconss.close,
-                      color: Colorsmanegments.textWhite,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ],
@@ -80,12 +88,11 @@ class _AddUserDialogState extends State<AddUserDialog> {
             // ====== Body ======
             Expanded(
               child: SingleChildScrollView(
-                // ✅ جعل المحتوى قابل للتمرير
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   children: [
-                    // ====== Full Name ======
                     _buildTextField(
+                      context,
                       controller: nameController,
                       label: 'الاسم الكامل',
                       hint: 'أدخل الاسم الكامل',
@@ -93,8 +100,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ====== Username ======
                     _buildTextField(
+                      context,
                       controller: usernameController,
                       label: 'اسم المستخدم',
                       hint: 'أدخل اسم المستخدم',
@@ -102,9 +109,9 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ====== Password ======
                     _buildPasswordField(
-                      controller : passwordController,
+                      context,
+                      controller: passwordController,
                       label: 'كلمة المرور',
                       hint: 'أدخل كلمة المرور',
                       icon: Iconss.lock,
@@ -117,8 +124,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ====== Confirm Password ======
                     _buildPasswordField(
+                      context,
                       controller: confirmpass,
                       label: 'تأكيد كلمة المرور',
                       hint: 'أعد كتابة كلمة المرور',
@@ -132,8 +139,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ====== Phone ======
                     _buildTextField(
+                      context,
                       controller: phoneController,
                       label: 'رقم الهاتف',
                       hint: 'أدخل رقم الهاتف',
@@ -141,8 +148,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ====== Email ======
                     _buildTextField(
+                      context,
                       controller: emailController,
                       label: 'البريد الإلكتروني (اختياري)',
                       hint: 'أدخل البريد الإلكتروني',
@@ -150,8 +157,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ====== Role ======
                     _buildDropdown(
+                      context,
                       label: 'الدور',
                       value: _selectedRole!,
                       items: ['Admin', 'Manager', 'Cashier'],
@@ -164,8 +171,8 @@ class _AddUserDialogState extends State<AddUserDialog> {
                     ),
                     const SizedBox(height: 14),
 
-                    // ====== Status ======
                     _buildDropdown(
+                      context,
                       label: 'الحالة',
                       value: _selectedStatus!,
                       items: ['Active', 'Inactive'],
@@ -176,7 +183,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
                         });
                       },
                     ),
-                    const SizedBox(height: 4), // ✅ مسافة صغيرة في النهاية
+                    const SizedBox(height: 4),
                   ],
                 ),
               ),
@@ -186,7 +193,7 @@ class _AddUserDialogState extends State<AddUserDialog> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: Colorsmanegments.border)),
+                border: Border(top: BorderSide(color: theme.dividerColor)),
               ),
               child: Row(
                 children: [
@@ -199,35 +206,34 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      child: Text('إلغاء', style: TxtStyle.buttonPrimary),
+                      child: Text(
+                        'إلغاء',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.primary,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colorsmanegments.primary,
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       onPressed: () {
-                        print("NAME => ${nameController.text}");
-                        print("USERNAME => ${usernameController.text}");
-                        print("PASSWORD => ${passwordController.text}");
-                        print("PHONE => ${phoneController.text}");
-                        print("EMAIL => ${emailController.text}");
                         final user = UserModel(
                           name: nameController.text.trim(),
                           username: usernameController.text.trim(),
                           password: passwordController.text.trim(),
                           phone: phoneController.text.trim(),
                           email: emailController.text.trim(),
-
                           role: _selectedRole!,
                           isActive: _selectedStatus == "Active",
-
                           canManageProducts: true,
                           canManageCategories: true,
                           canManageCustomers: true,
@@ -236,18 +242,21 @@ class _AddUserDialogState extends State<AddUserDialog> {
                           canManageReports: true,
                           canManageSettings: true,
                           canManageUsers: true,
-
                           canDiscount: true,
                           canDeleteInvoice: true,
                           canHoldOrders: true,
                         );
-                        print(user.toMap());
 
                         context.read<UserCubit>().addUser(user);
-
                         Navigator.pop(context);
                       },
-                      child: Text('حفظ', style: TxtStyle.buttonMedium),
+                      child: Text(
+                        'حفظ',
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -259,36 +268,46 @@ class _AddUserDialogState extends State<AddUserDialog> {
     );
   }
 
-  Widget _buildTextField({
-    required String label,
-    required String hint,
-    required IconData icon, required TextEditingController controller,
-  }) {
+  Widget _buildTextField(
+      BuildContext context, {
+        required String label,
+        required String hint,
+        required IconData icon,
+        required TextEditingController controller,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TxtStyle.labelMedium),
+        Text(
+          label,
+          style: theme.textTheme.labelMedium,
+        ),
         const SizedBox(height: 4),
         TextField(
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium,
           controller: controller,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TxtStyle.hint,
-            prefixIcon: Icon(icon, color: Colorsmanegments.primary, size: 20),
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            ),
+            prefixIcon: Icon(icon, color: colorScheme.primary, size: 20),
             filled: true,
-            fillColor: Colorsmanegments.background,
+            fillColor: colorScheme.background,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colorsmanegments.border),
+              borderSide: BorderSide(color: colorScheme.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colorsmanegments.primary, width: 2),
+              borderSide: BorderSide(color: colorScheme.primary, width: 2),
             ),
           ),
         ),
@@ -296,47 +315,57 @@ class _AddUserDialogState extends State<AddUserDialog> {
     );
   }
 
-  Widget _buildPasswordField({
-    required String label,
-    required String hint,
-    required IconData icon,
-    required bool obscure,
-    required VoidCallback onToggle, required TextEditingController controller,
-  }) {
+  Widget _buildPasswordField(
+      BuildContext context, {
+        required String label,
+        required String hint,
+        required IconData icon,
+        required bool obscure,
+        required VoidCallback onToggle,
+        required TextEditingController controller,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TxtStyle.labelMedium),
+        Text(
+          label,
+          style: theme.textTheme.labelMedium,
+        ),
         const SizedBox(height: 4),
         TextField(
           obscureText: obscure,
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium,
           controller: controller,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle: TxtStyle.hint,
-            prefixIcon: Icon(icon, color: Colorsmanegments.primary, size: 20),
+            hintStyle: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            ),
+            prefixIcon: Icon(icon, color: colorScheme.primary, size: 20),
             suffixIcon: IconButton(
               icon: Icon(
                 obscure ? Iconss.visibilityOff : Iconss.visibility,
-                color: Colorsmanegments.textSecondary,
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                 size: 20,
               ),
               onPressed: onToggle,
             ),
             filled: true,
-            fillColor: Colorsmanegments.background,
+            fillColor: colorScheme.background,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colorsmanegments.border),
+              borderSide: BorderSide(color: colorScheme.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colorsmanegments.primary, width: 2),
+              borderSide: BorderSide(color: colorScheme.primary, width: 2),
             ),
           ),
         ),
@@ -344,34 +373,40 @@ class _AddUserDialogState extends State<AddUserDialog> {
     );
   }
 
-  Widget _buildDropdown({
-    required String label,
-    required String value,
-    required List<String> items,
-    required IconData icon,
-    required ValueChanged<String> onChanged,
-  }) {
+  Widget _buildDropdown(
+      BuildContext context, {
+        required String label,
+        required String value,
+        required List<String> items,
+        required IconData icon,
+        required ValueChanged<String> onChanged,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TxtStyle.labelMedium),
+        Text(
+          label,
+          style: theme.textTheme.labelMedium,
+        ),
         const SizedBox(height: 4),
         Container(
           decoration: BoxDecoration(
-            color: Colorsmanegments.background,
+            color: colorScheme.background,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colorsmanegments.border),
+            border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: DropdownButtonFormField<String>(
             value: value,
-            style: TxtStyle.bodyMedium,
-
+            style: theme.textTheme.bodyMedium,
             decoration: InputDecoration(
-              prefixIcon: Icon(icon, color: Colorsmanegments.primary, size: 20),
+              prefixIcon: Icon(icon, color: colorScheme.primary, size: 20),
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 14,
-                vertical: 8, // ✅ تقليل الـ padding الرأسي
+                vertical: 8,
               ),
             ),
             items: items.map((item) {

@@ -2,12 +2,10 @@
 
 import 'package:flutter/material.dart';
 
+// ====== Core ======
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/icons.dart';
 import '../../../../core/theming/txt_style.dart';
-
-// ====== Core ======
-
 
 class ErrorSalesWidget extends StatelessWidget {
   final String message;
@@ -21,6 +19,9 @@ class ErrorSalesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -28,21 +29,22 @@ class ErrorSalesWidget extends StatelessWidget {
           Icon(
             Iconss.error,
             size: 70,
-            color: Colorsmanegments.danger.withOpacity(0.5),
+            color: Colors.red.withOpacity(0.5),
           ),
           const SizedBox(height: 16),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TxtStyle.danger.copyWith(
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: Colors.red,
               fontSize: 16,
             ),
           ),
           const SizedBox(height: 20),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.primary,
-              foregroundColor: Colorsmanegments.textWhite,
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -51,12 +53,15 @@ class ErrorSalesWidget extends StatelessWidget {
             onPressed: onRetry,
             icon: Icon(
               Iconss.refresh,
-              color: Colorsmanegments.textWhite,
+              color: colorScheme.onPrimary,
               size: 18,
             ),
             label: Text(
               "إعادة المحاولة",
-              style: TxtStyle.buttonMedium,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.onPrimary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],

@@ -120,17 +120,14 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
 
       if (response != null) {
         setState(() {
-          // الطابعات
           cashierPrinter = response['cashierPrinter']?.toString() ?? cashierPrinter;
           kitchenPrinter = response['kitchenPrinter']?.toString() ?? kitchenPrinter;
           barcodePrinter = response['barcodePrinter']?.toString() ?? barcodePrinter;
           reportsPrinter = response['reportsPrinter']?.toString() ?? reportsPrinter;
 
-          // الأحجام والمقاسات
           paperWidth = response['paperWidth'] ?? paperWidth;
           barcodeSize = response['barcodeSize']?.toString() ?? barcodeSize;
 
-          // تنسيقات خط عنوان الباركود
           if (response['barcodeTitleStyle'] is Map) {
             final bStyle = response['barcodeTitleStyle'];
             barcodeTitleFont = bStyle['font'] ?? barcodeTitleFont;
@@ -140,7 +137,6 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
             barcodeTitleUnderline = bStyle['underline'] ?? barcodeTitleUnderline;
           }
 
-          // تنسيقات خط عنوان الصنف
           if (response['itemTitleStyle'] is Map) {
             final iStyle = response['itemTitleStyle'];
             itemTitleFont = iStyle['font'] ?? itemTitleFont;
@@ -150,7 +146,6 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
             itemTitleUnderline = iStyle['underline'] ?? itemTitleUnderline;
           }
 
-          // خيارات عرض الباركود
           if (response['barcodeDisplayOptions'] is Map) {
             final opts = response['barcodeDisplayOptions'];
             showBarcodeValue = opts['showBarcodeValue'] ?? showBarcodeValue;
@@ -164,7 +159,6 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
             showItemName = response['showItemName'] ?? showItemName;
           }
 
-          // خيارات طباعة النسخ التلقائية
           if (response['autoPrintCopies'] is Map) {
             final copies = response['autoPrintCopies'];
             printCustomerCopy = copies['customer'] ?? printCustomerCopy;
@@ -229,7 +223,6 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
     };
 
     try {
-      // 1. حفظ الإعدادات محلياً على الجهاز
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('printCustomerCopy', printCustomerCopy);
       await prefs.setBool('printKitchenCopy', printKitchenCopy);
@@ -239,20 +232,20 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
       await prefs.setString('kitchenPrinter', kitchenPrinter);
       await prefs.setInt('paperWidth', paperWidth);
 
-      // 2. إرسال الإعدادات للسيرفر
       await ModuPrintService().saveSettings(settingsMap);
 
       if (!mounted) return;
-      // تم إزالة SnackBar
       Navigator.pop(context);
     } catch (e) {
       if (!mounted) return;
-      // تم إزالة SnackBar
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final printerOptions = installedPrinters.isNotEmpty
         ? installedPrinters
         : ['Microsoft XPS Document Writer'];
@@ -260,15 +253,17 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: Colorsmanegments.background,
+        backgroundColor: colorScheme.background,
         appBar: AppBar(
           title: Text(
             'تحكم وتنسيق الطابعات والباركود',
-            style: TxtStyle.headerMedium,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           centerTitle: true,
-          backgroundColor: Colorsmanegments.card,
-          foregroundColor: Colorsmanegments.textPrimary,
+          backgroundColor: colorScheme.surface,
+          foregroundColor: theme.textTheme.bodyLarge?.color,
           elevation: 0,
           leading: Tooltip(
             message: "Esc - رجوع",
@@ -276,7 +271,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
             child: IconButton(
               icon: Icon(
                 Iconss.arrowBack,
-                color: Colorsmanegments.textPrimary,
+                color: theme.textTheme.bodyLarge?.color,
               ),
               onPressed: () => Navigator.pop(context),
             ),
@@ -384,6 +379,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                 child: SettingsCard(
                   children: [
                     _buildStyleControlRow(
+                      context,
                       title: 'تنسيق عنوان الباركود',
                       font: barcodeTitleFont,
                       size: barcodeTitleSize,
@@ -401,8 +397,9 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                       onUnderlineChanged: (u) =>
                           setState(() => barcodeTitleUnderline = u),
                     ),
-                    const Divider(height: 32),
+                    Divider(color: theme.dividerColor, height: 32),
                     _buildStyleControlRow(
+                      context,
                       title: 'تنسيق عنوان الصنف',
                       font: itemTitleFont,
                       size: itemTitleSize,
@@ -541,7 +538,7 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                     child: SettingsActionButton(
                       label: 'تجربة طباعة الباركود / الفاتورة',
                       icon: Iconss.print,
-                      color: Colorsmanegments.primary,
+                      color: colorScheme.primary,
                       onTap: () async {
                         try {
                           await ModuPrintService().testPrint(
@@ -549,10 +546,8 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                             paperWidth: paperWidth,
                           );
                           if (!mounted) return;
-                          // تم إزالة SnackBar
                         } catch (e) {
                           if (!mounted) return;
-                          // تم إزالة SnackBar
                         }
                       },
                     ),
@@ -570,13 +565,17 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colorsmanegments.primary,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
                     onPressed: _savePrinterSettings,
                     child: Text(
                       'حفظ الإعدادات وإرسالها للسيرفر',
-                      style: TxtStyle.headerLarge,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -588,23 +587,32 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
     );
   }
 
-  Widget _buildStyleControlRow({
-    required String title,
-    required String font,
-    required int size,
-    required bool isBold,
-    required bool isItalic,
-    required bool isUnderline,
-    required ValueChanged<String> onFontChanged,
-    required ValueChanged<int> onSizeChanged,
-    required ValueChanged<bool> onBoldChanged,
-    required ValueChanged<bool> onItalicChanged,
-    required ValueChanged<bool> onUnderlineChanged,
-  }) {
+  Widget _buildStyleControlRow(
+      BuildContext context, {
+        required String title,
+        required String font,
+        required int size,
+        required bool isBold,
+        required bool isItalic,
+        required bool isUnderline,
+        required ValueChanged<String> onFontChanged,
+        required ValueChanged<int> onSizeChanged,
+        required ValueChanged<bool> onBoldChanged,
+        required ValueChanged<bool> onItalicChanged,
+        required ValueChanged<bool> onUnderlineChanged,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: TxtStyle.labelBold),
+        Text(
+          title,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -613,12 +621,13 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
+                  border: Border.all(color: colorScheme.outlineVariant),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<String>(
                     value: font,
+                    style: theme.textTheme.bodyMedium,
                     items: const [
                       DropdownMenuItem(
                           value: "Arial (Arabic)",
@@ -641,12 +650,13 @@ class _PrinterSettingsScreenState extends State<PrinterSettingsScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
                 decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey.shade400),
+                  border: Border.all(color: colorScheme.outlineVariant),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
                     value: size,
+                    style: theme.textTheme.bodyMedium,
                     items: [10, 12, 14, 16, 18, 20, 24].map((s) {
                       return DropdownMenuItem(
                           value: s,

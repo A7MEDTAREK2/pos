@@ -20,6 +20,9 @@ class SaleDetailsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
@@ -31,15 +34,15 @@ class SaleDetailsDialog extends StatelessWidget {
           maxHeight: 700,
         ),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: colorScheme.background,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFFE5E7EB),
+            color: colorScheme.outlineVariant,
             width: 1,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.1),
+              color: colorScheme.shadow.withOpacity(0.1),
               blurRadius: 30,
               offset: const Offset(0, 10),
             ),
@@ -90,10 +93,13 @@ class SaleDetailsDialog extends StatelessWidget {
       BuildContext context,
       SaleDetailsModel sale,
       ) async {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return showDialog(
       context: context,
       barrierDismissible: true,
-      barrierColor: Colors.black.withOpacity(0.4),
+      barrierColor: colorScheme.shadow.withOpacity(0.4),
       builder: (_) => FadeTransition(
         opacity: const AlwaysStoppedAnimation(1),
         child: SaleDetailsDialog(sale: sale),

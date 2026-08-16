@@ -63,7 +63,11 @@ class _PaymentDialogState extends State<PaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: SizedBox(
         width: 800,
@@ -74,7 +78,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
               width: 320,
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.grey.shade50,
+                color: colorScheme.background,
                 borderRadius: const BorderRadius.horizontal(
                   left: Radius.circular(16),
                 ),
@@ -83,25 +87,25 @@ class _PaymentDialogState extends State<PaymentDialog> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     'ملخص الدفع',
-                    style: TextStyle(
-                      fontSize: 20,
+                    style: theme.textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'Cairo',
                     ),
                   ),
                   const SizedBox(height: 32),
                   _buildSummaryItem(
                     'المطلوب سداده',
                     '${widget.totalAmount.toStringAsFixed(2)} ج.م',
-                    Colors.black87,
+                    theme.textTheme.bodyLarge?.color ?? Colors.black87,
                     24,
                   ),
                   const SizedBox(height: 24),
-                  const Text(
+                  Text(
                     'المبلغ المدفوع',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   Tooltip(
@@ -110,14 +114,13 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     child: TextField(
                       controller: amountController,
                       keyboardType: TextInputType.number,
-                      style: const TextStyle(
-                        fontSize: 24,
+                      style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF0D53FC),
+                        color: colorScheme.primary,
                       ),
                       decoration: InputDecoration(
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: colorScheme.surface,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                           borderSide: BorderSide.none,
@@ -159,12 +162,10 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
+                        Text(
                           'وسيلة الدفع',
-                          style: TextStyle(
-                            fontSize: 18,
+                          style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
-                            fontFamily: 'Cairo',
                           ),
                         ),
                         Tooltip(
@@ -177,7 +178,10 @@ class _PaymentDialogState extends State<PaymentDialog> {
                               context.read<OrderCubit>().clearCart();
                               Navigator.pop(context);
                             },
-                            icon: const Icon(Icons.close_rounded),
+                            icon: Icon(
+                              Icons.close_rounded,
+                              color: theme.textTheme.bodyLarge?.color,
+                            ),
                           ),
                         ),
                       ],
@@ -203,6 +207,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                         ];
 
                         return _buildPaymentMethod(
+                          context,
                           index,
                           methods[index].$1,
                           methods[index].$2,
@@ -218,28 +223,27 @@ class _PaymentDialogState extends State<PaymentDialog> {
                         height: 55,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF0D53FC),
+                            backgroundColor: colorScheme.primary,
+                            foregroundColor: colorScheme.onPrimary,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                           onPressed: _isProcessing ? null : _processPayment,
                           child: _isProcessing
-                              ? const SizedBox(
+                              ? SizedBox(
                             height: 24,
                             width: 24,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: colorScheme.onPrimary,
                             ),
                           )
-                              : const Text(
+                              : Text(
                             'تأكيد وسداد الفاتورة',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: colorScheme.onPrimary,
                               fontWeight: FontWeight.bold,
-                              fontFamily: 'Cairo',
                             ),
                           ),
                         ),
@@ -260,7 +264,6 @@ class _PaymentDialogState extends State<PaymentDialog> {
     final paid = double.tryParse(amountController.text) ?? 0;
 
     if (paid < widget.totalAmount) {
-      // تم إزالة SnackBar
       return;
     }
 
@@ -271,60 +274,49 @@ class _PaymentDialogState extends State<PaymentDialog> {
     try {
       final cubit = context.read<OrderCubit>();
 
-      // ====== 1. إتمام الدفع ======
       await cubit.completePayment(widget.orderId);
 
       if (!context.mounted) return;
 
-      // ====== 2. تجهيز وطباعة الفواتير عبر الـ API ======
       await _printReceipts(cubit);
 
       if (!context.mounted) return;
 
-      // ====== 3. إغلاق الـ Dialog ======
       Navigator.pop(context);
       widget.onPrintFinalReceipt();
 
-      // تم إزالة SnackBar
     } catch (e) {
       setState(() {
         _isProcessing = false;
       });
-      // تم إزالة SnackBar
     }
   }
 
-  // ====== طباعة الفواتير مع ربط إعدادات الشاشة والبيانات الحقيقية ======
+  // ====== طباعة الفواتير ======
   Future<void> _printReceipts(OrderCubit cubit) async {
     final currentOrder = cubit.currentOrder;
     if (currentOrder == null) return;
 
-    // 1. جلب الإعدادات المحفوظة من SharedPreferences (حالة الأزرار وأسماء الطابعات)
     final prefs = await SharedPreferences.getInstance();
     bool printCustomer = prefs.getBool('printCustomerCopy') ?? true;
     bool printDelivery = prefs.getBool('printDeliveryCopy') ?? false;
     String cashierPrinterName =
         prefs.getString('cashierPrinter') ?? "DefaultPrinter";
 
-    // 2. جلب إعدادات المتجر الحقيقية (العنوان، الهاتف، اسم المتجر) من الـ SettingsCubit
     SettingsModel? currentSettings;
     try {
       currentSettings = context.read<SettingsCubit>().settings;
-    } catch (_) {
-      // احتياطياً في حال عدم توفر الـ Cubit في سياق الشاشة الحالي
-    }
+    } catch (_) {}
 
-    // 3. تجهيز بايلود الكاشير مع تمرير البيانات الحقيقية
     Map<String, dynamic>? cashierPayload;
     if (printCustomer) {
       cashierPayload = ReceiptMapper.toCashierPayload(
         order: currentOrder,
-        settings: currentSettings, // تم تمرير الإعدادات الحقيقية هنا
+        settings: currentSettings,
         printerName: cashierPrinterName,
       );
     }
 
-    // 4. تجهيز بايلود الدليفري مع تمرير البيانات الحقيقية
     Map<String, dynamic>? deliveryPayload;
     if (currentOrder.orderType == OrderType.delivery &&
         currentOrder.driverName != null &&
@@ -332,20 +324,18 @@ class _PaymentDialogState extends State<PaymentDialog> {
         printDelivery) {
       deliveryPayload = ReceiptMapper.toDeliveryPayload(
         order: currentOrder,
-        settings: currentSettings, // تم تمرير الإعدادات الحقيقية هنا
+        settings: currentSettings,
         printerName: cashierPrinterName,
       );
 
-      // تفعيل طباعة نسختين
       deliveryPayload['copies'] = 2;
     }
-
-    // 5. استدعاء خدمة الطباعة لإرسال الداتا للـ API والسيرفر
-    // await PrintService.printOrderViaApi(cashierPayload, deliveryPayload);
   }
 
-  // ====== باقي الدوال المساعدة ======
-  Widget _buildPaymentMethod(int index, String label, IconData icon) {
+  // ====== دوال مساعدة ======
+  Widget _buildPaymentMethod(BuildContext context, int index, String label, IconData icon) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final selected = selectedPaymentIndex == index;
 
     return Tooltip(
@@ -368,14 +358,14 @@ class _PaymentDialogState extends State<PaymentDialog> {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           decoration: BoxDecoration(
-            color: selected ? const Color(0xff2563EB) : Colors.white,
+            color: selected ? colorScheme.primary : colorScheme.surface,
             borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? const Color(0xff2563EB) : Colors.grey.shade300,
+              color: selected ? colorScheme.primary : colorScheme.outlineVariant,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(.05),
+                color: colorScheme.shadow.withOpacity(0.05),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
@@ -387,15 +377,14 @@ class _PaymentDialogState extends State<PaymentDialog> {
               Icon(
                 icon,
                 size: 42,
-                color: selected ? Colors.white : const Color(0xff2563EB),
+                color: selected ? colorScheme.onPrimary : colorScheme.primary,
               ),
               const SizedBox(height: 14),
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 16,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: selected ? Colors.white : Colors.black87,
+                  color: selected ? colorScheme.onPrimary : theme.textTheme.bodyLarge?.color,
                 ),
               ),
             ],
@@ -449,6 +438,8 @@ class _PaymentDialogState extends State<PaymentDialog> {
       );
 
   Widget _quickAmountButton(double amount) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isExact = amount == widget.totalAmount;
 
     return Tooltip(
@@ -467,22 +458,22 @@ class _PaymentDialogState extends State<PaymentDialog> {
           child: Ink(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
             decoration: BoxDecoration(
-              color: isExact ? const Color(0xFF2563EB) : Colors.white,
+              color: isExact ? colorScheme.primary : colorScheme.surface,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isExact ? const Color(0xFF2563EB) : Colors.grey.shade300,
+                color: isExact ? colorScheme.primary : colorScheme.outlineVariant,
               ),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 if (isExact)
-                  const Icon(Icons.done, color: Colors.white, size: 16),
+                  Icon(Icons.done, color: colorScheme.onPrimary, size: 16),
                 if (isExact) const SizedBox(width: 6),
                 Text(
                   isExact ? "مطابق" : "${amount.toStringAsFixed(0)} ج.م",
-                  style: TextStyle(
-                    color: isExact ? Colors.white : Colors.black87,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: isExact ? colorScheme.onPrimary : theme.textTheme.bodyLarge?.color,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

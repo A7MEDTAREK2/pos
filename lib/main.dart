@@ -13,7 +13,11 @@ import 'core/data_mange/data_mange/local_mange.dart';
 import 'core/data_mange/data_mange/repo.dart';
 import 'core/service/printing/printing_manager.dart';
 import 'core/service/printing/service/modu_print_service.dart';
+import 'core/service/server_service.dart';
+import 'core/theming/app_theme.dart';
 import 'core/theming/colors manegments.dart';
+import 'core/theming/theme_cubit.dart';
+
 // ====== Splash ======
 import 'feature/driver/data/localdata.dart';
 import 'feature/driver/data/repo.dart';
@@ -83,19 +87,24 @@ import 'feature/sale/data/data_source/sales_history_local_data_source_impl.dart'
 import 'feature/sale/data/repo/local_rapo.dart';
 import 'feature/sale/logic/sale_cubit.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //PrintingManager.instance.startQueueWorker();
 
   if (Platform.isWindows || Platform.isLinux) {
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
   }
 
+  try {
+    await ServerService.start();
+    print("✅ Print Service Running");
+  } catch (e) {
+    print("❌ Print Service Error: $e");
+  }
+
+  PrintingManager.instance.startQueueWorker();
+
   runApp(const MyApp());
-
-  //PrintingManager.instance.startQueueWorker();
-
 }
 
 class MyApp extends StatelessWidget {
@@ -105,6 +114,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        // ====== Theme Cubit ======
+        BlocProvider<ThemeCubit>(
+          create: (_) => ThemeCubit(),
+        ),
+
         // ====== Home ======
         BlocProvider<HomeCubit>(
           create: (_) => HomeCubit(
@@ -274,16 +288,17 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Modu POS',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(
-            seedColor: Colorsmanegments.primary,
-          ),
-          fontFamily: 'Cairo',
-        ),
-        home: const SplashScreen(),
+      child: BlocBuilder<ThemeCubit, ThemeMode>(
+        builder: (context, themeMode) {
+          return MaterialApp(
+            debugShowCheckedModeBanner: false,
+            title: 'Modu POS',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeMode,
+            home: const SplashScreen(),
+          );
+        },
       ),
     );
   }

@@ -11,32 +11,35 @@ class PaymentMethodBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     Color bg;
     Color color;
     IconData icon;
 
     switch (method.toLowerCase()) {
       case "cash":
-        bg = const Color(0xFFDCFCE7);
-        color = const Color(0xFF16A34A);
+        bg = Colors.green.withOpacity(0.1);
+        color = Colors.green;
         icon = Icons.payments_outlined;
         break;
 
       case "visa":
-        bg = const Color(0xFFDBEAFE);
-        color = const Color(0xFF2563EB);
+        bg = colorScheme.primary.withOpacity(0.1);
+        color = colorScheme.primary;
         icon = Icons.credit_card;
         break;
 
       case "wallet":
-        bg = const Color(0xFFF3E8FF);
-        color = const Color(0xFF7C3AED);
+        bg = Colors.purple.withOpacity(0.1);
+        color = Colors.purple;
         icon = Icons.account_balance_wallet_outlined;
         break;
 
       default:
-        bg = const Color(0xFFF3F4F6);
-        color = Colors.grey;
+        bg = colorScheme.outlineVariant;
+        color = colorScheme.onSurface.withOpacity(0.5);
         icon = Icons.payment;
     }
 
@@ -60,8 +63,7 @@ class PaymentMethodBadge extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             method,
-            style: GoogleFonts.cairo(
-              fontSize: 12,
+            style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),

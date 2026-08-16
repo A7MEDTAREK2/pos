@@ -18,17 +18,20 @@ class DriverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colorsmanegments.border,
+          color: colorScheme.outlineVariant,
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.shadowLight,
+            color: colorScheme.shadow.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -43,14 +46,15 @@ class DriverCard extends StatelessWidget {
             height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: Colorsmanegments.primary.withOpacity(0.1),
+              color: colorScheme.primary.withOpacity(0.1),
             ),
             child: Center(
               child: Text(
                 driver.name.isNotEmpty ? driver.name[0] : '?',
-                style: TxtStyle.titleMedium.copyWith(
-                  color: Colorsmanegments.primary,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colorScheme.primary,
                   fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -64,8 +68,9 @@ class DriverCard extends StatelessWidget {
               children: [
                 Text(
                   driver.name,
-                  style: TxtStyle.titleSmall.copyWith(
+                  style: theme.textTheme.titleSmall?.copyWith(
                     fontSize: 15,
+                    fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -76,13 +81,13 @@ class DriverCard extends StatelessWidget {
                       Icon(
                         Icons.phone_rounded,
                         size: 14,
-                        color: Colorsmanegments.grey,
+                        color: colorScheme.onSurface.withOpacity(0.5),
                       ),
                       const SizedBox(width: 4),
                       Text(
                         driver.phone!,
-                        style: TxtStyle.bodySmall.copyWith(
-                          color: Colorsmanegments.grey,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.5),
                           fontSize: 13,
                         ),
                       ),
@@ -100,7 +105,7 @@ class DriverCard extends StatelessWidget {
                 onPressed: onEdit,
                 icon: Icon(
                   Icons.edit_rounded,
-                  color: Colorsmanegments.primary,
+                  color: colorScheme.primary,
                   size: 22,
                 ),
                 padding: EdgeInsets.zero,
@@ -115,7 +120,7 @@ class DriverCard extends StatelessWidget {
                 onPressed: onDelete,
                 icon: Icon(
                   Icons.delete_rounded,
-                  color: Colorsmanegments.danger,
+                  color: Colors.red,
                   size: 22,
                 ),
                 padding: EdgeInsets.zero,

@@ -25,11 +25,14 @@ class ProductTableRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Colorsmanegments.border),
+          bottom: BorderSide(color: theme.dividerColor),
         ),
       ),
       child: Row(
@@ -56,7 +59,7 @@ class ProductTableRow extends StatelessWidget {
                   : Icon(
                 Iconss.image,
                 size: 30,
-                color: Colorsmanegments.textSecondary,
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
               ),
             ),
           ),
@@ -69,7 +72,9 @@ class ProductTableRow extends StatelessWidget {
                 Flexible(
                   child: Text(
                     product.name,
-                    style: TxtStyle.tableRowBold,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -81,13 +86,14 @@ class ProductTableRow extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colorsmanegments.primaryLight,
+                      color: colorScheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
                       "${product.sizes!.length} أحجام",
-                      style: TxtStyle.badgeSmall.copyWith(
-                        color: Colorsmanegments.primary,
+                      style: theme.textTheme.labelSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -101,7 +107,7 @@ class ProductTableRow extends StatelessWidget {
             flex: 2,
             child: Text(
               product.barcode ?? "---",
-              style: TxtStyle.tableRow,
+              style: theme.textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
           ),
@@ -112,14 +118,15 @@ class ProductTableRow extends StatelessWidget {
             child: product.hasSizes
                 ? Text(
               "من ${product.displayPrice.toStringAsFixed(2)} ج.م",
-              style: TxtStyle.tableRowBold.copyWith(
-                color: Colorsmanegments.primary,
+              style: theme.textTheme.titleSmall?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
             )
                 : Text(
               "${product.sellPrice} ج.م",
-              style: TxtStyle.tableRow,
+              style: theme.textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
           ),
@@ -129,7 +136,7 @@ class ProductTableRow extends StatelessWidget {
             flex: 1,
             child: Text(
               "${product.quantity}",
-              style: TxtStyle.tableRow,
+              style: theme.textTheme.bodyMedium,
               textAlign: TextAlign.center,
             ),
           ),
@@ -144,7 +151,7 @@ class ProductTableRow extends StatelessWidget {
                   icon: Icon(
                     Iconss.edit,
                     size: 18,
-                    color: Colorsmanegments.primary,
+                    color: colorScheme.primary,
                   ),
                   onPressed: () {
                     final productCubit = context.read<ProductCubit>();
@@ -167,10 +174,9 @@ class ProductTableRow extends StatelessWidget {
                 ),
                 IconButton(
                   icon: Icon(
-
                     Iconss.delete,
                     size: 18,
-                    color: Colorsmanegments.danger,
+                    color: Colors.red,
                   ),
                   onPressed: () {
                     context.read<ProductCubit>().deleteProduct(product.id!);

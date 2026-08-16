@@ -24,20 +24,25 @@ class PosFinancialSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(30),
       child: Column(
         children: [
-          _buildSummaryCards(),
+          _buildSummaryCards(context),
           const SizedBox(height: 5),
-          const Divider(),
-          _buildTotalRow(),
+          Divider(color: theme.dividerColor),
+          _buildTotalRow(context),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryCards() {
+  Widget _buildSummaryCards(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -85,7 +90,10 @@ class PosFinancialSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalRow() {
+  Widget _buildTotalRow(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -93,12 +101,13 @@ class PosFinancialSummary extends StatelessWidget {
         children: [
           Text(
             "الإجمالي",
-            style: TxtStyle.totalMedium,
+            style: theme.textTheme.titleLarge,
           ),
           Text(
             "${totals.finalTotal.toStringAsFixed(2)} ج.م",
-            style: TxtStyle.totalLarge.copyWith(
-              color: Colorsmanegments.info,
+            style: theme.textTheme.headlineMedium?.copyWith(
+              color: colorScheme.primary,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ],

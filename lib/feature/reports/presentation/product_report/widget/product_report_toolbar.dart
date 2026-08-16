@@ -10,15 +10,18 @@ class ProductReportToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: colorScheme.shadow.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -31,25 +34,25 @@ class ProductReportToolbar extends StatelessWidget {
             child: Container(
               height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
+                color: colorScheme.background,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
+                border: Border.all(color: colorScheme.outlineVariant),
               ),
               child: TextField(
                 textDirection: TextDirection.rtl,
                 onChanged: (value) {
                   context.read<ProductReportCubit>().searchReport(value);
                 },
+                style: theme.textTheme.bodyMedium,
                 decoration: InputDecoration(
                   hintText: 'ابحث باسم المنتج...',
-                  hintStyle: GoogleFonts.cairo(
-                    fontSize: 13,
-                    color: const Color(0xFF9CA3AF),
+                  hintStyle: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.5),
                   ),
-                  prefixIcon: const Icon(
+                  prefixIcon: Icon(
                     Icons.search,
                     size: 18,
-                    color: Color(0xFF6B7280),
+                    color: colorScheme.onSurface.withOpacity(0.5),
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(horizontal: 14),
@@ -62,67 +65,67 @@ class ProductReportToolbar extends StatelessWidget {
 
           // ====== PDF Button ======
           _buildToolButton(
+            context,
             icon: Icons.picture_as_pdf,
             label: 'PDF',
-            color: const Color(0xFFDC2626),
-            onPressed: () {
-              // Export PDF
-            },
+            color: Colors.red,
+            onPressed: () {},
           ),
 
           const SizedBox(width: 8),
 
           // ====== Excel Button ======
           _buildToolButton(
+            context,
             icon: Icons.grid_on,
             label: 'Excel',
-            color: const Color(0xFF16A34A),
-            onPressed: () {
-              // Export Excel
-            },
+            color: Colors.green,
+            onPressed: () {},
           ),
 
           const SizedBox(width: 8),
 
           // ====== Print Button ======
           _buildToolButton(
+            context,
             icon: Icons.print,
             label: 'طباعة',
-            color: const Color(0xFF2563EB),
+            color: colorScheme.primary,
             isPrimary: true,
-            onPressed: () {
-              // Print
-            },
+            onPressed: () {},
           ),
         ],
       ),
     );
   }
 
-  Widget _buildToolButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onPressed,
-    bool isPrimary = false,
-  }) {
+  Widget _buildToolButton(
+      BuildContext context, {
+        required IconData icon,
+        required String label,
+        required Color color,
+        required VoidCallback onPressed,
+        bool isPrimary = false,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: isPrimary
           ? ElevatedButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon, size: 18, color: Colors.white),
+        icon: Icon(icon, size: 18, color: colorScheme.onPrimary),
         label: Text(
           label,
-          style: GoogleFonts.cairo(
-            fontSize: 13,
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
-            color: Colors.white,
+            color: colorScheme.onPrimary,
           ),
         ),
         style: ElevatedButton.styleFrom(
           backgroundColor: color,
-          foregroundColor: Colors.white,
+          foregroundColor: colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -135,8 +138,7 @@ class ProductReportToolbar extends StatelessWidget {
         icon: Icon(icon, size: 18, color: color),
         label: Text(
           label,
-          style: GoogleFonts.cairo(
-            fontSize: 13,
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w500,
             color: color,
           ),

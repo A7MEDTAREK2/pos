@@ -24,20 +24,22 @@ class SaleItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final total = item.quantity * item.price;
 
     return Container(
       margin: EdgeInsets.only(bottom: isCompact ? 6 : 10),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(isCompact ? 10 : 14),
         border: Border.all(
-          color: Colorsmanegments.border,
+          color: colorScheme.outlineVariant,
           width: 1.2,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.shadowLight,
+            color: colorScheme.shadow.withOpacity(0.05),
             blurRadius: isCompact ? 4 : 8,
             offset: const Offset(0, 2),
           ),
@@ -48,37 +50,40 @@ class SaleItemCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            _buildQuantityBadge(),
+            _buildQuantityBadge(context),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildProductName(),
+                  _buildProductName(context),
                   const SizedBox(height: 4),
-                  _buildProductDetails(),
+                  _buildProductDetails(context),
                   if (showNote && item.note != null && item.note!.isNotEmpty)
-                    _buildNote(),
+                    _buildNote(context),
                 ],
               ),
             ),
             const SizedBox(width: 8),
-            _buildTotalPrice(total),
+            _buildTotalPrice(context, total),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildQuantityBadge() {
+  Widget _buildQuantityBadge(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       width: isCompact ? 32 : 40,
       height: isCompact ? 32 : 40,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colorsmanegments.primary,
-            Colorsmanegments.primaryDark,
+            colorScheme.primary,
+            colorScheme.primary.withOpacity(0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -86,7 +91,7 @@ class SaleItemCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(isCompact ? 8 : 12),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.primary.withOpacity(0.3),
+            color: colorScheme.primary.withOpacity(0.3),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -95,7 +100,9 @@ class SaleItemCard extends StatelessWidget {
       child: Center(
         child: Text(
           '${item.quantity}',
-          style: TxtStyle.badge.copyWith(
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: colorScheme.onPrimary,
+            fontWeight: FontWeight.bold,
             fontSize: isCompact ? 14 : 16,
           ),
         ),
@@ -103,13 +110,14 @@ class SaleItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProductName() {
+  Widget _buildProductName(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Text(
       item.productName,
-      style: TextStyle(
+      style: theme.textTheme.titleSmall?.copyWith(
         fontSize: isCompact ? 14 : 16,
         fontWeight: FontWeight.w600,
-        color: Colorsmanegments.textPrimary,
         height: 1.2,
       ),
       maxLines: 1,
@@ -117,7 +125,9 @@ class SaleItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildProductDetails() {
+  Widget _buildProductDetails(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final hasSize = item.sizeName != null && item.sizeName!.isNotEmpty;
 
     return Wrap(
@@ -127,33 +137,33 @@ class SaleItemCard extends StatelessWidget {
       children: [
         Text(
           '${item.price.toStringAsFixed(2)} ج.م',
-          style: TxtStyle.bodySmall.copyWith(
+          style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w500,
           ),
         ),
-        _buildDotDivider(),
+        _buildDotDivider(context),
         Text(
           '× ${item.quantity}',
-          style: TxtStyle.bodySmall.copyWith(
+          style: theme.textTheme.bodySmall?.copyWith(
             fontWeight: FontWeight.w500,
           ),
         ),
         if (hasSize) ...[
-          _buildDotDivider(),
+          _buildDotDivider(context),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colorsmanegments.primary.withOpacity(0.1),
-                  Colorsmanegments.primary.withOpacity(0.2),
+                  colorScheme.primary.withOpacity(0.1),
+                  colorScheme.primary.withOpacity(0.2),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               borderRadius: BorderRadius.circular(6),
               border: Border.all(
-                color: Colorsmanegments.primary.withOpacity(0.2),
+                color: colorScheme.primary.withOpacity(0.2),
                 width: 0.8,
               ),
             ),
@@ -163,13 +173,14 @@ class SaleItemCard extends StatelessWidget {
                 Icon(
                   Iconss.size,
                   size: 12,
-                  color: Colorsmanegments.primary,
+                  color: colorScheme.primary,
                 ),
                 const SizedBox(width: 3),
                 Text(
                   item.sizeName!,
-                  style: TxtStyle.badgeSmall.copyWith(
-                    color: Colorsmanegments.primary,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -180,26 +191,31 @@ class SaleItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildDotDivider() {
+  Widget _buildDotDivider(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       width: 3,
       height: 3,
       decoration: BoxDecoration(
-        color: Colorsmanegments.border,
+        color: theme.dividerColor,
         shape: BoxShape.circle,
       ),
     );
   }
 
-  Widget _buildNote() {
+  Widget _buildNote(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       margin: const EdgeInsets.only(top: 4),
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colorsmanegments.warning.withOpacity(0.1),
+        color: Colors.amber.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: Colorsmanegments.warning.withOpacity(0.2),
+          color: Colors.amber.withOpacity(0.2),
           width: 0.5,
         ),
       ),
@@ -208,14 +224,14 @@ class SaleItemCard extends StatelessWidget {
           Icon(
             Iconss.noteOutline,
             size: 13,
-            color: Colorsmanegments.warning,
+            color: Colors.amber,
           ),
           const SizedBox(width: 4),
           Expanded(
             child: Text(
               item.note!,
-              style: TxtStyle.bodySmall.copyWith(
-                color: Colorsmanegments.textSecondary,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.6),
                 fontStyle: FontStyle.italic,
                 height: 1.2,
               ),
@@ -228,21 +244,23 @@ class SaleItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildTotalPrice(double total) {
+  Widget _buildTotalPrice(BuildContext context, double total) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colorsmanegments.success.withOpacity(0.1),
-            Colorsmanegments.success.withOpacity(0.2),
+            Colors.green.withOpacity(0.1),
+            Colors.green.withOpacity(0.2),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: Colorsmanegments.success.withOpacity(0.2),
+          color: Colors.green.withOpacity(0.2),
           width: 0.8,
         ),
       ),
@@ -251,16 +269,16 @@ class SaleItemCard extends StatelessWidget {
         children: [
           Text(
             '${total.toStringAsFixed(2)}',
-            style: TextStyle(
+            style: theme.textTheme.titleSmall?.copyWith(
               fontSize: isCompact ? 14 : 16,
               fontWeight: FontWeight.bold,
-              color: Colorsmanegments.success,
+              color: Colors.green,
             ),
           ),
           Text(
             'ج.م',
-            style: TxtStyle.labelSmall.copyWith(
-              color: Colorsmanegments.success.withOpacity(0.6),
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: Colors.green.withOpacity(0.6),
             ),
           ),
         ],

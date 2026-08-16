@@ -31,21 +31,24 @@ class CartPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       width: 550,
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         border: Border(
-          left: BorderSide(color: Colorsmanegments.borderLight),
+          left: BorderSide(color: colorScheme.outlineVariant),
         ),
       ),
       child: Column(
         children: [
-          _buildHeader(),
+          _buildHeader(context),
           _buildOrderTypeSelector(context),
           Flexible(
             child: Container(
-              color: Colorsmanegments.background,
+              color: colorScheme.background,
               child: CartItemsList(
                 items: cartItems,
                 cubit: cubit,
@@ -105,26 +108,29 @@ class CartPanel extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         border: Border(
-          bottom: BorderSide(color: Colorsmanegments.grey200),
+          bottom: BorderSide(color: colorScheme.outlineVariant),
         ),
       ),
       child: Row(
         children: [
           Icon(
             Iconss.cart,
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
           ),
           const SizedBox(width: 8),
           Text(
             "الطلب الحالي",
-            style: TxtStyle.titleSmall,
+            style: theme.textTheme.titleMedium,
           ),
           const Spacer(),
           Container(
@@ -133,13 +139,14 @@ class CartPanel extends StatelessWidget {
               vertical: 5,
             ),
             decoration: BoxDecoration(
-              color: Colorsmanegments.primaryLight,
+              color: colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               "${cartItems.length} منتج",
-              style: TxtStyle.badgeSmall.copyWith(
-                color: Colorsmanegments.primary,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -149,14 +156,17 @@ class CartPanel extends StatelessWidget {
   }
 
   Widget _buildOrderTypeSelector(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Card(
         elevation: 0,
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(18),
-          side: const BorderSide(color: Color(0xffE5E7EB)),
+          side: BorderSide(color: colorScheme.outlineVariant),
         ),
         child: Padding(
           padding: const EdgeInsets.all(16),

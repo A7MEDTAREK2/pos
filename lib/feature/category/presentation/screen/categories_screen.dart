@@ -19,14 +19,15 @@ class CategoriesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colorsmanegments.background,
+      backgroundColor: colorScheme.background,
       body: Padding(
         padding: const EdgeInsets.all(32.0),
         child: BlocConsumer<CategoryCubit, CategoryState>(
-          listener: (context, state) {
-            // تم إزالة SnackBar
-          },
+          listener: (context, state) {},
           builder: (context, state) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -36,8 +37,8 @@ class CategoriesScreen extends StatelessWidget {
                 Expanded(
                   child: _buildGridContent(context, state),
                 ),
-                const Divider(height: 40),
-                _buildFooter(state),
+                Divider(color: theme.dividerColor, height: 40),
+                _buildFooter(context, state),
               ],
             );
           },
@@ -50,6 +51,9 @@ class CategoriesScreen extends StatelessWidget {
   // Header
   // ============================================================
   Widget _buildHeader(BuildContext context, CategoryState state) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Row(
       children: [
         Tooltip(
@@ -59,7 +63,7 @@ class CategoriesScreen extends StatelessWidget {
             icon: Icon(
               Iconss.arrowBack,
               size: 28,
-              color: Colorsmanegments.textPrimary,
+              color: theme.textTheme.bodyLarge?.color,
             ),
             onPressed: () => Navigator.pop(context),
           ),
@@ -70,15 +74,17 @@ class CategoriesScreen extends StatelessWidget {
           children: [
             Text(
               "إدارة المنتجات",
-              style: TxtStyle.labelLarge.copyWith(
-                color: Colorsmanegments.primary,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               "الأقسام",
-              style: TxtStyle.headerMedium,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),
@@ -90,11 +96,11 @@ class CategoriesScreen extends StatelessWidget {
   // Grid Content
   // ============================================================
   Widget _buildGridContent(BuildContext context, CategoryState state) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     if (state is CategoryLoading) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: Colorsmanegments.primary,
-        ),
+        child: CircularProgressIndicator(),
       );
     }
     List<CategoryModel> categories = (state is CategorySuccess) ? state.categories : [];
@@ -117,18 +123,21 @@ class CategoriesScreen extends StatelessWidget {
   // Category Card
   // ============================================================
   Widget _buildCategoryCard(BuildContext context, CategoryModel category, int index) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Tooltip(
       message: "Ctrl + ${index + 1} - ${category.name}",
       waitDuration: const Duration(milliseconds: 300),
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colorsmanegments.card,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colorsmanegments.border),
+          border: Border.all(color: colorScheme.outlineVariant),
           boxShadow: [
             BoxShadow(
-              color: Colorsmanegments.blackOpacity10,
+              color: colorScheme.shadow.withOpacity(0.08),
               blurRadius: 8,
               offset: const Offset(0, 2),
             ),
@@ -144,18 +153,18 @@ class CategoriesScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colorsmanegments.background,
+                    color: colorScheme.background,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     Iconss.restaurant,
-                    color: Colorsmanegments.textPrimary,
+                    color: theme.textTheme.bodyLarge?.color,
                   ),
                 ),
                 PopupMenuButton<String>(
                   icon: Icon(
                     Iconss.more,
-                    color: Colorsmanegments.textSecondary,
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                   ),
                   onSelected: (value) {
                     if (value == 'edit') _openEditCategoryDialog(context, category);
@@ -178,13 +187,13 @@ class CategoriesScreen extends StatelessWidget {
                         children: [
                           Icon(
                             Iconss.delete,
-                            color: Colorsmanegments.danger,
+                            color: Colors.red,
                             size: 18,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             'حذف',
-                            style: TxtStyle.danger,
+                            style: TextStyle(color: Colors.red),
                           ),
                         ],
                       ),
@@ -198,7 +207,7 @@ class CategoriesScreen extends StatelessWidget {
               children: [
                 Text(
                   category.name,
-                  style: TxtStyle.titleSmall,
+                  style: theme.textTheme.titleMedium,
                 ),
                 const SizedBox(height: 4),
                 Row(
@@ -206,12 +215,12 @@ class CategoriesScreen extends StatelessWidget {
                     Icon(
                       Iconss.success,
                       size: 8,
-                      color: Colorsmanegments.success,
+                      color: Colors.green,
                     ),
                     const SizedBox(width: 6),
                     Text(
                       "قسم مفعل",
-                      style: TxtStyle.bodySmall,
+                      style: theme.textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -227,6 +236,9 @@ class CategoriesScreen extends StatelessWidget {
   // Create New Card
   // ============================================================
   Widget _buildCreateNewCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Tooltip(
       message: "Ctrl + N - إضافة قسم جديد",
       waitDuration: const Duration(milliseconds: 300),
@@ -235,10 +247,10 @@ class CategoriesScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         child: Container(
           decoration: BoxDecoration(
-            color: Colorsmanegments.card.withOpacity(0.4),
+            color: colorScheme.surface.withOpacity(0.4),
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: Colorsmanegments.primary.withOpacity(0.4),
+              color: colorScheme.primary.withOpacity(0.4),
               width: 1.5,
             ),
           ),
@@ -248,17 +260,17 @@ class CategoriesScreen extends StatelessWidget {
               Icon(
                 Iconss.addCircle,
                 size: 40,
-                color: Colorsmanegments.primary.withOpacity(0.7),
+                color: colorScheme.primary.withOpacity(0.7),
               ),
               const SizedBox(height: 12),
               Text(
                 "إضافة قسم",
-                style: TxtStyle.titleSmall,
+                style: theme.textTheme.titleMedium,
               ),
               const SizedBox(height: 4),
               Text(
                 "إنشاء تصنيف جديد",
-                style: TxtStyle.bodySmall,
+                style: theme.textTheme.bodySmall,
               ),
             ],
           ),
@@ -270,13 +282,14 @@ class CategoriesScreen extends StatelessWidget {
   // ============================================================
   // Footer
   // ============================================================
-  Widget _buildFooter(CategoryState state) {
+  Widget _buildFooter(BuildContext context, CategoryState state) {
+    final theme = Theme.of(context);
     int count = (state is CategorySuccess) ? state.categories.length : 0;
     return Row(
       children: [
         Text(
           "عرض $count أقسام مفعلة حالياً.",
-          style: TxtStyle.bodySmall,
+          style: theme.textTheme.bodySmall,
         ),
       ],
     );
@@ -295,19 +308,23 @@ class CategoriesScreen extends StatelessWidget {
   }
 
   void _showDeleteConfirmation(BuildContext context, CategoryModel category) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
           'حذف القسم',
-          style: TxtStyle.headerSmall,
+          style: theme.textTheme.titleLarge,
         ),
         content: Text(
           'هل أنت متأكد من حذف قسم "${category.name}" نهائياً؟',
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium,
         ),
         actions: [
           Tooltip(
@@ -317,7 +334,9 @@ class CategoriesScreen extends StatelessWidget {
               onPressed: () => Navigator.pop(dialogContext),
               child: Text(
                 'إلغاء',
-                style: TxtStyle.buttonPrimary,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.primary,
+                ),
               ),
             ),
           ),
@@ -326,7 +345,8 @@ class CategoriesScreen extends StatelessWidget {
             waitDuration: const Duration(milliseconds: 300),
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colorsmanegments.danger,
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
               ),
               onPressed: () {
                 context.read<CategoryCubit>().deleteCategory(category.id!);
@@ -334,7 +354,10 @@ class CategoriesScreen extends StatelessWidget {
               },
               child: Text(
                 'حذف',
-                style: TxtStyle.buttonMedium,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -344,34 +367,42 @@ class CategoriesScreen extends StatelessWidget {
   }
 
   void _openEditCategoryDialog(BuildContext context, CategoryModel category) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final TextEditingController controller = TextEditingController(text: category.name);
+
     showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
+        backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
         title: Text(
           'تعديل اسم القسم',
-          style: TxtStyle.headerSmall,
+          style: theme.textTheme.titleLarge,
         ),
         content: Tooltip(
           message: "Ctrl + E - تعديل الاسم",
           waitDuration: const Duration(milliseconds: 300),
           child: TextFormField(
             controller: controller,
-            style: TxtStyle.bodyMedium,
+            style: theme.textTheme.bodyMedium,
             decoration: InputDecoration(
               hintText: 'اسم القسم',
-              hintStyle: TxtStyle.hint,
+              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colorsmanegments.border),
+                borderSide: BorderSide(color: colorScheme.outlineVariant),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide(color: Colorsmanegments.primary, width: 2),
+                borderSide: BorderSide(color: colorScheme.primary, width: 2),
               ),
+              filled: true,
+              fillColor: colorScheme.background,
             ),
           ),
         ),
@@ -383,7 +414,9 @@ class CategoriesScreen extends StatelessWidget {
               onPressed: () => Navigator.pop(dialogContext),
               child: Text(
                 'إلغاء',
-                style: TxtStyle.buttonPrimary,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.primary,
+                ),
               ),
             ),
           ),
@@ -391,6 +424,10 @@ class CategoriesScreen extends StatelessWidget {
             message: "Enter - حفظ",
             waitDuration: const Duration(milliseconds: 300),
             child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
+              ),
               onPressed: () {
                 context.read<CategoryCubit>().updateExistingCategory(
                   CategoryModel(id: category.id, name: controller.text),
@@ -399,7 +436,10 @@ class CategoriesScreen extends StatelessWidget {
               },
               child: Text(
                 'حفظ',
-                style: TxtStyle.buttonMedium,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),

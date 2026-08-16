@@ -38,6 +38,9 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MultiBlocProvider(
       providers: [
         BlocProvider.value(
@@ -125,7 +128,7 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
             final cubit = context.read<OrderCubit>();
             _editValue(
               context: context,
-              title: "رسوم التوصيل",
+              title: "رسوم التويل",
               currentValue: cubit.deliveryFee,
               onSave: (v) => cubit.setDeliveryFee(v),
             );
@@ -172,7 +175,7 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
           },
         },
         child: Scaffold(
-          backgroundColor: Colorsmanegments.background,
+          backgroundColor: colorScheme.background,
           body: SafeArea(
             child: BlocConsumer<OrderCubit, OrderState>(
               listener: (context, state) {
@@ -269,20 +272,35 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
 
   void _showClearCartConfirmation(BuildContext context) {
     final cubit = context.read<OrderCubit>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('مسح السلة'),
-        content: const Text('هل أنت متأكد من مسح جميع المنتجات من السلة؟'),
+        backgroundColor: colorScheme.surface,
+        title: Text(
+          'مسح السلة',
+          style: theme.textTheme.titleLarge,
+        ),
+        content: Text(
+          'هل أنت متأكد من مسح جميع المنتجات من السلة؟',
+          style: theme.textTheme.bodyMedium,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('إلغاء'),
+            child: Text(
+              'إلغاء',
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+              ),
+            ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
             ),
             onPressed: () {
               cubit.clearCart();

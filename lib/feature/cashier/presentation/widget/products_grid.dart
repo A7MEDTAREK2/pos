@@ -19,7 +19,8 @@ class PosProductsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cubit = context.watch<OrderCubit>();
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     return BlocBuilder<ProductCubit, ProductState>(
       builder: (context, state) {
@@ -36,7 +37,7 @@ class PosProductsGrid extends StatelessWidget {
             itemBuilder: (context, index) {
               final product = state.products[index];
 
-              return _buildProductCard(context, cubit, product, index);
+              return _buildProductCard(context, product, index);
             },
           );
         }
@@ -47,26 +48,28 @@ class PosProductsGrid extends StatelessWidget {
 
   Widget _buildProductCard(
       BuildContext context,
-      OrderCubit orderCubit,
       ProductModel product,
       int index,
       ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Tooltip(
       message: "Ctrl + ${index + 1} - ${product.name}",
       waitDuration: const Duration(milliseconds: 300),
       child: Material(
-        color: Colorsmanegments.transparent,
+        color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () => onProductTap(product),
           child: Ink(
             decoration: BoxDecoration(
-              color: Colorsmanegments.card,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colorsmanegments.border),
+              border: Border.all(color: colorScheme.outlineVariant),
               boxShadow: [
                 BoxShadow(
-                  color: Colorsmanegments.blackOpacity10,
+                  color: colorScheme.shadow.withOpacity(0.08),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -81,7 +84,7 @@ class PosProductsGrid extends StatelessWidget {
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Colorsmanegments.background,
+                        color: colorScheme.background,
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: ClipRRect(
@@ -96,7 +99,7 @@ class PosProductsGrid extends StatelessWidget {
                             : Icon(
                           Iconss.food,
                           size: 70,
-                          color: Colorsmanegments.blueGrey,
+                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
                         ),
                       ),
                     ),
@@ -107,7 +110,7 @@ class PosProductsGrid extends StatelessWidget {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    style: TxtStyle.bodyLarge.copyWith(
+                    style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -116,8 +119,9 @@ class PosProductsGrid extends StatelessWidget {
                     product.hasSizes
                         ? "من ${product.displayPrice.toStringAsFixed(2)} ج.م"
                         : "${product.sellPrice ?? 0} ج.م",
-                    style: TxtStyle.titleSmall.copyWith(
-                      color: Colorsmanegments.primary,
+                    style: theme.textTheme.titleSmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -130,7 +134,8 @@ class PosProductsGrid extends StatelessWidget {
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
                           elevation: 0,
-                          backgroundColor: Colorsmanegments.primary,
+                          backgroundColor: colorScheme.primary,
+                          foregroundColor: colorScheme.onPrimary,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -138,12 +143,15 @@ class PosProductsGrid extends StatelessWidget {
                         onPressed: () => onProductTap(product),
                         icon: Icon(
                           Iconss.add,
-                          color: Colorsmanegments.textWhite,
+                          color: colorScheme.onPrimary,
                           size: 18,
                         ),
                         label: Text(
                           "إضافة",
-                          style: TxtStyle.buttonSmall,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: colorScheme.onPrimary,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),

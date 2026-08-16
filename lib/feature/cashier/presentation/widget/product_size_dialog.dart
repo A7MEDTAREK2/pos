@@ -22,7 +22,11 @@ class ProductSizeDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -38,7 +42,7 @@ class ProductSizeDialog extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
@@ -50,14 +54,14 @@ class ProductSizeDialog extends StatelessWidget {
                     children: [
                       Icon(
                         Iconss.size,
-                        color: Colorsmanegments.textWhite,
+                        color: colorScheme.onPrimary,
                         size: 20,
                       ),
                       const SizedBox(width: 8),
                       Text(
                         "اختر الحجم",
-                        style: TxtStyle.bodyMedium.copyWith(
-                          color: Colorsmanegments.textWhite,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onPrimary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -71,7 +75,7 @@ class ProductSizeDialog extends StatelessWidget {
                           onPressed: () => Navigator.pop(context),
                           icon: Icon(
                             Iconss.close,
-                            color: Colorsmanegments.textWhite,
+                            color: colorScheme.onPrimary,
                             size: 20,
                           ),
                         ),
@@ -81,8 +85,10 @@ class ProductSizeDialog extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     product.name,
-                    style: TxtStyle.headerWhite.copyWith(
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: colorScheme.onPrimary,
                       fontSize: 20,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
@@ -115,10 +121,10 @@ class ProductSizeDialog extends StatelessWidget {
                             vertical: 14,
                           ),
                           decoration: BoxDecoration(
-                            color: Colorsmanegments.background,
+                            color: colorScheme.background,
                             borderRadius: BorderRadius.circular(12),
                             border: Border.all(
-                              color: Colorsmanegments.border,
+                              color: colorScheme.outlineVariant,
                             ),
                           ),
                           child: Row(
@@ -126,12 +132,12 @@ class ProductSizeDialog extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(8),
                                 decoration: BoxDecoration(
-                                  color: Colorsmanegments.primary.withOpacity(0.1),
+                                  color: colorScheme.primary.withOpacity(0.1),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Icon(
                                   Iconss.food,
-                                  color: Colorsmanegments.primary,
+                                  color: colorScheme.primary,
                                   size: 18,
                                 ),
                               ),
@@ -139,19 +145,21 @@ class ProductSizeDialog extends StatelessWidget {
                               Expanded(
                                 child: Text(
                                   size.sizeName,
-                                  style: TxtStyle.titleSmall,
+                                  style: theme.textTheme.titleMedium,
                                 ),
                               ),
                               Text(
                                 "${size.price.toStringAsFixed(2)} ج.م",
-                                style: TxtStyle.buttonPrimary.copyWith(
+                                style: theme.textTheme.labelLarge?.copyWith(
                                   fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: colorScheme.primary,
                                 ),
                               ),
                               const SizedBox(width: 4),
                               Icon(
                                 Iconss.arrowForward,
-                                color: Colorsmanegments.textSecondary,
+                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                                 size: 20,
                               ),
                             ],

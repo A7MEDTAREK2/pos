@@ -17,15 +17,18 @@ class DashboardCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colorsmanegments.border),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.shadowLight,
+            color: colorScheme.shadow.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),

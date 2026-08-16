@@ -9,12 +9,14 @@ import 'package:home/feature/reports/presentation/Stock%20Report/widget/stock_ta
 import '../../../logic/report/stock_report_cubit.dart';
 import '../../../logic/report/stock_report_state.dart';
 
-
 class StockReportTable extends StatelessWidget {
   const StockReportTable({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocBuilder<StockReportCubit, StockReportState>(
       builder: (context, state) {
         if (state is! StockReportLoaded) {
@@ -26,15 +28,15 @@ class StockReportTable extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: const Color(0xFFE5E7EB),
+              color: colorScheme.outlineVariant,
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: colorScheme.shadow.withOpacity(0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -45,7 +47,7 @@ class StockReportTable extends StatelessWidget {
               const StockTableHeader(),
               Container(
                 height: 1,
-                color: const Color(0xFFE5E7EB),
+                color: colorScheme.outlineVariant,
               ),
               Expanded(
                 child: ListView.separated(
@@ -58,10 +60,9 @@ class StockReportTable extends StatelessWidget {
                       index: index + 1,
                       productName: stock.productName,
                       quantity: stock.quantity,
-
                       stockValue: stock.stockValue,
-
-                      isEven: index % 2 == 0, status: '',
+                      isEven: index % 2 == 0,
+                      status: '', // سيتم تعديله حسب البيانات الفعلية
                     );
                   },
                 ),
@@ -69,13 +70,13 @@ class StockReportTable extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: colorScheme.background,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(14),
                     bottomRight: Radius.circular(14),
                   ),
                   border: Border(
-                    top: BorderSide(color: const Color(0xFFE5E7EB)),
+                    top: BorderSide(color: colorScheme.outlineVariant),
                   ),
                 ),
                 child: Row(
@@ -83,29 +84,32 @@ class StockReportTable extends StatelessWidget {
                   children: [
                     Text(
                       'إجمالي النتائج: ${cubit.totalCount}',
-                      style: GoogleFonts.cairo(
-                        fontSize: 13,
-                        color: const Color(0xFF6B7280),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
                     Row(
                       children: [
                         _buildPaginationButton(
+                          context,
                           icon: Icons.chevron_left,
                           isActive: cubit.page > 0,
                           onPressed: cubit.previousPage,
                         ),
                         const SizedBox(width: 4),
                         _buildPaginationNumber(
+                          context,
                           '${cubit.page + 1}',
                           true,
                         ),
                         _buildPaginationNumber(
+                          context,
                           '${cubit.totalPages}',
                           false,
                         ),
                         const SizedBox(width: 4),
                         _buildPaginationButton(
+                          context,
                           icon: Icons.chevron_right,
                           isActive: cubit.page < cubit.totalPages - 1,
                           onPressed: cubit.nextPage,
@@ -122,29 +126,35 @@ class StockReportTable extends StatelessWidget {
     );
   }
 
-  Widget _buildPaginationButton({
-    required IconData icon,
-    required bool isActive,
-    required VoidCallback onPressed,
-  }) {
+  Widget _buildPaginationButton(
+      BuildContext context, {
+        required IconData icon,
+        required bool isActive,
+        required VoidCallback onPressed,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: isActive ? SystemMouseCursors.click : SystemMouseCursors.basic,
       child: Container(
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: isActive ? const Color(0xFF2563EB) : const Color(0xFFF3F4F6),
+          color: isActive ? colorScheme.primary : colorScheme.background,
           borderRadius: BorderRadius.circular(8),
           border: isActive
               ? null
-              : Border.all(color: const Color(0xFFE5E7EB), width: 1),
+              : Border.all(color: colorScheme.outlineVariant, width: 1),
         ),
         child: IconButton(
           onPressed: isActive ? onPressed : null,
           icon: Icon(
             icon,
             size: 18,
-            color: isActive ? Colors.white : const Color(0xFF9CA3AF),
+            color: isActive
+                ? colorScheme.onPrimary
+                : colorScheme.onSurface.withOpacity(0.4),
           ),
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(),
@@ -154,7 +164,14 @@ class StockReportTable extends StatelessWidget {
     );
   }
 
-  Widget _buildPaginationNumber(String number, bool isSelected) {
+  Widget _buildPaginationNumber(
+      BuildContext context,
+      String number,
+      bool isSelected,
+      ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: AnimatedContainer(
@@ -162,7 +179,7 @@ class StockReportTable extends StatelessWidget {
         width: 32,
         height: 32,
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
+          color: isSelected ? colorScheme.primary : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: isSelected
               ? null
@@ -171,10 +188,11 @@ class StockReportTable extends StatelessWidget {
         child: Center(
           child: Text(
             number,
-            style: GoogleFonts.cairo(
-              fontSize: 13,
+            style: theme.textTheme.bodySmall?.copyWith(
               fontWeight: isSelected ? FontWeight.bold : FontWeight.w400,
-              color: isSelected ? Colors.white : const Color(0xFF6B7280),
+              color: isSelected
+                  ? colorScheme.onPrimary
+                  : colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ),

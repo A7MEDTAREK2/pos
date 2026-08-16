@@ -98,30 +98,33 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colorsmanegments.backgroundDark,
+      backgroundColor: colorScheme.background,
       appBar: AppBar(
-        backgroundColor: Colorsmanegments.card,
+        backgroundColor: colorScheme.surface,
         elevation: 0,
         centerTitle: true,
         title: Text(
           'الأوردرات المحجوزة',
-          style: TxtStyle.headerMedium.copyWith(
-            color: Colorsmanegments.textPrimary,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontWeight: FontWeight.bold,
           ),
         ),
         leading: IconButton(
           icon: Icon(
             Iconss.arrowBack,
-            color: Colorsmanegments.textPrimary,
+            color: theme.textTheme.bodyLarge?.color,
           ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: Column(
         children: [
-          _buildFilterBar(),
-          _buildSearchBar(),
+          _buildFilterBar(context),
+          _buildSearchBar(context),
           Expanded(
             child: BlocBuilder<OrderCubit, OrderState>(
               builder: (context, state) {
@@ -133,7 +136,7 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
                   final orders = _filterOrders(state.holdingOrders);
 
                   if (orders.isEmpty) {
-                    return _buildEmptyState();
+                    return _buildEmptyState(context);
                   }
 
                   return ListView.separated(
@@ -141,7 +144,7 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
                     itemCount: orders.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 12),
                     itemBuilder: (_, index) {
-                      return _buildOrderCard(orders[index]);
+                      return _buildOrderCard(context, orders[index]);
                     },
                   );
                 }
@@ -155,18 +158,26 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
     );
   }
 
-  Widget _buildFilterBar() => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: Row(
-      children: List.generate(
-        tabs.length,
-            (index) => Expanded(child: _buildTabItem(index)),
-      ),
-    ),
-  );
+  Widget _buildFilterBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
-  Widget _buildTabItem(int index) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Row(
+        children: List.generate(
+          tabs.length,
+              (index) => Expanded(child: _buildTabItem(context, index)),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTabItem(BuildContext context, int index) {
     final isSelected = selectedTabIndex == index;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return GestureDetector(
       onTap: () {
         setState(() {
@@ -178,10 +189,10 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? Colorsmanegments.info : Colorsmanegments.card,
+          color: isSelected ? colorScheme.primary : colorScheme.surface,
           borderRadius: BorderRadius.circular(10),
           border: Border.all(
-            color: isSelected ? Colorsmanegments.info : Colorsmanegments.grey300,
+            color: isSelected ? colorScheme.primary : colorScheme.outlineVariant,
           ),
         ),
         child: Center(
@@ -192,18 +203,17 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
                 _getTabIcon(index),
                 size: 18,
                 color: isSelected
-                    ? Colorsmanegments.textWhite
-                    : Colorsmanegments.grey,
+                    ? colorScheme.onPrimary
+                    : theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
               ),
               const SizedBox(width: 6),
               Text(
                 tabs[index],
-                style: TextStyle(
+                style: theme.textTheme.labelLarge?.copyWith(
                   color: isSelected
-                      ? Colorsmanegments.textWhite
-                      : Colorsmanegments.textPrimary,
+                      ? colorScheme.onPrimary
+                      : theme.textTheme.bodyLarge?.color,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'Cairo',
                 ),
               ),
             ],
@@ -228,204 +238,242 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
     }
   }
 
-  Widget _buildSearchBar() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    child: TextField(
-      controller: searchController,
-      decoration: InputDecoration(
-        hintText: 'ابحث برقم الأوردر أو اسم العميل أو رقم الطاولة',
-        hintStyle: TxtStyle.hint.copyWith(fontFamily: 'Cairo'),
-        prefixIcon: Icon(
-          Iconss.search,
-          color: Colorsmanegments.grey,
-        ),
-        suffixIcon: searchController.text.isNotEmpty
-            ? IconButton(
-          icon: Icon(
-            Iconss.clear,
-            color: Colorsmanegments.grey,
+  Widget _buildSearchBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: TextField(
+        controller: searchController,
+        style: theme.textTheme.bodyMedium,
+        decoration: InputDecoration(
+          hintText: 'ابحث برقم الأوردر أو اسم العميل أو رقم الطاولة',
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            fontFamily: 'Cairo',
           ),
-          onPressed: () => searchController.clear(),
-        )
-            : null,
-        filled: true,
-        fillColor: Colorsmanegments.card,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+          prefixIcon: Icon(
+            Iconss.search,
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+          ),
+          suffixIcon: searchController.text.isNotEmpty
+              ? IconButton(
+            icon: Icon(
+              Iconss.clear,
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+            ),
+            onPressed: () => searchController.clear(),
+          )
+              : null,
+          filled: true,
+          fillColor: colorScheme.surface,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 
-  Widget _buildOrderCard(OrderModel order) => Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colorsmanegments.card,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: Colorsmanegments.blackOpacity10,
-          blurRadius: 10,
-          offset: const Offset(0, 4),
-        ),
-      ],
-    ),
-    child: Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "أوردر #${order.orderNumber}",
-                  style: TxtStyle.titleSmall,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "${order.items.length} صنف",
-                  style: TxtStyle.bodySmall,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "${_getOrderType(order.orderType)} | ${order.createdAt.hour}:${order.createdAt.minute.toString().padLeft(2, '0')}",
-                  style: TxtStyle.bodySmall,
-                ),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: _getOrderColor(order.orderType).withOpacity(0.12),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+  Widget _buildOrderCard(BuildContext context, OrderModel order) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: colorScheme.shadow.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    _getOrderIcon(order.orderType),
-                    size: 16,
-                    color: _getOrderColor(order.orderType),
-                  ),
-                  const SizedBox(width: 5),
                   Text(
-                    _getOrderType(order.orderType),
-                    style: TextStyle(
-                      color: _getOrderColor(order.orderType),
-                      fontWeight: FontWeight.bold,
-                    ),
+                    "أوردر #${order.orderNumber}",
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "${order.items.length} صنف",
+                    style: theme.textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    "${_getOrderType(order.orderType)} | ${order.createdAt.hour}:${order.createdAt.minute.toString().padLeft(2, '0')}",
+                    style: theme.textTheme.bodySmall,
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-        const Divider(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (order.customerName != null && order.customerName!.isNotEmpty)
-                  Text("👤 ${order.customerName}"),
-                if (order.customerPhone != null && order.customerPhone!.isNotEmpty)
-                  Text("📞 ${order.customerPhone}"),
-                if (order.tableNumber != null && order.tableNumber!.isNotEmpty)
-                  Text("🍽 ${order.tableNumber}"),
-                if (order.customerAddress != null && order.customerAddress!.isNotEmpty)
-                  Text(
-                    "📍 ${order.customerAddress}",
-                    style: TxtStyle.bodySmall,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: _getOrderColor(order.orderType).withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _getOrderIcon(order.orderType),
+                      size: 16,
+                      color: _getOrderColor(order.orderType),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      _getOrderType(order.orderType),
+                      style: TextStyle(
+                        color: _getOrderColor(order.orderType),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          Divider(
+            height: 24,
+            color: theme.dividerColor,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (order.customerName != null && order.customerName!.isNotEmpty)
+                    Text(
+                      "👤 ${order.customerName}",
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  if (order.customerPhone != null && order.customerPhone!.isNotEmpty)
+                    Text(
+                      "📞 ${order.customerPhone}",
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  if (order.tableNumber != null && order.tableNumber!.isNotEmpty)
+                    Text(
+                      "🍽 ${order.tableNumber}",
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  if (order.customerAddress != null && order.customerAddress!.isNotEmpty)
+                    Text(
+                      "📍 ${order.customerAddress}",
+                      style: theme.textTheme.bodySmall,
+                    ),
+                  if ((order.customerName == null || order.customerName!.isEmpty) &&
+                      (order.tableNumber == null || order.tableNumber!.isEmpty) &&
+                      (order.customerAddress == null || order.customerAddress!.isEmpty))
+                    Text(
+                      "بدون بيانات",
+                      style: theme.textTheme.bodySmall,
+                    ),
+                ],
+              ),
+              Text(
+                "${order.totalAmount.toStringAsFixed(2)} ج.م",
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () {
+                    context.read<OrderCubit>().loadHoldingOrder(order);
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    "فتح الأوردر",
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: colorScheme.primary,
+                    ),
                   ),
-                if ((order.customerName == null || order.customerName!.isEmpty) &&
-                    (order.tableNumber == null || order.tableNumber!.isEmpty) &&
-                    (order.customerAddress == null || order.customerAddress!.isEmpty))
-                  Text(
-                    "بدون بيانات",
-                    style: TxtStyle.bodySmall,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.red),
                   ),
-              ],
-            ),
-            Text(
-              "${order.totalAmount.toStringAsFixed(2)} ج.م",
-              style: TxtStyle.totalLarge.copyWith(
-                color: Colorsmanegments.info,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () {
-                  context.read<OrderCubit>().loadHoldingOrder(order);
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  "فتح الأوردر",
-                  style: TxtStyle.buttonPrimary,
+                  onPressed: () {
+                    context.read<OrderCubit>().deleteHoldingOrder(order.id!);
+                  },
+                  child: Text(
+                    "حذف الأوردر",
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: Colors.red,
+                    ),
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: OutlinedButton(
-                style: OutlinedButton.styleFrom(
-                  side: BorderSide(color: Colorsmanegments.danger),
-                ),
-                onPressed: () {
-                  context.read<OrderCubit>().deleteHoldingOrder(order.id!);
-                },
-                child: Text(
-                  "حذف الأوردر",
-                  style: TxtStyle.buttonDanger,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
-    ),
-  );
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
-  Widget _buildEmptyState() => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          Iconss.orderEmpty,
-          size: 80,
-          color: Colorsmanegments.grey300,
-        ),
-        const SizedBox(height: 16),
-        Text(
-          "لا توجد أوردرات محجوزة",
-          style: TxtStyle.emptyTitle.copyWith(
-            color: Colorsmanegments.grey,
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Iconss.orderEmpty,
+            size: 80,
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.3),
           ),
-        ),
-        const SizedBox(height: 16),
-        TextButton.icon(
-          onPressed: () {
-            context.read<OrderCubit>().fetchHoldingOrders();
-          },
-          icon: Icon(
-            Iconss.refresh,
-            color: Colorsmanegments.primary,
+          const SizedBox(height: 16),
+          Text(
+            "لا توجد أوردرات محجوزة",
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+            ),
           ),
-          label: Text(
-            "تحديث",
-            style: TxtStyle.buttonPrimary,
+          const SizedBox(height: 16),
+          TextButton.icon(
+            onPressed: () {
+              context.read<OrderCubit>().fetchHoldingOrders();
+            },
+            icon: Icon(
+              Iconss.refresh,
+              color: colorScheme.primary,
+            ),
+            label: Text(
+              "تحديث",
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+              ),
+            ),
           ),
-        ),
-      ],
-    ),
-  );
+        ],
+      ),
+    );
+  }
 }
 
 String _getOrderType(OrderType type) {

@@ -16,7 +16,7 @@ import '../../../category/data/model/category_model.dart';
 // ====== Product ======
 import '../../data/model/product_model.dart';
 import '../../logic/product_cubit.dart';
-import '../../logic/product_state.dart'; // 🎯 تم الاستيراد للوصول لحالات الـ Cubit
+import '../../logic/product_state.dart';
 
 class AddProductDialog extends StatefulWidget {
   final List<CategoryModel> categories;
@@ -188,7 +188,11 @@ class _AddProductDialogState extends State<AddProductDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480, maxHeight: 640),
@@ -200,7 +204,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
@@ -209,21 +213,25 @@ class _AddProductDialogState extends State<AddProductDialog> {
                 children: [
                   Icon(
                     Iconss.product,
-                    color: Colorsmanegments.textWhite,
+                    color: colorScheme.onPrimary,
                   ),
                   const SizedBox(width: 10),
                   Text(
                     widget.productToEdit == null
                         ? "إضافة منتج جديد"
                         : "تعديل المنتج",
-                    style: TxtStyle.headerWhite.copyWith(fontSize: 18),
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onPrimary,
+                    ),
                   ),
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: Icon(
                       Iconss.close,
-                      color: Colorsmanegments.textWhite,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ],
@@ -238,6 +246,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildTextField(
+                      context,
                       controller: _nameController,
                       label: "اسم المنتج",
                       icon: Iconss.food,
@@ -245,20 +254,21 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     const SizedBox(height: 14),
 
                     _buildTextField(
+                      context,
                       controller: _barcodeController,
                       label: "الباركود",
                       icon: Iconss.qrCode,
                     ),
                     const SizedBox(height: 14),
 
-                    // 🎯 استبدال الدؤن القدييم بـ BlocBuilder لتحديث الأقسام لحظياً
-                    _buildCategoryDropdownBloc(),
+                    _buildCategoryDropdownBloc(context),
                     const SizedBox(height: 14),
 
                     Row(
                       children: [
                         Expanded(
                           child: _buildTextField(
+                            context,
                             controller: _costController,
                             label: "سعر التكلفة",
                             icon: Iconss.sales,
@@ -268,6 +278,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                         const SizedBox(width: 10),
                         Expanded(
                           child: _buildTextField(
+                            context,
                             controller: _quantityController,
                             label: "الكمية",
                             icon: Iconss.numbers,
@@ -284,6 +295,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                       child: _hasSizes
                           ? const SizedBox.shrink()
                           : _buildTextField(
+                        context,
                         controller: _sellController,
                         label: "سعر البيع",
                         icon: Iconss.sell,
@@ -292,10 +304,10 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     ),
                     if (!_hasSizes) const SizedBox(height: 14),
 
-                    _buildImagePicker(),
+                    _buildImagePicker(context),
                     const SizedBox(height: 20),
 
-                    _buildSizesSection(),
+                    _buildSizesSection(context),
                   ],
                 ),
               ),
@@ -306,7 +318,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 border: Border(
-                  top: BorderSide(color: Colorsmanegments.border),
+                  top: BorderSide(color: theme.dividerColor),
                 ),
               ),
               child: Row(
@@ -319,11 +331,13 @@ class _AddProductDialogState extends State<AddProductDialog> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        side: BorderSide(color: Colorsmanegments.border),
+                        side: BorderSide(color: colorScheme.outlineVariant),
                       ),
                       child: Text(
                         "إلغاء",
-                        style: TxtStyle.buttonPrimary,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.primary,
+                        ),
                       ),
                     ),
                   ),
@@ -332,7 +346,8 @@ class _AddProductDialogState extends State<AddProductDialog> {
                     child: ElevatedButton(
                       onPressed: _saveProduct,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colorsmanegments.primary,
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -341,7 +356,10 @@ class _AddProductDialogState extends State<AddProductDialog> {
                       ),
                       child: Text(
                         widget.productToEdit == null ? "حفظ المنتج" : "تحديث",
-                        style: TxtStyle.buttonMedium,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -357,34 +375,38 @@ class _AddProductDialogState extends State<AddProductDialog> {
   // ============================================================
   // Widget: TextField
   // ============================================================
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    TextInputType? keyboardType,
-  }) {
+  Widget _buildTextField(
+      BuildContext context, {
+        required TextEditingController controller,
+        required String label,
+        required IconData icon,
+        TextInputType? keyboardType,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      style: TxtStyle.bodyMedium,
+      style: theme.textTheme.bodyMedium,
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: TxtStyle.labelMedium,
-        prefixIcon: Icon(icon, size: 20, color: Colorsmanegments.primary),
+        labelStyle: theme.textTheme.labelMedium,
+        prefixIcon: Icon(icon, size: 20, color: colorScheme.primary),
         filled: true,
-        fillColor: Colorsmanegments.background,
+        fillColor: colorScheme.background,
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 12,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colorsmanegments.border),
+          borderSide: BorderSide(color: colorScheme.outlineVariant),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
             width: 1.5,
           ),
         ),
@@ -393,18 +415,19 @@ class _AddProductDialogState extends State<AddProductDialog> {
   }
 
   // ============================================================
-  // Widget: Category Dropdown with BlocBuilder (تحديث لحظي للأقسام)
+  // Widget: Category Dropdown with BlocBuilder
   // ============================================================
-  Widget _buildCategoryDropdownBloc() {
+  Widget _buildCategoryDropdownBloc(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocBuilder<ProductCubit, ProductState>(
       builder: (context, state) {
-        // سحب الأقسام المتاحة إما من الـ State الحالية أو الاعتماد الاحتياطي على الـ widget.categories الممررة
         List<CategoryModel> categoriesList = widget.categories;
         if (state is ProductSuccess) {
           categoriesList = state.categories;
         }
 
-        // فلترة العناصر الفريدة (تجنب التكرار)
         final uniqueCategories = categoriesList
             .fold<Map<int, CategoryModel>>({}, (map, cat) {
           if (cat.id != null) map[cat.id!] = cat;
@@ -415,29 +438,29 @@ class _AddProductDialogState extends State<AddProductDialog> {
 
         return DropdownButtonFormField<int>(
           value: _selectedCategoryId,
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium,
           decoration: InputDecoration(
             labelText: "القسم",
-            labelStyle: TxtStyle.labelMedium,
+            labelStyle: theme.textTheme.labelMedium,
             prefixIcon: Icon(
               Iconss.category,
               size: 20,
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
             ),
             filled: true,
-            fillColor: Colorsmanegments.background,
+            fillColor: colorScheme.background,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide(color: Colorsmanegments.border),
+              borderSide: BorderSide(color: colorScheme.outlineVariant),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 width: 1.5,
               ),
             ),
@@ -463,16 +486,19 @@ class _AddProductDialogState extends State<AddProductDialog> {
   // ============================================================
   // Widget: Image Picker
   // ============================================================
-  Widget _buildImagePicker() {
+  Widget _buildImagePicker(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return InkWell(
       onTap: _pickImage,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colorsmanegments.background,
+          color: colorScheme.background,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colorsmanegments.border),
+          border: Border.all(color: colorScheme.outlineVariant),
         ),
         child: Row(
           children: [
@@ -488,10 +514,10 @@ class _AddProductDialogState extends State<AddProductDialog> {
                   : Container(
                 width: 48,
                 height: 48,
-                color: Colorsmanegments.border,
+                color: colorScheme.outlineVariant,
                 child: Icon(
                   Iconss.image,
-                  color: Colorsmanegments.textSecondary,
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                 ),
               ),
             ),
@@ -499,16 +525,16 @@ class _AddProductDialogState extends State<AddProductDialog> {
             Expanded(
               child: Text(
                 _imagePath == null ? "اختر صورة المنتج" : "تم اختيار الصورة",
-                style: TxtStyle.bodyMedium.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   color: _imagePath == null
-                      ? Colorsmanegments.textSecondary
-                      : Colorsmanegments.textPrimary,
+                      ? theme.textTheme.bodyMedium?.color?.withOpacity(0.6)
+                      : theme.textTheme.bodyLarge?.color,
                 ),
               ),
             ),
             Icon(
               Iconss.arrowForward,
-              color: Colorsmanegments.textSecondary,
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
             ),
           ],
         ),
@@ -519,13 +545,16 @@ class _AddProductDialogState extends State<AddProductDialog> {
   // ============================================================
   // Widget: Sizes Section
   // ============================================================
-  Widget _buildSizesSection() {
+  Widget _buildSizesSection(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colorsmanegments.background,
+        color: colorScheme.background,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colorsmanegments.border),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -535,18 +564,20 @@ class _AddProductDialogState extends State<AddProductDialog> {
               Icon(
                 Iconss.size,
                 size: 18,
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
               ),
               const SizedBox(width: 8),
-              const Expanded(
+              Expanded(
                 child: Text(
                   "هل المنتج له أحجام مختلفة؟",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               Switch(
                 value: _hasSizes,
-                activeColor: Colorsmanegments.primary,
+                activeColor: colorScheme.primary,
                 onChanged: (value) {
                   setState(() {
                     _hasSizes = value;
@@ -564,7 +595,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                const Divider(height: 1),
+                Divider(color: theme.dividerColor, height: 1),
                 const SizedBox(height: 12),
 
                 ...List.generate(_sizeRows.length, (index) {
@@ -577,13 +608,15 @@ class _AddProductDialogState extends State<AddProductDialog> {
                           flex: 3,
                           child: TextField(
                             controller: row.nameController,
-                            style: TxtStyle.bodySmall,
+                            style: theme.textTheme.bodySmall,
                             decoration: InputDecoration(
                               hintText: "اسم الحجم (صغير)",
-                              hintStyle: TxtStyle.hintSmall,
+                              hintStyle: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+                              ),
                               isDense: true,
                               filled: true,
-                              fillColor: Colorsmanegments.card,
+                              fillColor: colorScheme.surface,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 10,
@@ -591,7 +624,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Colorsmanegments.border,
+                                  color: colorScheme.outlineVariant,
                                 ),
                               ),
                             ),
@@ -603,13 +636,15 @@ class _AddProductDialogState extends State<AddProductDialog> {
                           child: TextField(
                             controller: row.priceController,
                             keyboardType: TextInputType.number,
-                            style: TxtStyle.bodySmall,
+                            style: theme.textTheme.bodySmall,
                             decoration: InputDecoration(
                               hintText: "السعر",
-                              hintStyle: TxtStyle.hintSmall,
+                              hintStyle: theme.textTheme.bodySmall?.copyWith(
+                                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+                              ),
                               isDense: true,
                               filled: true,
-                              fillColor: Colorsmanegments.card,
+                              fillColor: colorScheme.surface,
                               contentPadding: const EdgeInsets.symmetric(
                                 horizontal: 10,
                                 vertical: 10,
@@ -617,7 +652,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
                                 borderSide: BorderSide(
-                                  color: Colorsmanegments.border,
+                                  color: colorScheme.outlineVariant,
                                 ),
                               ),
                             ),
@@ -629,7 +664,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                           constraints: const BoxConstraints(),
                           icon: Icon(
                             Iconss.removeCircle,
-                            color: Colorsmanegments.danger,
+                            color: Colors.red,
                             size: 20,
                           ),
                           onPressed: () => _removeSizeRow(index),
@@ -650,7 +685,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
                       horizontal: 12,
                     ),
                     decoration: BoxDecoration(
-                      color: Colorsmanegments.primary.withOpacity(0.08),
+                      color: colorScheme.primary.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -659,13 +694,14 @@ class _AddProductDialogState extends State<AddProductDialog> {
                         Icon(
                           Iconss.add,
                           size: 16,
-                          color: Colorsmanegments.primary,
+                          color: colorScheme.primary,
                         ),
                         const SizedBox(width: 6),
                         Text(
                           "إضافة حجم",
-                          style: TxtStyle.buttonPrimary.copyWith(
-                            fontSize: 12,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: colorScheme.primary,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ],

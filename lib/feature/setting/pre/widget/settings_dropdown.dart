@@ -25,29 +25,32 @@ class SettingsDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TxtStyle.labelMedium,
+          style: theme.textTheme.labelMedium,
         ),
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            color: Colorsmanegments.background,
+            color: colorScheme.background,
             borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: Colorsmanegments.border,
+              color: colorScheme.outlineVariant,
             ),
           ),
           child: DropdownButtonFormField<String>(
             value: value,
-            style: TxtStyle.bodyMedium,
+            style: theme.textTheme.bodyMedium,
             decoration: InputDecoration(
               prefixIcon: Icon(
                 icon,
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 size: 20,
               ),
               border: InputBorder.none,
@@ -73,7 +76,7 @@ class SettingsDropdown extends StatelessWidget {
             onChanged: onChanged,
             icon: Icon(
               Iconss.arrowForward,
-              color: Colorsmanegments.textSecondary,
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
             ),
           ),
         ),

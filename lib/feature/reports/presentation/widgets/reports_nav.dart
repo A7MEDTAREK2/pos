@@ -13,6 +13,9 @@ class DetailedReportsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -25,14 +28,17 @@ class DetailedReportsButton extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [const Color(0xFF2563EB), const Color(0xFF1D4ED8)],
+              colors: [
+                colorScheme.primary,
+                colorScheme.primary.withOpacity(0.8),
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFF2563EB).withOpacity(0.2),
+                color: colorScheme.primary.withOpacity(0.2),
                 blurRadius: 12,
                 offset: const Offset(0, 6),
               ),
@@ -43,12 +49,12 @@ class DetailedReportsButton extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: colorScheme.onPrimary.withOpacity(0.15),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.analytics_outlined,
-                  color: Colors.white,
+                  color: colorScheme.onPrimary,
                   size: 24,
                 ),
               ),
@@ -59,26 +65,26 @@ class DetailedReportsButton extends StatelessWidget {
                   children: [
                     Text(
                       "التقارير التفصيلية",
-                      style: GoogleFonts.cairo(
+                      style: theme.textTheme.titleMedium?.copyWith(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       "عرض جميع التقارير والإحصائيات بالتفصيل",
-                      style: GoogleFonts.cairo(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontSize: 13,
-                        color: Colors.white.withOpacity(0.9),
+                        color: colorScheme.onPrimary.withOpacity(0.9),
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.arrow_forward_ios_rounded,
-                color: Colors.white,
+                color: colorScheme.onPrimary,
                 size: 20,
               ),
             ],

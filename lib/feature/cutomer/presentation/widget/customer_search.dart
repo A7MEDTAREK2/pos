@@ -19,35 +19,40 @@ class CustomerSearch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return TextField(
       controller: controller,
       onChanged: onChanged,
-      style: TxtStyle.bodyMedium,
+      style: theme.textTheme.bodyMedium,
       decoration: InputDecoration(
         hintText: "بحث بالاسم أو الهاتف",
-        hintStyle: TxtStyle.hint,
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+        ),
         prefixIcon: Icon(
           Iconss.search,
-          color: Colorsmanegments.primary,
+          color: colorScheme.primary,
         ),
         filled: true,
-        fillColor: Colorsmanegments.card,
+        fillColor: colorScheme.surface,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: Colorsmanegments.border,
+            color: colorScheme.outlineVariant,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: Colorsmanegments.border,
+            color: colorScheme.outlineVariant,
           ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
             width: 2,
           ),
         ),

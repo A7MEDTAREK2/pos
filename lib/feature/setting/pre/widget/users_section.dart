@@ -20,6 +20,9 @@ class UsersSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return SettingsSection(
       title: 'المستخدمون والصلاحيات',
       icon: Iconss.users,
@@ -29,7 +32,7 @@ class UsersSection extends StatelessWidget {
           SettingsActionButton(
             label: 'إضافة مستخدم',
             icon: Iconss.personAdd,
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
             isFullWidth: true,
             onTap: () {
               showDialog(

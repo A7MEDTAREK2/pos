@@ -18,15 +18,18 @@ class LowStockCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return DashboardCard(
       child: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return _buildLoadingState();
+            return _buildLoadingState(context);
           }
 
           if (state is DashboardError) {
-            return _buildErrorState(state.message);
+            return _buildErrorState(context, state.message);
           }
 
           if (state is! DashboardSuccess) {
@@ -36,80 +39,84 @@ class LowStockCard extends StatelessWidget {
           final products = state.dashboard.lowStockProducts;
 
           if (products.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
 
-          return _buildContent(products);
+          return _buildContent(context, products);
         },
       ),
     );
   }
 
-  // ============================================================
-  // Loading State
-  // ============================================================
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context) {
     return const SizedBox(
       height: 200,
       child: Center(
-        child: CircularProgressIndicator(
-          color: Colorsmanegments.primary,
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }
 
-  // ============================================================
-  // Error State
-  // ============================================================
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(BuildContext context, String message) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       height: 200,
       child: Center(
         child: Text(
           message,
-          style: TxtStyle.danger,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: Colors.red,
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // Empty State
-  // ============================================================
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return SizedBox(
       height: 200,
       child: Center(
         child: Text(
           "لا يوجد منتجات منخفضة المخزون",
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface.withOpacity(0.6),
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // Content
-  // ============================================================
-  Widget _buildContent(List<dynamic> products) {
+  Widget _buildContent(BuildContext context, List<dynamic> products) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const SectionTitle(title: "المخزون المنخفض"),
+            Text(
+              "المخزون المنخفض",
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             const Spacer(),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: Colorsmanegments.danger.withOpacity(0.1),
+                color: Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
                 "${products.length} منتج",
-                style: TxtStyle.badgeSmall.copyWith(
-                  color: Colorsmanegments.danger,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
@@ -117,6 +124,7 @@ class LowStockCard extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ...products.map((product) => _buildProductItem(
+          context,
           name: product.name,
           stock: product.quantity,
         )),
@@ -124,13 +132,13 @@ class LowStockCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Product Item
-  // ============================================================
-  Widget _buildProductItem({
-    required String name,
-    required int stock,
-  }) {
+  Widget _buildProductItem(
+      BuildContext context, {
+        required String name,
+        required int stock,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isCritical = stock <= 5;
 
     return Padding(
@@ -141,16 +149,15 @@ class LowStockCard extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               color: isCritical
-                  ? Colorsmanegments.danger.withOpacity(0.1)
-                  : Colorsmanegments.warning.withOpacity(0.1),
+                  ? Colors.red.withOpacity(0.1)
+                  : Colors.amber.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               "$stock",
-              style: TxtStyle.tableRowBold.copyWith(
-                color: isCritical
-                    ? Colorsmanegments.danger
-                    : Colorsmanegments.warning,
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isCritical ? Colors.red : Colors.amber,
               ),
             ),
           ),
@@ -158,7 +165,7 @@ class LowStockCard extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: TxtStyle.bodyMedium.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -166,16 +173,17 @@ class LowStockCard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colorsmanegments.danger.withOpacity(0.1),
+              color: Colors.red.withOpacity(0.1),
               borderRadius: BorderRadius.circular(4),
               border: Border.all(
-                color: Colorsmanegments.danger.withOpacity(0.2),
+                color: Colors.red.withOpacity(0.2),
               ),
             ),
             child: Text(
               "⚠️ $stock",
-              style: TxtStyle.badgeSmall.copyWith(
-                color: Colorsmanegments.danger,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

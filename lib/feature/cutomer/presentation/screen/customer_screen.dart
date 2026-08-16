@@ -45,22 +45,22 @@ class _CustomerScreenState extends State<CustomerScreen> {
   // ============================================================
   // Loading State
   // ============================================================
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const CircularProgressIndicator(
             strokeWidth: 3,
-            valueColor: AlwaysStoppedAnimation<Color>(
-              Colorsmanegments.primary,
-            ),
           ),
           const SizedBox(height: 16),
           Text(
             "جاري تحميل العملاء...",
-            style: TxtStyle.bodyMedium.copyWith(
-              color: Colorsmanegments.textSecondary,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
           ),
         ],
@@ -71,7 +71,10 @@ class _CustomerScreenState extends State<CustomerScreen> {
   // ============================================================
   // Empty State
   // ============================================================
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -80,26 +83,28 @@ class _CustomerScreenState extends State<CustomerScreen> {
             width: 120,
             height: 120,
             decoration: BoxDecoration(
-              color: Colorsmanegments.primary.withOpacity(0.08),
+              color: colorScheme.primary.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Iconss.people,
               size: 60,
-              color: Colorsmanegments.primary.withOpacity(0.5),
+              color: colorScheme.primary.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 24),
           Text(
             "لا يوجد عملاء",
-            style: TxtStyle.emptyTitle.copyWith(
-              color: Colorsmanegments.textSecondary,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             "قم بإضافة عميل جديد",
-            style: TxtStyle.emptySubtitle,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            ),
           ),
           const SizedBox(height: 30),
           Tooltip(
@@ -108,8 +113,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
             child: ElevatedButton.icon(
               onPressed: _navigateToAddCustomer,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colorsmanegments.primary,
-                foregroundColor: Colorsmanegments.textWhite,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -118,11 +123,14 @@ class _CustomerScreenState extends State<CustomerScreen> {
               ),
               icon: Icon(
                 Iconss.add,
-                color: Colorsmanegments.textWhite,
+                color: colorScheme.onPrimary,
               ),
               label: Text(
                 "إضافة عميل",
-                style: TxtStyle.buttonMedium,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -134,7 +142,10 @@ class _CustomerScreenState extends State<CustomerScreen> {
   // ============================================================
   // Error State
   // ============================================================
-  Widget _buildErrorState(String error) {
+  Widget _buildErrorState(BuildContext context, String error) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -143,20 +154,20 @@ class _CustomerScreenState extends State<CustomerScreen> {
             width: 100,
             height: 100,
             decoration: BoxDecoration(
-              color: Colorsmanegments.danger.withOpacity(0.08),
+              color: Colors.red.withOpacity(0.08),
               shape: BoxShape.circle,
             ),
             child: Icon(
               Iconss.error,
               size: 50,
-              color: Colorsmanegments.danger.withOpacity(0.5),
+              color: Colors.red.withOpacity(0.5),
             ),
           ),
           const SizedBox(height: 20),
           Text(
             "حدث خطأ",
-            style: TxtStyle.headerSmall.copyWith(
-              color: Colorsmanegments.textSecondary,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 8),
@@ -164,8 +175,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 30),
             child: Text(
               error,
-              style: TxtStyle.bodyMedium.copyWith(
-                color: Colorsmanegments.textSecondary,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -179,8 +190,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
                 context.read<CustomerCubit>().loadCustomers();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colorsmanegments.primary,
-                foregroundColor: Colorsmanegments.textWhite,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: colorScheme.onPrimary,
                 elevation: 2,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -189,11 +200,14 @@ class _CustomerScreenState extends State<CustomerScreen> {
               ),
               icon: Icon(
                 Iconss.refresh,
-                color: Colorsmanegments.textWhite,
+                color: colorScheme.onPrimary,
               ),
               label: Text(
                 "إعادة المحاولة",
-                style: TxtStyle.buttonMedium,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -219,7 +233,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
     if (mounted) {
       context.read<CustomerCubit>().loadCustomers();
 
-      // 🌟 تحديث الداشبورد فوراً بعد إضافة العميل
       try {
         context.read<HomeCubit>().refreshDashboard();
       } catch (_) {}
@@ -240,7 +253,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
     if (mounted) {
       context.read<CustomerCubit>().loadCustomers();
 
-      // 🌟 تحديث الداشبورد فوراً بعد تعديل العميل
       try {
         context.read<HomeCubit>().refreshDashboard();
       } catch (_) {}
@@ -251,10 +263,14 @@ class _CustomerScreenState extends State<CustomerScreen> {
   // Delete Dialog
   // ============================================================
   Future<bool?> _showDeleteDialog(String customerName) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return showDialog<bool>(
       context: context,
       builder: (_) {
         return AlertDialog(
+          backgroundColor: colorScheme.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -262,19 +278,19 @@ class _CustomerScreenState extends State<CustomerScreen> {
             children: [
               Icon(
                 Iconss.warning,
-                color: Colorsmanegments.danger,
+                color: Colors.red,
                 size: 28,
               ),
               const SizedBox(width: 10),
               Text(
                 "حذف العميل",
-                style: TxtStyle.headerSmall,
+                style: theme.textTheme.titleLarge,
               ),
             ],
           ),
           content: Text(
             "هل تريد حذف $customerName ؟",
-            style: TxtStyle.bodyMedium,
+            style: theme.textTheme.bodyMedium,
           ),
           actions: [
             Tooltip(
@@ -283,11 +299,13 @@ class _CustomerScreenState extends State<CustomerScreen> {
               child: TextButton(
                 onPressed: () => Navigator.pop(context, false),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colorsmanegments.textSecondary,
+                  foregroundColor: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                 ),
                 child: Text(
                   "إلغاء",
-                  style: TxtStyle.buttonPrimary,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.primary,
+                  ),
                 ),
               ),
             ),
@@ -297,15 +315,18 @@ class _CustomerScreenState extends State<CustomerScreen> {
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context, true),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colorsmanegments.danger,
-                  foregroundColor: Colorsmanegments.textWhite,
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: Text(
                   "حذف",
-                  style: TxtStyle.buttonMedium,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -317,8 +338,11 @@ class _CustomerScreenState extends State<CustomerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colorsmanegments.background,
+      backgroundColor: colorScheme.background,
 
       appBar: const CustomerAppBar(),
 
@@ -327,8 +351,8 @@ class _CustomerScreenState extends State<CustomerScreen> {
         waitDuration: const Duration(milliseconds: 300),
         child: FloatingActionButton(
           onPressed: _navigateToAddCustomer,
-          backgroundColor: Colorsmanegments.primary,
-          foregroundColor: Colorsmanegments.textWhite,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
           elevation: 6,
           child: Icon(
             Iconss.personAdd,
@@ -360,12 +384,12 @@ class _CustomerScreenState extends State<CustomerScreen> {
               child: BlocBuilder<CustomerCubit, CustomerState>(
                 builder: (context, state) {
                   if (state is CustomerLoading) {
-                    return _buildLoadingState();
+                    return _buildLoadingState(context);
                   }
 
                   if (state is CustomerSuccess) {
                     if (state.customers.isEmpty) {
-                      return _buildEmptyState();
+                      return _buildEmptyState(context);
                     }
 
                     return ListView.separated(
@@ -389,7 +413,6 @@ class _CustomerScreenState extends State<CustomerScreen> {
                                 customer.id!,
                               );
 
-                              // 🌟 تحديث الداشبورد أيضاً فور حذف العميل
                               if (mounted) {
                                 try {
                                   context.read<HomeCubit>().refreshDashboard();
@@ -403,7 +426,7 @@ class _CustomerScreenState extends State<CustomerScreen> {
                   }
 
                   if (state is CustomerError) {
-                    return _buildErrorState(state.error);
+                    return _buildErrorState(context, state.error);
                   }
 
                   return const SizedBox();

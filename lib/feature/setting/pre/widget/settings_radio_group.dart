@@ -24,12 +24,15 @@ class SettingsRadioGroup extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           label,
-          style: TxtStyle.labelMedium,
+          style: theme.textTheme.labelMedium,
         ),
         const SizedBox(height: 6),
         Row(
@@ -38,12 +41,12 @@ class SettingsRadioGroup extends StatelessWidget {
               child: RadioListTile<String>(
                 title: Text(
                   item,
-                  style: TxtStyle.bodyMedium,
+                  style: theme.textTheme.bodyMedium,
                 ),
                 value: item,
                 groupValue: value,
                 onChanged: (_) {},
-                activeColor: Colorsmanegments.primary,
+                activeColor: colorScheme.primary,
                 contentPadding: EdgeInsets.zero,
                 visualDensity: VisualDensity.compact,
               ),

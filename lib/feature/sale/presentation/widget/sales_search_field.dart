@@ -21,18 +21,23 @@ class SalesSearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: TxtStyle.bodyMedium,
+        style: theme.textTheme.bodyMedium,
         decoration: InputDecoration(
           hintText: "بحث برقم الفاتورة، اسم العميل أو طريقة الدفع...",
-          hintStyle: TxtStyle.hint,
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+          ),
           prefixIcon: Icon(
             Iconss.search,
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
           ),
           suffixIcon: ValueListenableBuilder<TextEditingValue>(
             valueListenable: controller,
@@ -42,14 +47,14 @@ class SalesSearchField extends StatelessWidget {
               return IconButton(
                 icon: Icon(
                   Iconss.clear,
-                  color: Colorsmanegments.textSecondary,
+                  color: colorScheme.onSurface.withOpacity(0.6),
                 ),
                 onPressed: onClear,
               );
             },
           ),
           filled: true,
-          fillColor: Colorsmanegments.card,
+          fillColor: colorScheme.surface,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
@@ -61,7 +66,7 @@ class SalesSearchField extends StatelessWidget {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide(
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
               width: 1.5,
             ),
           ),

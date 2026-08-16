@@ -30,70 +30,45 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
       backgroundColor: Colors.transparent,
       child: Container(
-        width: 650, // ✅ من 750 إلى 650
+        width: 650,
         constraints: const BoxConstraints(
-          maxHeight: 560, // ✅ تحديد أقصى ارتفاع
+          maxHeight: 560,
         ),
-        padding: const EdgeInsets.all(24), // ✅ تقليل الـ padding
+        padding: const EdgeInsets.all(24),
         decoration: BoxDecoration(
-          color: Colorsmanegments.card,
+          color: colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colorsmanegments.shadowDark,
+              color: colorScheme.shadow.withOpacity(0.3),
               blurRadius: 40,
               offset: const Offset(0, 5),
             ),
           ],
         ),
-        child: SingleChildScrollView( // ✅ جعل المحتوى قابل للتمرير
+        child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // ============================================================
-              // HEADER
-              // ============================================================
-              _buildHeader(),
-
+              _buildHeader(context),
               const SizedBox(height: 8),
-
-              // ============================================================
-              // WARNING CARD
-              // ============================================================
-              _buildWarningCard(),
-
+              _buildWarningCard(context),
               const SizedBox(height: 12),
-
-              // ============================================================
-              // RESET OPTIONS
-              // ============================================================
-              _buildResetOptions(),
-
+              _buildResetOptions(context),
               const SizedBox(height: 16),
-
-              // ============================================================
-              // BACKUP CARD
-              // ============================================================
-              _buildBackupCard(),
-
+              _buildBackupCard(context),
               const SizedBox(height: 16),
-
-              // ============================================================
-              // CONFIRMATION
-              // ============================================================
-              _buildConfirmation(),
-
+              _buildConfirmation(context),
               const SizedBox(height: 16),
-
-              // ============================================================
-              // BOTTOM BUTTONS
-              // ============================================================
               _buildBottomButtons(context),
             ],
           ),
@@ -102,36 +77,39 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
     );
   }
 
-  // ============================================================
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       children: [
         Container(
-          width: 48, // ✅ من 60 إلى 48
-          height: 48, // ✅ من 60 إلى 48
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
-            color: Colorsmanegments.danger.withOpacity(0.1),
+            color: Colors.red.withOpacity(0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
             Iconss.warning,
-            size: 28, // ✅ من 36 إلى 28
-            color: Colorsmanegments.danger,
+            size: 28,
+            color: Colors.red,
           ),
         ),
         const SizedBox(height: 10),
         Text(
           'إعادة تهيئة البيانات',
-          style: TxtStyle.headerMedium.copyWith(
-            fontSize: 20, // ✅ من 24 إلى 20
+          style: theme.textTheme.headlineMedium?.copyWith(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
         ),
         const SizedBox(height: 4),
         Text(
           'هذه العملية قد تؤدي إلى حذف بيانات من النظام ولا يمكن التراجع عنها.',
-          style: TxtStyle.bodySmall.copyWith(
-            color: Colorsmanegments.textSecondary,
-            fontSize: 12, // ✅ من 14 إلى 12
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+            fontSize: 12,
           ),
           textAlign: TextAlign.center,
         ),
@@ -139,15 +117,17 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
     );
   }
 
-  // ============================================================
-  Widget _buildWarningCard() {
+  Widget _buildWarningCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-        color: Colorsmanegments.danger.withOpacity(0.04),
+        color: Colors.red.withOpacity(0.04),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colorsmanegments.danger.withOpacity(0.3),
+          color: Colors.red.withOpacity(0.3),
           width: 1,
         ),
       ),
@@ -156,7 +136,7 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
           Icon(
             Iconss.warning,
             size: 16,
-            color: Colorsmanegments.danger,
+            color: Colors.red,
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -165,16 +145,17 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
               children: [
                 Text(
                   'هام جداً',
-                  style: TxtStyle.labelBold.copyWith(
-                    color: Colorsmanegments.danger,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: Colors.red,
                     fontSize: 12,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 2),
                 Text(
                   '• يفضل إنشاء نسخة احتياطية قبل التنفيذ.\n• لا تغلق البرنامج أثناء التنفيذ.',
-                  style: TxtStyle.bodySmall.copyWith(
-                    color: Colorsmanegments.textSecondary,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                     fontSize: 11,
                     height: 1.4,
                   ),
@@ -187,29 +168,15 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
     );
   }
 
-  // ============================================================
-  Widget _buildResetOptions() {
+  Widget _buildResetOptions(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final options = [
-      {
-        'icon': Iconss.restart,
-        'title': 'بدء وردية جديدة',
-        'description': 'إعادة تعيين عداد الطلبات فقط.',
-      },
-      {
-        'icon': Iconss.deleteSales,
-        'title': 'حذف جميع المبيعات',
-        'description': 'حذف الفواتير مع الاحتفاظ بالمنتجات والعملاء.',
-      },
-      {
-        'icon': Iconss.people,
-        'title': 'حذف العملاء',
-        'description': 'حذف جميع العملاء والعناوين فقط.',
-      },
-      {
-        'icon': Iconss.deleteForever,
-        'title': 'إعادة تهيئة كاملة',
-        'description': 'حذف جميع البيانات والبدء من جديد.',
-      },
+      {'icon': Iconss.restart, 'title': 'بدء وردية جديدة', 'description': 'إعادة تعيين عداد الطلبات فقط.'},
+      {'icon': Iconss.deleteSales, 'title': 'حذف جميع المبيعات', 'description': 'حذف الفواتير مع الاحتفاظ بالمنتجات والعملاء.'},
+      {'icon': Iconss.people, 'title': 'حذف العملاء', 'description': 'حذف جميع العملاء والعناوين فقط.'},
+      {'icon': Iconss.deleteForever, 'title': 'إعادة تهيئة كاملة', 'description': 'حذف جميع البيانات والبدء من جديد.'},
     ];
 
     return Column(
@@ -217,28 +184,29 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
       children: [
         Text(
           'اختر العملية',
-          style: TxtStyle.labelBold,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 8),
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colorsmanegments.background,
+            color: colorScheme.background,
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: Colorsmanegments.border,
+              color: colorScheme.outlineVariant,
               width: 1,
             ),
           ),
           child: Column(
             children: options.map((option) {
               final isFirst = options.indexOf(option) == 0;
-              final isLast = options.indexOf(option) == options.length - 1;
 
               return Column(
                 children: [
                   if (!isFirst) ...[
-                    const Divider(height: 2, thickness: 0.5),
+                    Divider(color: theme.dividerColor, height: 2, thickness: 0.5),
                   ],
                   RadioListTile<String>(
                     contentPadding: EdgeInsets.zero,
@@ -248,12 +216,12 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
                         Icon(
                           option['icon'] as IconData,
                           size: 16,
-                          color: Colorsmanegments.primary,
+                          color: colorScheme.primary,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           option['title'] as String,
-                          style: TxtStyle.bodySmall.copyWith(
+                          style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
                             fontSize: 12,
                           ),
@@ -262,8 +230,8 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
                     ),
                     subtitle: Text(
                       option['description'] as String,
-                      style: TxtStyle.bodySmall.copyWith(
-                        color: Colorsmanegments.textSecondary,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                         fontSize: 11,
                       ),
                     ),
@@ -275,7 +243,7 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
                         selectedOption = value;
                       });
                     },
-                    activeColor: Colorsmanegments.primary,
+                    activeColor: colorScheme.primary,
                     visualDensity: const VisualDensity(
                       horizontal: -4,
                       vertical: -4,
@@ -290,22 +258,24 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
     );
   }
 
-  // ============================================================
-  Widget _buildBackupCard() {
+  Widget _buildBackupCard(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colorsmanegments.primary.withOpacity(0.08),
-            Colorsmanegments.primary.withOpacity(0.04),
+            colorScheme.primary.withOpacity(0.08),
+            colorScheme.primary.withOpacity(0.04),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colorsmanegments.primary.withOpacity(0.2),
+          color: colorScheme.primary.withOpacity(0.2),
           width: 1,
         ),
       ),
@@ -314,44 +284,49 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colorsmanegments.primary.withOpacity(0.15),
+              color: colorScheme.primary.withOpacity(0.15),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               Iconss.backup,
               size: 20,
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               'يوصى بإنشاء نسخة احتياطية قبل التنفيذ.',
-              style: TxtStyle.bodySmall.copyWith(
-                color: Colorsmanegments.textPrimary,
+              style: theme.textTheme.bodySmall?.copyWith(
                 fontSize: 12,
               ),
             ),
           ),
           ElevatedButton.icon(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.primary,
-              foregroundColor: Colorsmanegments.textWhite,
+              backgroundColor: colorScheme.primary,
+              foregroundColor: colorScheme.onPrimary,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
               elevation: 0,
             ),
-            onPressed: () { context.read<MaintenanceCubit>().backupDatabase();},
+            onPressed: () {
+              context.read<MaintenanceCubit>().backupDatabase();
+            },
             icon: Icon(
               Iconss.backup,
               size: 16,
-              color: Colorsmanegments.textWhite,
+              color: colorScheme.onPrimary,
             ),
             label: Text(
               'نسخ احتياطي',
-              style: TxtStyle.buttonSmall.copyWith(fontSize: 11),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.onPrimary,
+                fontWeight: FontWeight.bold,
+                fontSize: 11,
+              ),
             ),
           ),
         ],
@@ -359,15 +334,17 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
     );
   }
 
-  // ============================================================
-  Widget _buildConfirmation() {
+  Widget _buildConfirmation(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colorsmanegments.background,
+        color: colorScheme.background,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Colorsmanegments.border,
+          color: colorScheme.outlineVariant,
           width: 1,
         ),
       ),
@@ -378,16 +355,16 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
             children: [
               Text(
                 'للتأكيد اكتب:',
-                style: TxtStyle.bodySmall.copyWith(
-                  color: Colorsmanegments.textSecondary,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                   fontSize: 12,
                 ),
               ),
               const SizedBox(width: 8),
               Text(
                 'DELETE',
-                style: TxtStyle.labelBold.copyWith(
-                  color: Colorsmanegments.danger,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: Colors.red,
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 2,
@@ -402,12 +379,14 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
               setState(() {});
             },
             textDirection: TextDirection.ltr,
-            style: TxtStyle.bodySmall,
+            style: theme.textTheme.bodySmall,
             decoration: InputDecoration(
               hintText: 'اكتب DELETE',
-              hintStyle: TxtStyle.hintSmall,
+              hintStyle: theme.textTheme.bodySmall?.copyWith(
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+              ),
               filled: true,
-              fillColor: Colorsmanegments.card,
+              fillColor: colorScheme.surface,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 8,
@@ -415,19 +394,19 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Colorsmanegments.border,
+                  color: colorScheme.outlineVariant,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Colorsmanegments.border,
+                  color: colorScheme.outlineVariant,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: BorderSide(
-                  color: Colorsmanegments.primary,
+                  color: colorScheme.primary,
                   width: 2,
                 ),
               ),
@@ -438,8 +417,10 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
     );
   }
 
-  // ============================================================
   Widget _buildBottomButtons(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Row(
       children: [
         Expanded(
@@ -450,13 +431,16 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
                 borderRadius: BorderRadius.circular(10),
               ),
               side: BorderSide(
-                color: Colorsmanegments.border,
+                color: colorScheme.outlineVariant,
               ),
             ),
             onPressed: () => Navigator.pop(context),
             child: Text(
               'إلغاء',
-              style: TxtStyle.buttonPrimary.copyWith(fontSize: 13),
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+                fontSize: 13,
+              ),
             ),
           ),
         ),
@@ -465,9 +449,9 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: canExecute
-                  ? Colorsmanegments.danger
-                  : Colorsmanegments.danger.withOpacity(0.5),
-              foregroundColor: Colorsmanegments.textWhite,
+                  ? Colors.red
+                  : Colors.red.withOpacity(0.5),
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 10),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
@@ -482,15 +466,12 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
                 case 'بدء وردية جديدة':
                   cubit.restartShift();
                   break;
-
                 case 'حذف جميع المبيعات':
                   cubit.deleteSales();
                   break;
-
                 case 'حذف العملاء':
                   cubit.deleteCustomers();
                   break;
-
                 case 'إعادة تهيئة كاملة':
                   cubit.deleteAllData();
                   break;
@@ -501,9 +482,10 @@ class _ResetDataDialogState extends State<ResetDataDialog> {
                 : null,
             child: Text(
               'تنفيذ',
-              style: TxtStyle.buttonLarge.copyWith(
-                color: Colorsmanegments.textWhite,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: Colors.white,
                 fontSize: 14,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

@@ -20,15 +20,18 @@ class TopProductsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return DashboardCard(
       child: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return _buildLoadingState();
+            return _buildLoadingState(context);
           }
 
           if (state is DashboardError) {
-            return _buildErrorState(state.message);
+            return _buildErrorState(context, state.message);
           }
 
           if (state is! DashboardSuccess) {
@@ -38,15 +41,14 @@ class TopProductsCard extends StatelessWidget {
           final products = state.dashboard.topProducts;
 
           if (products.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
 
-          // 🌟 تم تعديل القيمة 1 إلى 1.0 لضمان توافق الأنواع كـ double
           final maxSales = products.first.quantity == 0
               ? 1.0
               : products.first.quantity.toDouble();
 
-          return _buildContent(products, maxSales);
+          return _buildContent(context, products, maxSales);
         },
       ),
     );
@@ -55,13 +57,11 @@ class TopProductsCard extends StatelessWidget {
   // ============================================================
   // Loading State
   // ============================================================
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context) {
     return const SizedBox(
       height: 250,
       child: Center(
-        child: CircularProgressIndicator(
-          color: Colorsmanegments.primary,
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }
@@ -69,13 +69,17 @@ class TopProductsCard extends StatelessWidget {
   // ============================================================
   // Error State
   // ============================================================
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(BuildContext context, String message) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       height: 250,
       child: Center(
         child: Text(
           message,
-          style: TxtStyle.danger,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: Colors.red,
+          ),
         ),
       ),
     );
@@ -84,13 +88,18 @@ class TopProductsCard extends StatelessWidget {
   // ============================================================
   // Empty State
   // ============================================================
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return SizedBox(
       height: 250,
       child: Center(
         child: Text(
           "لا توجد بيانات",
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface.withOpacity(0.6),
+          ),
         ),
       ),
     );
@@ -99,14 +108,27 @@ class TopProductsCard extends StatelessWidget {
   // ============================================================
   // Content
   // ============================================================
-  Widget _buildContent(List<TopProductModel> products, double maxSales) {
+  Widget _buildContent(
+      BuildContext context,
+      List<TopProductModel> products,
+      double maxSales,
+      ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionTitle(title: 'أفضل المنتجات'),
+        Text(
+          'أفضل المنتجات',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 16),
         ...products.map(
               (product) => _buildProductItem(
+            context,
             product,
             product.quantity / maxSales,
           ),
@@ -118,28 +140,38 @@ class TopProductsCard extends StatelessWidget {
   // ============================================================
   // Product Item
   // ============================================================
-  Widget _buildProductItem(TopProductModel product, double progress) {
+  Widget _buildProductItem(
+      BuildContext context,
+      TopProductModel product,
+      double progress,
+      ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
+          // ====== Product Icon ======
           Container(
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colorsmanegments.background,
+              color: colorScheme.background,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: Colorsmanegments.border),
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Center(
               child: Icon(
                 Iconss.food,
                 size: 20,
-                color: Colorsmanegments.primary.withOpacity(0.5),
+                color: colorScheme.primary.withOpacity(0.5),
               ),
             ),
           ),
           const SizedBox(width: 12),
+
+          // ====== Product Info ======
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,7 +180,7 @@ class TopProductsCard extends StatelessWidget {
                   product.name,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TxtStyle.bodyMedium.copyWith(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -157,27 +189,28 @@ class TopProductsCard extends StatelessWidget {
                   children: [
                     Text(
                       '${product.quantity} مبيعات',
-                      style: TxtStyle.bodySmall,
+                      style: theme.textTheme.bodySmall,
                     ),
                     const SizedBox(width: 12),
                     Text(
                       '${product.total.toStringAsFixed(0)} ج.م',
-                      style: TxtStyle.bodySmall.copyWith(
+                      style: theme.textTheme.bodySmall?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: Colorsmanegments.primary,
+                        color: colorScheme.primary,
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 6),
+
+                // ====== Progress Bar ======
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4),
                   child: LinearProgressIndicator(
-                    // 🌟 تم إضافة .toDouble() هنا لمنع خطأ اختلاف الأنواع مع num
                     value: progress.clamp(0, 1).toDouble(),
                     minHeight: 4,
-                    backgroundColor: Colorsmanegments.border,
-                    color: Colorsmanegments.primary,
+                    backgroundColor: colorScheme.outlineVariant,
+                    color: colorScheme.primary,
                   ),
                 ),
               ],

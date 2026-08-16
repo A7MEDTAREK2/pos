@@ -42,161 +42,184 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-      appBar: AppBar(title: const Text("سجل المبيعات"), centerTitle: true),
-      body:
-
-         Stack(
-          children: [
-            Column(
-              children: [
-                SalesSearchField(
-                  controller: searchController,
-                  onChanged: (value) {
-                    if (value.trim().isEmpty) {
-                      context.read<SalesHistoryCubit>().clearSearch();
-                    } else {
-                      context.read<SalesHistoryCubit>().searchSales(value);
-                    }
-                  },
-                  onClear: () {
-                    searchController.clear();
-                    context.read<SalesHistoryCubit>().clearSearch();
-                  },
-                ),
-                Expanded(
-                  child: BlocBuilder<SalesHistoryCubit, SalesHistoryState>(
-                    builder: (context, state) {
-                      if (state is SalesHistoryLoading) {
-                        return const SalesLoadingWidget();
-                      }
-
-                      if (state is SalesHistoryError) {
-                        return ErrorSalesWidget(
-                          message: state.message,
-                          onRetry: () {
-                            context.read<SalesHistoryCubit>().loadSales();
-                          },
-                        );
-                      }
-
-                      if (state is SalesHistorySuccess) {
-                        return Column(
-                          children: [
-                            SalesStatsCard(state: state),
-
-                            const SizedBox(height: 12),
-
-                            Expanded(
-                              child: state.displaySales.isEmpty
-                                  ? const EmptySalesWidget()
-                                  : ListView.builder(
-                                padding: const EdgeInsets.all(16),
-                                itemCount: state.displaySales.length,
-                                itemBuilder: (context, index) {
-                                  final sale = state.displaySales[index];
-
-                                  return Card(
-                                    margin: const EdgeInsets.only(
-                                      bottom: 12,
-                                    ),
-                                    child: SaleCard(
-                                      sale: sale,
-
-                                      onDetails: () {
-                                        SaleDetailsBottomSheet.show(
-                                          context,
-                                          sale.id,
-                                        );
-                                      },
-
-                                      onDelete: () async {
-                                        final confirm =
-                                        await SaleActionDialogs.confirmDelete(
-                                          context,
-                                        );
-
-                                        if (!confirm) return;
-
-                                        await context
-                                            .read<SalesHistoryCubit>()
-                                            .deleteSale(sale.id);
-
-                                        // 🌟 تحديث الداشبورد بعد الحذف
-                                        if (context.mounted) {
-                                          try {
-                                            context.read<HomeCubit>().refreshDashboard();
-                                          } catch (_) {}
-                                        }
-                                      },
-
-                                      onPrint: () {
-                                        context
-                                            .read<SalesHistoryCubit>()
-                                            .printSale(sale.id);
-                                      },
-
-                                      onReopen: () async {
-                                        final confirm =
-                                        await SaleActionDialogs.confirmReopen(
-                                          context,
-                                        );
-
-                                        if (!confirm) return;
-
-                                        await context
-                                            .read<SalesHistoryCubit>()
-                                            .reopenOrder(sale.id);
-
-                                        // 🌟 تحديث الداشبورد بعد إعادة فتح الطلب
-                                        if (context.mounted) {
-                                          try {
-                                            context.read<HomeCubit>().refreshDashboard();
-                                          } catch (_) {}
-                                        }
-                                      },
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        );
-                      }
-
-                      return const SizedBox();
-                    },
-                  ),
-                ),
-              ],
-            ),
-            BlocBuilder<SalesHistoryCubit, SalesHistoryState>(
-              builder: (context, state) {
-                final loading =
-                    state is SalesDeleteLoading ||
-                        state is SalesReopenLoading ||
-                        state is SalesPrintLoading;
-
-                if (!loading) {
-                  return const SizedBox.shrink();
-                }
-
-                return Positioned.fill(
-                  child: ColoredBox(
-                    color: Colors.black26,
-                    child: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ],
+      backgroundColor: colorScheme.background,
+      appBar: AppBar(
+        title: Text(
+          "سجل المبيعات",
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
+        centerTitle: true,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: theme.textTheme.bodyLarge?.color,
+        elevation: 0,
+        leading: Tooltip(
+          message: "Esc - رجوع",
+          waitDuration: const Duration(milliseconds: 300),
+          child: IconButton(
+            icon: Icon(
+              Icons.arrow_back_rounded,
+              color: theme.textTheme.bodyLarge?.color,
+            ),
+            onPressed: () => Navigator.pop(context),
+          ),
+        ),
+      ),
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              SalesSearchField(
+                controller: searchController,
+                onChanged: (value) {
+                  if (value.trim().isEmpty) {
+                    context.read<SalesHistoryCubit>().clearSearch();
+                  } else {
+                    context.read<SalesHistoryCubit>().searchSales(value);
+                  }
+                },
+                onClear: () {
+                  searchController.clear();
+                  context.read<SalesHistoryCubit>().clearSearch();
+                },
+              ),
+              Expanded(
+                child: BlocBuilder<SalesHistoryCubit, SalesHistoryState>(
+                  builder: (context, state) {
+                    if (state is SalesHistoryLoading) {
+                      return const SalesLoadingWidget();
+                    }
 
+                    if (state is SalesHistoryError) {
+                      return ErrorSalesWidget(
+                        message: state.message,
+                        onRetry: () {
+                          context.read<SalesHistoryCubit>().loadSales();
+                        },
+                      );
+                    }
+
+                    if (state is SalesHistorySuccess) {
+                      return Column(
+                        children: [
+                          SalesStatsCard(state: state),
+
+                          const SizedBox(height: 12),
+
+                          Expanded(
+                            child: state.displaySales.isEmpty
+                                ? const EmptySalesWidget()
+                                : ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: state.displaySales.length,
+                              itemBuilder: (context, index) {
+                                final sale = state.displaySales[index];
+
+                                return Card(
+                                  margin: const EdgeInsets.only(
+                                    bottom: 12,
+                                  ),
+                                  color: colorScheme.surface,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    side: BorderSide(
+                                      color: colorScheme.outlineVariant,
+                                      width: 0.8,
+                                    ),
+                                  ),
+                                  elevation: 0,
+                                  child: SaleCard(
+                                    sale: sale,
+                                    onDetails: () {
+                                      SaleDetailsBottomSheet.show(
+                                        context,
+                                        sale.id,
+                                      );
+                                    },
+                                    onDelete: () async {
+                                      final confirm =
+                                      await SaleActionDialogs.confirmDelete(
+                                        context,
+                                      );
+
+                                      if (!confirm) return;
+
+                                      await context
+                                          .read<SalesHistoryCubit>()
+                                          .deleteSale(sale.id);
+
+                                      if (context.mounted) {
+                                        try {
+                                          context.read<HomeCubit>().refreshDashboard();
+                                        } catch (_) {}
+                                      }
+                                    },
+                                    onPrint: () {
+                                      context
+                                          .read<SalesHistoryCubit>()
+                                          .printSale(sale.id);
+                                    },
+                                    onReopen: () async {
+                                      final confirm =
+                                      await SaleActionDialogs.confirmReopen(
+                                        context,
+                                      );
+
+                                      if (!confirm) return;
+
+                                      await context
+                                          .read<SalesHistoryCubit>()
+                                          .reopenOrder(sale.id);
+
+                                      if (context.mounted) {
+                                        try {
+                                          context.read<HomeCubit>().refreshDashboard();
+                                        } catch (_) {}
+                                      }
+                                    },
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    return const SizedBox();
+                  },
+                ),
+              ),
+            ],
+          ),
+          BlocBuilder<SalesHistoryCubit, SalesHistoryState>(
+            builder: (context, state) {
+              final loading =
+                  state is SalesDeleteLoading ||
+                      state is SalesReopenLoading ||
+                      state is SalesPrintLoading;
+
+              if (!loading) {
+                return const SizedBox.shrink();
+              }
+
+              return Positioned.fill(
+                child: ColoredBox(
+                  color: colorScheme.shadow.withOpacity(0.3),
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
-
-
 }

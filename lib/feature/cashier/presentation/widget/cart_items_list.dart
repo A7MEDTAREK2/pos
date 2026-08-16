@@ -20,6 +20,9 @@ class CartItemsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     if (items.isEmpty) {
       return Center(
         child: Column(
@@ -28,12 +31,14 @@ class CartItemsList extends StatelessWidget {
             Icon(
               Iconss.cartEmpty,
               size: 30,
-              color: Colorsmanegments.grey,
+              color: colorScheme.onSurface.withOpacity(0.3),
             ),
             const SizedBox(height: 12),
             Text(
               "السلة فارغة",
-              style: TxtStyle.emptyTitle,
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.6),
+              ),
             ),
           ],
         ),
@@ -57,16 +62,19 @@ class CartItemsList extends StatelessWidget {
       Map<String, dynamic> item,
       double total,
       ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colorsmanegments.border),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.blackOpacity10,
+            color: colorScheme.shadow.withOpacity(0.05),
             blurRadius: 6,
             offset: const Offset(0, 2),
           ),
@@ -74,22 +82,23 @@ class CartItemsList extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _buildProductImage(item),
+          _buildProductImage(context, item),
           const SizedBox(width: 10),
           Expanded(
-            child: _buildProductDetails(item),
+            child: _buildProductDetails(context, item),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 "${total.toStringAsFixed(2)} ج.م",
-                style: TxtStyle.tableRowBold.copyWith(
-                  color: Colorsmanegments.primary,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  color: colorScheme.primary,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
-              _buildQuantityControls(item),
+              _buildQuantityControls(context, item),
               const SizedBox(height: 4),
               _buildActionButtons(context, item),
             ],
@@ -99,7 +108,10 @@ class CartItemsList extends StatelessWidget {
     );
   }
 
-  Widget _buildProductImage(Map<String, dynamic> item) {
+  Widget _buildProductImage(BuildContext context, Map<String, dynamic> item) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: item['image'] != null && (item['image'] as String).isNotEmpty
@@ -112,17 +124,20 @@ class CartItemsList extends StatelessWidget {
           : Container(
         width: 42,
         height: 42,
-        color: Colorsmanegments.background,
+        color: colorScheme.background,
         child: Icon(
           Iconss.food,
-          color: Colorsmanegments.blueGrey,
+          color: colorScheme.onSurface.withOpacity(0.3),
           size: 20,
         ),
       ),
     );
   }
 
-  Widget _buildProductDetails(Map<String, dynamic> item) {
+  Widget _buildProductDetails(BuildContext context, Map<String, dynamic> item) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -132,12 +147,14 @@ class CartItemsList extends StatelessWidget {
               : item['name'],
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: TxtStyle.tableRowBold,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(height: 2),
         Text(
           "${item['price']} ج.م",
-          style: TxtStyle.bodySmall,
+          style: theme.textTheme.bodySmall,
         ),
         if ((item['note'] ?? '').toString().isNotEmpty)
           Padding(
@@ -147,7 +164,7 @@ class CartItemsList extends StatelessWidget {
                 Icon(
                   Iconss.note,
                   size: 11,
-                  color: Colorsmanegments.orange,
+                  color: Colors.amber,
                 ),
                 const SizedBox(width: 3),
                 Expanded(
@@ -155,7 +172,10 @@ class CartItemsList extends StatelessWidget {
                     item['note'],
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TxtStyle.badgeWarning,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: Colors.amber,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -165,7 +185,10 @@ class CartItemsList extends StatelessWidget {
     );
   }
 
-  Widget _buildQuantityControls(Map<String, dynamic> item) {
+  Widget _buildQuantityControls(BuildContext context, Map<String, dynamic> item) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -178,6 +201,7 @@ class CartItemsList extends StatelessWidget {
             icon: Icon(
               Iconss.removeCircle,
               size: 18,
+              color: colorScheme.onSurface.withOpacity(0.4),
             ),
             onPressed: () {
               cubit.decrementItem(
@@ -190,7 +214,9 @@ class CartItemsList extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           "${item['quantity']}",
-          style: TxtStyle.tableRowBold,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         const SizedBox(width: 4),
         Tooltip(
@@ -201,7 +227,7 @@ class CartItemsList extends StatelessWidget {
             constraints: const BoxConstraints(),
             icon: Icon(
               Iconss.addCircle,
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
               size: 18,
             ),
             onPressed: () {
@@ -217,6 +243,8 @@ class CartItemsList extends StatelessWidget {
   }
 
   Widget _buildActionButtons(BuildContext context, Map<String, dynamic> item) {
+    final theme = Theme.of(context);
+
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -232,7 +260,7 @@ class CartItemsList extends StatelessWidget {
             },
             icon: Icon(
               Iconss.noteOutline,
-              color: Colorsmanegments.orange,
+              color: Colors.amber,
               size: 16,
             ),
           ),
@@ -250,7 +278,7 @@ class CartItemsList extends StatelessWidget {
             },
             icon: Icon(
               Iconss.delete,
-              color: Colorsmanegments.danger,
+              color: Colors.red,
               size: 16,
             ),
           ),

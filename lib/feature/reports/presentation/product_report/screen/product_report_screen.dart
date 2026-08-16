@@ -10,15 +10,19 @@ import '../widget/product_report_table.dart';
 import '../widget/product_report_toolbar.dart';
 import '../widget/product_report_view.dart';
 
-
 class ProductReportScreen extends StatelessWidget {
   const ProductReportScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Directionality(
       textDirection: TextDirection.rtl,
-      child:  BlocBuilder<ProductReportCubit, ProductReportState>(
+      child: Scaffold(
+        backgroundColor: colorScheme.background,
+        body: BlocBuilder<ProductReportCubit, ProductReportState>(
           builder: (context, state) {
             return Padding(
               padding: const EdgeInsets.all(24),
@@ -26,7 +30,7 @@ class ProductReportScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ====== Toolbar ======
-                  ProductReportView(),
+                  const ProductReportView(),
                   const SizedBox(height: 24),
 
                   // ====== Table ======
@@ -38,22 +42,22 @@ class ProductReportScreen extends StatelessWidget {
             );
           },
         ),
-
+      ),
     );
   }
 
   Widget _buildContent(BuildContext context, ProductReportState state) {
     if (state is ProductReportLoading) {
-      return _buildLoadingState();
+      return _buildLoadingState(context);
     }
 
     if (state is ProductReportError) {
-      return _buildErrorState(state.message, context);
+      return _buildErrorState(context, state.message);
     }
 
     if (state is ProductReportLoaded) {
       if (state.products.isEmpty) {
-        return _buildEmptyState();
+        return _buildEmptyState(context);
       }
       return const ProductReportTable();
     }
@@ -61,26 +65,26 @@ class ProductReportScreen extends StatelessWidget {
     return const SizedBox();
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(
-              color: Color(0xFF2563EB),
-            ),
-            SizedBox(height: 16),
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
             Text(
               'جاري تحميل المنتجات...',
-              style: TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B7280),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],
@@ -89,12 +93,15 @@ class ProductReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorState(String message, BuildContext context) {
+  Widget _buildErrorState(BuildContext context, String message) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Center(
         child: Column(
@@ -103,14 +110,13 @@ class ProductReportScreen extends StatelessWidget {
             Icon(
               Icons.error_outline,
               size: 48,
-              color: const Color(0xFFDC2626).withOpacity(0.5),
+              color: Colors.red.withOpacity(0.5),
             ),
             const SizedBox(height: 16),
             Text(
               message,
-              style: GoogleFonts.cairo(
-                fontSize: 14,
-                color: const Color(0xFF6B7280),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.6),
               ),
               textAlign: TextAlign.center,
             ),
@@ -119,8 +125,17 @@ class ProductReportScreen extends StatelessWidget {
               onPressed: () {
                 context.read<ProductReportCubit>().loadReport();
               },
-              icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('إعادة المحاولة'),
+              icon: Icon(
+                Icons.refresh,
+                size: 18,
+                color: colorScheme.primary,
+              ),
+              label: Text(
+                'إعادة المحاولة',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.primary,
+                ),
+              ),
             ),
           ],
         ),
@@ -128,12 +143,15 @@ class ProductReportScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Center(
         child: Column(
@@ -142,23 +160,20 @@ class ProductReportScreen extends StatelessWidget {
             Icon(
               Icons.inventory_2_outlined,
               size: 64,
-              color: const Color(0xFF6B7280).withOpacity(0.3),
+              color: colorScheme.onSurface.withOpacity(0.2),
             ),
             const SizedBox(height: 16),
             Text(
               'لا توجد منتجات',
-              style: GoogleFonts.cairo(
-                fontSize: 18,
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF111827),
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'قم بإضافة منتجات جديدة لعرضها هنا',
-              style: GoogleFonts.cairo(
-                fontSize: 14,
-                color: const Color(0xFF6B7280),
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ],

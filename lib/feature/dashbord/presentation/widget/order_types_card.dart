@@ -19,15 +19,18 @@ class OrderTypesCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return DashboardCard(
       child: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return _buildLoadingState();
+            return _buildLoadingState(context);
           }
 
           if (state is DashboardError) {
-            return _buildErrorState(state.message);
+            return _buildErrorState(context, state.message);
           }
 
           if (state is! DashboardSuccess) {
@@ -37,69 +40,72 @@ class OrderTypesCard extends StatelessWidget {
           final types = state.dashboard.orderTypes;
 
           if (types.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
 
-          return _buildContent(types);
+          return _buildContent(context, types);
         },
       ),
     );
   }
 
-  // ============================================================
-  // Loading State
-  // ============================================================
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context) {
     return const SizedBox(
       height: 200,
       child: Center(
-        child: CircularProgressIndicator(
-          color: Colorsmanegments.primary,
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }
 
-  // ============================================================
-  // Error State
-  // ============================================================
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(BuildContext context, String message) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       height: 200,
       child: Center(
         child: Text(
           message,
-          style: TxtStyle.danger,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: Colors.red,
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // Empty State
-  // ============================================================
-  Widget _buildEmptyState() {
-    return  SizedBox(
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return SizedBox(
       height: 200,
       child: Center(
         child: Text(
           "لا توجد بيانات",
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface.withOpacity(0.6),
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // Content
-  // ============================================================
-  Widget _buildContent(List<dynamic> types) {
+  Widget _buildContent(BuildContext context, List<dynamic> types) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionTitle(title: 'أنواع الطلبات'),
+        Text(
+          'أنواع الطلبات',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 16),
         ...types.map((type) => _buildTypeItem(
+          context,
           name: type.type,
           count: type.count,
           color: _getOrderTypeColor(type.type),
@@ -109,15 +115,15 @@ class OrderTypesCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Type Item
-  // ============================================================
-  Widget _buildTypeItem({
-    required String name,
-    required int count,
-    required Color color,
-    required IconData icon,
-  }) {
+  Widget _buildTypeItem(
+      BuildContext context, {
+        required String name,
+        required int count,
+        required Color color,
+        required IconData icon,
+      }) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
@@ -138,7 +144,7 @@ class OrderTypesCard extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: TxtStyle.bodyMedium.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -151,8 +157,9 @@ class OrderTypesCard extends StatelessWidget {
             ),
             child: Text(
               '$count طلب',
-              style: TxtStyle.badgeSmall.copyWith(
+              style: theme.textTheme.labelSmall?.copyWith(
                 color: color,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
@@ -161,9 +168,6 @@ class OrderTypesCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Helper Functions
-  // ============================================================
   IconData _getOrderTypeIcon(String type) {
     switch (type) {
       case "تيك أواي":
@@ -180,13 +184,13 @@ class OrderTypesCard extends StatelessWidget {
   Color _getOrderTypeColor(String type) {
     switch (type) {
       case "تيك أواي":
-        return Colorsmanegments.warning;
+        return Colors.amber;
       case "داخل المطعم":
-        return Colorsmanegments.success;
+        return Colors.green;
       case "دليفري":
-        return Colorsmanegments.primary;
+        return const Color(0xFF2563EB);
       default:
-        return Colorsmanegments.grey;
+        return Colors.grey;
     }
   }
 }

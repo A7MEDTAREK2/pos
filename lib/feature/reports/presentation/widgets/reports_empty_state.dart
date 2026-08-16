@@ -8,6 +8,9 @@ class ReportsEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -16,30 +19,27 @@ class ReportsEmptyState extends StatelessWidget {
             width: 80,
             height: 80,
             decoration: BoxDecoration(
-              color: const Color(0xFF2563EB).withOpacity(0.08),
+              color: colorScheme.primary.withOpacity(0.08),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.analytics_outlined,
               size: 40,
-              color: Color(0xFF2563EB),
+              color: colorScheme.primary,
             ),
           ),
           const SizedBox(height: 24),
           Text(
             'اختر تقريراً من القائمة الجانبية',
-            style: GoogleFonts.cairo(
-              fontSize: 20,
+            style: theme.textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: const Color(0xFF111827),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             'اختر نوع التقرير لعرض البيانات',
-            style: GoogleFonts.cairo(
-              fontSize: 14,
-              color: const Color(0xFF6B7280),
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ],

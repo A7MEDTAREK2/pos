@@ -24,35 +24,36 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colorsmanegments.background,
+      backgroundColor: colorScheme.background,
       body: Padding(
         padding: const EdgeInsets.all(32.0),
         child: Column(
           children: [
-            // الهيدر بيحتوي على زرار الرجوع والعنوان وزر الإضافة
             _buildHeader(context),
             const SizedBox(height: 20),
 
-            // شريط البحث
             _buildSearchBar(context),
             const SizedBox(height: 20),
 
-            // رأس الجدول لتوضيح البيانات
-            _buildTableHeader(),
+            _buildTableHeader(context),
 
-            // جسم الجدول بيتم تحديثه تلقائياً حسب حالة الـ Cubit
             Expanded(
               child: BlocBuilder<ProductCubit, ProductState>(
                 builder: (context, state) {
-                  // حالة التحميل
                   if (state is ProductLoading) {
-                    return const Center(child: CircularProgressIndicator(color: Colorsmanegments.primary));
-                  }
-                  // حالة النجاح وعرض البيانات
-                  else if (state is ProductSuccess) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is ProductSuccess) {
                     if (state.products.isEmpty) {
-                      return const Center(child: Text("لا توجد منتجات مطابقة للبحث"));
+                      return Center(
+                        child: Text(
+                          "لا توجد منتجات مطابقة للبحث",
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      );
                     }
                     return ListView.builder(
                       itemCount: state.products.length,
@@ -60,12 +61,22 @@ class _ProductsScreenState extends State<ProductsScreen> {
                         return ProductTableRow(product: state.products[index]);
                       },
                     );
+                  } else if (state is ProductError) {
+                    return Center(
+                      child: Text(
+                        state.message,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.red,
+                        ),
+                      ),
+                    );
                   }
-                  // حالة الخطأ
-                  else if (state is ProductError) {
-                    return Center(child: Text(state.message, style: const TextStyle(color: Colorsmanegments.red)));
-                  }
-                  return const Center(child: Text("جاري تحميل البيانات..."));
+                  return Center(
+                    child: Text(
+                      "جاري تحميل البيانات...",
+                      style: theme.textTheme.bodyMedium,
+                    ),
+                  );
                 },
               ),
             ),
@@ -75,26 +86,37 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  // تصميم شريط البحث (Search Bar)
   Widget _buildSearchBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colorsmanegments.border),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: TextField(
         controller: searchController,
         onChanged: (value) {
           context.read<ProductCubit>().searchProducts(value);
         },
+        style: theme.textTheme.bodyMedium,
         decoration: InputDecoration(
           hintText: "ابحث باسم المنتج أو الباركود...",
-          hintStyle: const TextStyle(color: Colors.grey),
-          prefixIcon: const Icon(Icons.search, color: Colorsmanegments.primary),
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+          ),
+          prefixIcon: Icon(
+            Icons.search,
+            color: colorScheme.primary,
+          ),
           suffixIcon: searchController.text.isNotEmpty
               ? IconButton(
-            icon: const Icon(Icons.clear, color: Colors.grey),
+            icon: Icon(
+              Icons.clear,
+              color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+            ),
             onPressed: () {
               searchController.clear();
               context.read<ProductCubit>().searchProducts('');
@@ -108,52 +130,112 @@ class _ProductsScreenState extends State<ProductsScreen> {
     );
   }
 
-  // تصميم رأس الجدول
-  Widget _buildTableHeader() {
+  Widget _buildTableHeader(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colorsmanegments.border, width: 2)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: theme.dividerColor, width: 2),
+        ),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Expanded(flex: 1, child: Text("صورة", style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 4, child: Text("المنتج", style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 2, child: Text("الباركود", style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 2, child: Text("السعر", style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 1, child: Text("الكمية", style: TextStyle(fontWeight: FontWeight.bold))),
-          Expanded(flex: 1, child: Text("إجراءات", style: TextStyle(fontWeight: FontWeight.bold))),
+          Expanded(
+            flex: 1,
+            child: Text(
+              "صورة",
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 4,
+            child: Text(
+              "المنتج",
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              "الباركود",
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              "السعر",
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              "الكمية",
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Text(
+              "إجراءات",
+              style: theme.textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  // تصميم الهيدر مع زرار الرجوع
   Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        // زرار الرجوع مع العنوان
         Row(
           children: [
             IconButton(
-              icon: const Icon(Icons.arrow_back_rounded),
+              icon: Icon(
+                Icons.arrow_back_rounded,
+                color: theme.textTheme.bodyLarge?.color,
+              ),
               onPressed: () => Navigator.pop(context),
             ),
             const SizedBox(width: 8),
-            const Text("إدارة المنتجات", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            Text(
+              "إدارة المنتجات",
+              style: theme.textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
 
-        // 🎯 زر إضافة منتج جديد (تم تصحيح طريقة فتح الديالوج ليعمل فوراً ويستقبل الأقسام)
         ElevatedButton.icon(
           onPressed: () {
             final productCubit = context.read<ProductCubit>();
-
-            // استدعاء دالة التحديث في الخلفية للتأكد من جلب البيانات الجديدة
             productCubit.loadProducts();
 
-            // فتح الديالوج فوراً وربطه بالـ Cubit لكي تظهر الأقسام بمجرد توفرها
             showDialog(
               context: context,
               builder: (_) => BlocProvider.value(
@@ -161,13 +243,26 @@ class _ProductsScreenState extends State<ProductsScreen> {
                 child: AddProductDialog(
                   categories: productCubit.state is ProductSuccess
                       ? (productCubit.state as ProductSuccess).categories
-                      : [], // تمرير القائمة المتاحة حالياً وضمان عدم حدوث Crash
+                      : [],
                 ),
               ),
             );
           },
-          icon: const Icon(Icons.add),
-          label: const Text("إضافة منتج"),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
+          ),
+          icon: Icon(
+            Icons.add,
+            color: colorScheme.onPrimary,
+          ),
+          label: Text(
+            "إضافة منتج",
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: colorScheme.onPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
       ],
     );

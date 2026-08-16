@@ -30,6 +30,9 @@ class _OrderTypeTableRowState extends State<OrderTypeTableRow> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: SystemMouseCursors.basic,
       onEnter: (_) => setState(() => _isHovered = true),
@@ -40,7 +43,7 @@ class _OrderTypeTableRowState extends State<OrderTypeTableRow> {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: _getRowColor(),
+          color: _getRowColor(colorScheme),
           border: const Border(
             bottom: BorderSide(
               color: Color(0xFFF1F5F9),
@@ -50,7 +53,7 @@ class _OrderTypeTableRowState extends State<OrderTypeTableRow> {
           boxShadow: _isHovered
               ? [
             BoxShadow(
-              color: const Color(0xFF2563EB).withOpacity(0.04),
+              color: colorScheme.primary.withOpacity(0.04),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -60,25 +63,30 @@ class _OrderTypeTableRowState extends State<OrderTypeTableRow> {
         child: Row(
           children: [
             _buildCell(
+              context,
               text: widget.index.toString(),
               flex: 1,
               isIndex: true,
             ),
             _buildCell(
+              context,
               text: widget.orderType,
               flex: 3,
               isBold: true,
             ),
             _buildCell(
+              context,
               text: '${widget.orderCount}',
               flex: 2,
             ),
             _buildCell(
+              context,
               text: '${widget.totalRevenue.toStringAsFixed(2)} ج.م',
               flex: 3,
               isRevenue: true,
             ),
             _buildCell(
+              context,
               text: '${widget.averageValue.toStringAsFixed(2)} ج.م',
               flex: 3,
             ),
@@ -88,37 +96,40 @@ class _OrderTypeTableRowState extends State<OrderTypeTableRow> {
     );
   }
 
-  Widget _buildCell({
-    required String text,
-    int flex = 1,
-    bool isBold = false,
-    bool isIndex = false,
-    bool isRevenue = false,
-  }) {
+  Widget _buildCell(
+      BuildContext context, {
+        required String text,
+        int flex = 1,
+        bool isBold = false,
+        bool isIndex = false,
+        bool isRevenue = false,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Expanded(
       flex: flex,
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: GoogleFonts.cairo(
-          fontSize: 13,
+        style: theme.textTheme.bodySmall?.copyWith(
           fontWeight: isBold || isRevenue ? FontWeight.w600 : FontWeight.w400,
           color: isRevenue
-              ? const Color(0xFF16A34A)
+              ? Colors.green
               : isIndex
-              ? const Color(0xFF9CA3AF)
-              : const Color(0xFF111827),
+              ? colorScheme.onSurface.withOpacity(0.4)
+              : colorScheme.onSurface,
         ),
       ),
     );
   }
 
-  Color _getRowColor() {
+  Color _getRowColor(ColorScheme colorScheme) {
     if (_isHovered) {
-      return const Color(0xFF2563EB).withOpacity(0.04);
+      return colorScheme.primary.withOpacity(0.04);
     }
     return widget.isEven
-        ? const Color(0xFFFAFBFC)
-        : Colors.white;
+        ? colorScheme.background
+        : colorScheme.surface;
   }
 }

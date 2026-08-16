@@ -10,6 +10,8 @@ class PosTopAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final cubit = context.watch<OrderCubit>();
     final now = DateTime.now();
     final orderDate = cubit.currentOrder?.createdAt ?? now;
@@ -17,9 +19,9 @@ class PosTopAppBar extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xffE5E7EB))),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        border: Border(bottom: BorderSide(color: colorScheme.outlineVariant)),
       ),
       child: Row(
         children: [
@@ -32,13 +34,13 @@ class PosTopAppBar extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: Colorsmanegments.grey100,
+                  color: colorScheme.background,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   Iconss.arrowBack,
                   size: 20,
-                  color: Colorsmanegments.textSecondary,
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                 ),
               ),
             ),
@@ -46,7 +48,9 @@ class PosTopAppBar extends StatelessWidget {
           const SizedBox(width: 20),
           Text(
             "ModuPos",
-            style: TxtStyle.titleLarge,
+            style: theme.textTheme.headlineSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const Spacer(),
           Column(
@@ -54,11 +58,14 @@ class PosTopAppBar extends StatelessWidget {
             children: [
               Text(
                 "أوردر رقم",
-                style: TxtStyle.bodySmall,
+                style: theme.textTheme.bodySmall,
               ),
               Text(
                 "#$displayOrderNumber",
-                style: TxtStyle.titleLarge.copyWith(fontSize: 28),
+                style: theme.textTheme.displayMedium?.copyWith(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 6),
               Row(
@@ -66,23 +73,23 @@ class PosTopAppBar extends StatelessWidget {
                   Icon(
                     Iconss.accessTime,
                     size: 16,
-                    color: Colorsmanegments.grey,
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
                   ),
                   const SizedBox(width: 5),
                   Text(
                     TimeOfDay.fromDateTime(orderDate).format(context),
-                    style: TxtStyle.bodySmall,
+                    style: theme.textTheme.bodySmall,
                   ),
                   const SizedBox(width: 18),
                   Icon(
                     Iconss.calendar,
                     size: 16,
-                    color: Colorsmanegments.grey,
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
                   ),
                   const SizedBox(width: 5),
                   Text(
                     "${orderDate.day}/${orderDate.month}/${orderDate.year}",
-                    style: TxtStyle.bodySmall,
+                    style: theme.textTheme.bodySmall,
                   ),
                 ],
               ),

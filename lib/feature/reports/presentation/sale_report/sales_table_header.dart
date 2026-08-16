@@ -6,27 +6,30 @@ class SalesTableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       height: 54,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF8FAFC),
-        border: Border(
+      decoration: BoxDecoration(
+        color: colorScheme.background,
+        border: const Border(
           bottom: BorderSide(
             color: Color(0xFFE5E7EB),
           ),
         ),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          _HeaderCell("م"),
-          _HeaderCell("رقم الفاتورة", flex: 2),
-          _HeaderCell("العميل", flex: 3),
-          _HeaderCell("نوع الطلب", flex: 2),
-          _HeaderCell("الدفع", flex: 2),
-          _HeaderCell("الإجمالي", flex: 2),
-          _HeaderCell("التاريخ", flex: 2),
-          _HeaderCell("الإجراءات", flex: 2),
+          _HeaderCell(context, "م", flex: 1),
+          _HeaderCell(context, "رقم الفاتورة", flex: 2),
+          _HeaderCell(context, "العميل", flex: 3),
+          _HeaderCell(context, "نوع الطلب", flex: 2),
+          _HeaderCell(context, "الدفع", flex: 2),
+          _HeaderCell(context, "الإجمالي", flex: 2),
+          _HeaderCell(context, "التاريخ", flex: 2),
+          _HeaderCell(context, "الإجراءات", flex: 2),
         ],
       ),
     );
@@ -38,21 +41,27 @@ class _HeaderCell extends StatelessWidget {
   final int flex;
 
   const _HeaderCell(
+      this.context,
       this.title, {
         this.flex = 1,
       });
 
+  final BuildContext context;
+
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Expanded(
       flex: flex,
       child: Text(
         title,
         textAlign: TextAlign.center,
-        style: GoogleFonts.cairo(
+        style: theme.textTheme.labelLarge?.copyWith(
           fontWeight: FontWeight.bold,
           fontSize: 13,
-          color: const Color(0xFF374151),
+          color: colorScheme.onSurface.withOpacity(0.7),
         ),
       ),
     );

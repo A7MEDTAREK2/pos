@@ -2,9 +2,11 @@
 
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../../../core/service/user_session.dart';
+import '../../../../core/theming/theme_cubit.dart';
 import '../../../auth/login/presentation/screen/login_screen.dart';
 
 class HomeAppBar extends StatefulWidget {
@@ -29,7 +31,6 @@ class _HomeAppBarState extends State<HomeAppBar> {
   void initState() {
     super.initState();
     _now = DateTime.now();
-    // 🎯 تحديث الوقت والتاريخ كل ثانية لحظياً
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (mounted) {
         setState(() {
@@ -41,22 +42,26 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // 🎯 إلغاء التايمر عند التدمير لمنع تسريب الذاكرة
+    _timer?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // 🎯 جلب بيانات المستخدم المسجل حالياً من الجلسة (UserSession)
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     final String currentUserName = UserSession.currentUser?.name ?? 'مستخدم النظام';
     final String currentUserRole = UserSession.currentUser?.role ?? 'كاشير';
 
+    final bool isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
         border: Border(
-          bottom: BorderSide(color: Color(0xFFE5E7EB)),
+          bottom: BorderSide(color: theme.dividerColor),
         ),
       ),
       child: Row(
@@ -80,14 +85,14 @@ class _HomeAppBarState extends State<HomeAppBar> {
                     style: GoogleFonts.cairo(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
-                      color: const Color(0xFF111827),
+                      color: theme.textTheme.titleLarge?.color,
                     ),
                   ),
                   Text(
                     'نظام نقاط البيع',
                     style: GoogleFonts.cairo(
                       fontSize: 11,
-                      color: const Color(0xFF6B7280),
+                      color: theme.textTheme.bodySmall?.color,
                     ),
                   ),
                 ],
@@ -97,50 +102,75 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
           const Spacer(),
 
-          // ====== التاريخ والوقت (يتحدث لحظياً) ======
+          // ====== التاريخ والوقت ======
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: colorScheme.background,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE5E7EB)),
+              border: Border.all(color: theme.dividerColor),
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.calendar_today,
                   size: 16,
-                  color: Color(0xFF6B7280),
+                  color: theme.textTheme.bodySmall?.color,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   _formatDate(_now),
                   style: GoogleFonts.cairo(
                     fontSize: 13,
-                    color: const Color(0xFF6B7280),
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Container(
                   width: 1,
                   height: 16,
-                  color: const Color(0xFFE5E7EB),
+                  color: theme.dividerColor,
                 ),
                 const SizedBox(width: 12),
-                const Icon(
+                Icon(
                   Icons.access_time,
                   size: 16,
-                  color: Color(0xFF6B7280),
+                  color: theme.textTheme.bodySmall?.color,
                 ),
                 const SizedBox(width: 8),
                 Text(
                   _formatTime(_now),
                   style: GoogleFonts.cairo(
                     fontSize: 13,
-                    color: const Color(0xFF6B7280),
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                 ),
               ],
+            ),
+          ),
+
+          const SizedBox(width: 16),
+
+          // ====== زر تبديل الثيم ======
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: colorScheme.background,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: theme.dividerColor),
+            ),
+            child: IconButton(
+              padding: EdgeInsets.zero,
+              onPressed: () {
+                context.read<ThemeCubit>().toggleTheme(!isDarkMode);
+              },
+              icon: Icon(
+                isDarkMode ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                size: 22,
+                color: isDarkMode ? Colors.amber : const Color(0xFF6B7280),
+              ),
+              tooltip: isDarkMode ? 'الوضع الفاتح' : 'الوضع الداكن',
             ),
           ),
 
@@ -153,17 +183,17 @@ class _HomeAppBarState extends State<HomeAppBar> {
                 width: 42,
                 height: 42,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: colorScheme.background,
                   borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  border: Border.all(color: theme.dividerColor),
                 ),
                 child: IconButton(
                   padding: EdgeInsets.zero,
                   onPressed: widget.onNotificationsPressed ?? () {},
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.notifications_none,
                     size: 22,
-                    color: Color(0xFF6B7280),
+                    color: theme.textTheme.bodySmall?.color,
                   ),
                 ),
               ),
@@ -184,70 +214,86 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
           const SizedBox(width: 16),
 
-          // ====== اسم المستخدم والقائمة ======
-          PopupMenuButton<UserMenuAction>(
-            onSelected: (value) {
-              switch (value) {
-                case UserMenuAction.switchAccount:
-                  UserSession.logout();
+          // ====== زر حساب المستخدم ======
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: colorScheme.background,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: theme.dividerColor),
+            ),
+            child: PopupMenuButton<UserMenuAction>(
+              padding: EdgeInsets.zero,
+              offset: const Offset(0, 48),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              icon: Icon(
+                Icons.person_outline,
+                size: 22,
+                color: theme.textTheme.bodySmall?.color,
+              ),
+              onSelected: (value) {
+                switch (value) {
+                  case UserMenuAction.switchAccount:
+                    UserSession.logout();
 
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const LoginScreen(),
-                    ),
-                        (route) => false,
-                  );
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                enabled: false,
-                child: Text("👤 حساب المستخدم"),
-              ),
-              const PopupMenuDivider(),
-              const PopupMenuItem(
-                value: UserMenuAction.switchAccount,
-                child: Row(
-                  children: [
-                    Icon(Icons.switch_account),
-                    SizedBox(width: 8),
-                    Text("تبديل الحساب"),
-                  ],
-                ),
-              ),
-            ],
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  currentUserName, // 👈 الاسم الحقيقي ديناميكياً
-                  style: GoogleFonts.cairo(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF111827),
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const LoginScreen(),
+                      ),
+                          (route) => false,
+                    );
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  enabled: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        currentUserName,
+                        style: GoogleFonts.cairo(
+                          fontWeight: FontWeight.bold,
+                          color: theme.textTheme.titleLarge?.color,
+                        ),
+                      ),
+                      Text(
+                        currentUserRole,
+                        style: GoogleFonts.cairo(
+                          fontSize: 11,
+                          color: theme.textTheme.bodySmall?.color,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  currentUserRole, // 👈 الدور الحقيقي ديناميكياً
-                  style: GoogleFonts.cairo(
-                    fontSize: 12,
-                    color: const Color(0xFF6B7280),
+                const PopupMenuDivider(),
+                PopupMenuItem(
+                  value: UserMenuAction.switchAccount,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.switch_account, size: 20, color: Color(0xFF2563EB)),
+                      const SizedBox(width: 8),
+                      Text(
+                        "تبديل الحساب",
+                        style: GoogleFonts.cairo(fontSize: 13),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
   }
 
-  // ============================================================
-  // دوال مساعدة للتنسيق
-  // ============================================================
   String _formatDate(DateTime date) {
     return '${date.day} ${_getMonthName(date.month)} ${date.year}';
   }

@@ -81,15 +81,18 @@ class MetricCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colorsmanegments.border),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.blackOpacity10,
+            color: colorScheme.shadow.withOpacity(0.08),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -105,13 +108,13 @@ class MetricCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TxtStyle.labelLarge.copyWith(
+                  style: theme.textTheme.labelLarge?.copyWith(
                     letterSpacing: 0.5,
+                    color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                   ),
                 ),
                 const SizedBox(height: 8),
 
-                // 🎯 تحول سلس للرقم عند التحديث اللحظي
                 AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   transitionBuilder: (child, animation) => FadeTransition(
@@ -120,8 +123,10 @@ class MetricCard extends StatelessWidget {
                   ),
                   child: Text(
                     value,
-                    key: ValueKey<String>(value), // يضمن إرسال التأثير اللحظي فور تغيّر القيمة
-                    style: TxtStyle.dashboardValue,
+                    key: ValueKey<String>(value),
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -137,8 +142,8 @@ class MetricCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   decoration: BoxDecoration(
                     color: isPositive
-                        ? Colorsmanegments.success.withOpacity(0.12)
-                        : Colorsmanegments.danger.withOpacity(0.12),
+                        ? Colors.green.withOpacity(0.12)
+                        : Colors.red.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
@@ -147,17 +152,14 @@ class MetricCard extends StatelessWidget {
                       Icon(
                         isPositive ? Iconss.trendingUp : Iconss.trendingDown,
                         size: 14,
-                        color: isPositive
-                            ? Colorsmanegments.success
-                            : Colorsmanegments.danger,
+                        color: isPositive ? Colors.green : Colors.red,
                       ),
                       const SizedBox(width: 4),
                       Text(
                         badgeText!,
-                        style: TxtStyle.badgeSmall.copyWith(
-                          color: isPositive
-                              ? Colorsmanegments.success
-                              : Colorsmanegments.danger,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: isPositive ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -170,7 +172,7 @@ class MetricCard extends StatelessWidget {
 
               Icon(
                 icon,
-                color: Colorsmanegments.textSecondary.withOpacity(0.6),
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                 size: 28,
               ),
             ],

@@ -1,6 +1,7 @@
 // lib/feature/dashboard/presentation/widgets/statistic_card.dart
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/icons.dart';
@@ -29,17 +30,19 @@ class StatisticCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isPositive = data.change >= 0;
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colorsmanegments.border),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.shadowLight,
+            color: colorScheme.shadow.withOpacity(0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -69,8 +72,8 @@ class StatisticCard extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: isPositive
-                        ? Colorsmanegments.success.withOpacity(0.1)
-                        : Colorsmanegments.danger.withOpacity(0.1),
+                        ? Colors.green.withOpacity(0.1)
+                        : Colors.red.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Row(
@@ -80,17 +83,14 @@ class StatisticCard extends StatelessWidget {
                             ? Iconss.trendingUp
                             : Iconss.trendingDown,
                         size: 10,
-                        color: isPositive
-                            ? Colorsmanegments.success
-                            : Colorsmanegments.danger,
+                        color: isPositive ? Colors.green : Colors.red,
                       ),
                       const SizedBox(width: 2),
                       Text(
                         '${isPositive ? '+' : ''}${data.change.toStringAsFixed(1)}%',
-                        style: TxtStyle.dashboardChange.copyWith(
-                          color: isPositive
-                              ? Colorsmanegments.success
-                              : Colorsmanegments.danger,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: isPositive ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -103,12 +103,16 @@ class StatisticCard extends StatelessWidget {
             children: [
               Text(
                 data.value,
-                style: TxtStyle.dashboardValue,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
                 data.title,
-                style: TxtStyle.dashboardTitle,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface.withOpacity(0.6),
+                ),
               ),
             ],
           ),

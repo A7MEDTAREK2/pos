@@ -23,6 +23,9 @@ class SaleDetailsSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return SafeArea(
       child: DraggableScrollableSheet(
         initialChildSize: .85,
@@ -37,14 +40,16 @@ class SaleDetailsSheet extends StatelessWidget {
                 width: 60,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: Colorsmanegments.grey300,
+                  color: colorScheme.onSurface.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(20),
                 ),
               ),
               const SizedBox(height: 20),
               Text(
                 "فاتورة #${sale.orderNumber}",
-                style: TxtStyle.headerSmall,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 20),
               Expanded(
@@ -53,39 +58,46 @@ class SaleDetailsSheet extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   children: [
                     _infoTile(
+                      context,
                       Iconss.person,
                       "العميل",
                       sale.displayCustomerName,
                     ),
                     if (sale.customerPhone.isNotEmpty)
                       _infoTile(
+                        context,
                         Iconss.phone,
                         "الهاتف",
                         sale.customerPhone,
                       ),
                     _infoTile(
+                      context,
                       Iconss.shoppingBag,
                       "نوع الطلب",
                       sale.orderTypeStringAr,
                     ),
                     _infoTile(
+                      context,
                       Iconss.calendar,
                       "التاريخ",
                       _formatDate(sale.createdAt),
                     ),
                     const SizedBox(height: 20),
-                    const Divider(),
+                    Divider(color: theme.dividerColor),
                     Text(
                       "المنتجات",
-                      style: TxtStyle.titleCard,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 10),
                     ...items.map(
                           (item) => SaleItemCard(item: item),
                     ),
                     const SizedBox(height: 20),
-                    const Divider(),
+                    Divider(color: theme.dividerColor),
                     _totalRow(
+                      context,
                       "الإجمالي",
                       "${sale.total.toStringAsFixed(2)} ج.م",
                     ),
@@ -101,24 +113,30 @@ class SaleDetailsSheet extends StatelessWidget {
   }
 
   Widget _infoTile(
+      BuildContext context,
       IconData icon,
       String title,
       String value,
       ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, color: Colorsmanegments.primary),
+          Icon(icon, color: colorScheme.primary),
           const SizedBox(width: 10),
           Text(
             "$title : ",
-            style: TxtStyle.labelBold,
+            style: theme.textTheme.titleSmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           Expanded(
             child: Text(
               value,
-              style: TxtStyle.bodyMedium,
+              style: theme.textTheme.bodyMedium,
             ),
           ),
         ],
@@ -127,20 +145,26 @@ class SaleDetailsSheet extends StatelessWidget {
   }
 
   Widget _totalRow(
+      BuildContext context,
       String title,
       String value,
       ) {
+    final theme = Theme.of(context);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: TxtStyle.totalMedium,
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
         ),
         Text(
           value,
-          style: TxtStyle.totalLarge.copyWith(
-            color: Colorsmanegments.success,
+          style: theme.textTheme.headlineMedium?.copyWith(
+            color: Colors.green,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],

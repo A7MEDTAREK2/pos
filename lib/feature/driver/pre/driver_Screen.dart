@@ -9,7 +9,6 @@ import '../logic/drive_state.dart';
 import 'card.dart';
 import 'dialog.dart';
 
-
 class DriverScreen extends StatefulWidget {
   const DriverScreen({super.key});
 
@@ -39,35 +38,20 @@ class _DriverScreenState extends State<DriverScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Scaffold(
-      backgroundColor: Colorsmanegments.background,
+      backgroundColor: colorScheme.background,
       appBar: _buildAppBar(context),
       body: BlocConsumer<DriverCubit, DriverState>(
         listener: (context, state) {
-          if (state is DriverOperationSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colorsmanegments.success,
-                duration: const Duration(seconds: 2),
-              ),
-            );
-          }
-          if (state is DriverError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colorsmanegments.danger,
-                duration: const Duration(seconds: 3),
-              ),
-            );
-          }
+          // تم إزالة جميع SnackBars
         },
         builder: (context, state) {
           final cubit = context.read<DriverCubit>();
           final drivers = cubit.drivers;
 
-          // فلترة المندوبين حسب البحث
           final filteredDrivers = _searchQuery.isEmpty
               ? drivers
               : drivers.where((driver) =>
@@ -78,9 +62,7 @@ class _DriverScreenState extends State<DriverScreen> {
 
           return Column(
             children: [
-              // ====== Search Bar ======
-              _buildSearchBar(),
-              // ====== Body ======
+              _buildSearchBar(context),
               Expanded(
                 child: _buildBody(
                   context,
@@ -97,34 +79,38 @@ class _DriverScreenState extends State<DriverScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return AppBar(
-      backgroundColor: Colorsmanegments.card,
+      backgroundColor: colorScheme.surface,
       elevation: 0,
       title: Text(
         'إدارة المندوبين',
-        style: TxtStyle.headerLarge.copyWith(fontSize: 22),
+        style: theme.textTheme.headlineMedium?.copyWith(
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
+        ),
       ),
       actions: [
-        // ====== Refresh Button ======
         IconButton(
           onPressed: () {
             context.read<DriverCubit>().loadDrivers();
           },
           icon: Icon(
             Icons.refresh_rounded,
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
             size: 28,
           ),
           tooltip: 'تحديث القائمة',
         ),
-        // ====== Add Button ======
         IconButton(
           onPressed: () {
             _showAddEditDialog(context, null);
           },
           icon: Icon(
             Icons.add_circle_rounded,
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
             size: 32,
           ),
           tooltip: 'إضافة مندوب جديد',
@@ -134,16 +120,19 @@ class _DriverScreenState extends State<DriverScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      color: Colorsmanegments.card,
+      color: colorScheme.surface,
       child: Container(
         decoration: BoxDecoration(
-          color: Colorsmanegments.background,
+          color: colorScheme.background,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: Colorsmanegments.border,
+            color: colorScheme.outlineVariant,
           ),
         ),
         padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -151,22 +140,22 @@ class _DriverScreenState extends State<DriverScreen> {
           children: [
             Icon(
               Icons.search_rounded,
-              color: Colorsmanegments.grey,
+              color: colorScheme.onSurface.withOpacity(0.5),
               size: 24,
             ),
             const SizedBox(width: 12),
             Expanded(
               child: TextField(
                 controller: _searchController,
+                style: theme.textTheme.bodyMedium,
                 decoration: InputDecoration(
                   hintText: 'بحث عن مندوب...',
-                  hintStyle: TxtStyle.bodySmall.copyWith(
-                    color: Colorsmanegments.grey,
+                  hintStyle: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.5),
                   ),
                   border: InputBorder.none,
                   isDense: true,
                 ),
-                style: TxtStyle.bodyMedium,
               ),
             ),
             if (_searchQuery.isNotEmpty)
@@ -179,7 +168,7 @@ class _DriverScreenState extends State<DriverScreen> {
                 },
                 icon: Icon(
                   Icons.close_rounded,
-                  color: Colorsmanegments.grey,
+                  color: colorScheme.onSurface.withOpacity(0.5),
                   size: 20,
                 ),
                 padding: EdgeInsets.zero,
@@ -197,11 +186,12 @@ class _DriverScreenState extends State<DriverScreen> {
       List<dynamic> filteredDrivers,
       DriverCubit cubit,
       ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     if (state is DriverLoading && filteredDrivers.isEmpty) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: Colorsmanegments.primary,
-        ),
+        child: CircularProgressIndicator(),
       );
     }
 
@@ -236,6 +226,9 @@ class _DriverScreenState extends State<DriverScreen> {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -243,15 +236,15 @@ class _DriverScreenState extends State<DriverScreen> {
           Icon(
             Icons.person_outline_rounded,
             size: 80,
-            color: Colorsmanegments.grey.withOpacity(0.5),
+            color: colorScheme.onSurface.withOpacity(0.3),
           ),
           const SizedBox(height: 16),
           Text(
             _searchQuery.isEmpty
                 ? 'لا يوجد مندوبين'
                 : 'لا توجد نتائج للبحث',
-            style: TxtStyle.titleMedium.copyWith(
-              color: Colorsmanegments.grey,
+            style: theme.textTheme.titleMedium?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
           const SizedBox(height: 8),
@@ -259,8 +252,8 @@ class _DriverScreenState extends State<DriverScreen> {
             _searchQuery.isEmpty
                 ? 'أضف مندوب جديد بالضغط على زر +'
                 : 'جرب كلمات بحث مختلفة',
-            style: TxtStyle.bodySmall.copyWith(
-              color: Colorsmanegments.grey,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.5),
             ),
           ),
           if (_searchQuery.isNotEmpty) ...[
@@ -274,8 +267,8 @@ class _DriverScreenState extends State<DriverScreen> {
               },
               child: Text(
                 'مسح البحث',
-                style: TxtStyle.buttonPrimary.copyWith(
-                  color: Colorsmanegments.primary,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.primary,
                 ),
               ),
             ),
@@ -302,9 +295,13 @@ class _DriverScreenState extends State<DriverScreen> {
       dynamic driver,
       DriverCubit cubit,
       ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -312,31 +309,34 @@ class _DriverScreenState extends State<DriverScreen> {
           children: [
             Icon(
               Icons.warning_amber_rounded,
-              color: Colorsmanegments.danger,
+              color: Colors.red,
               size: 28,
             ),
             const SizedBox(width: 12),
             Text(
               'تأكيد الحذف',
-              style: TxtStyle.titleMedium,
+              style: theme.textTheme.titleLarge,
             ),
           ],
         ),
         content: Text(
           'هل أنت متأكد من حذف المندوب "${driver.name}"؟',
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
               'إلغاء',
-              style: TxtStyle.buttonPrimary,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+              ),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.danger,
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -347,8 +347,9 @@ class _DriverScreenState extends State<DriverScreen> {
             },
             child: Text(
               'حذف',
-              style: TxtStyle.buttonMedium.copyWith(
-                color: Colorsmanegments.textWhite,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),

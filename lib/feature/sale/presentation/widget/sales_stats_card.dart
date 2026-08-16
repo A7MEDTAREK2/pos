@@ -20,14 +20,17 @@ class SalesStatsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Colorsmanegments.primary,
-            Colorsmanegments.primary.withOpacity(0.8),
+            colorScheme.primary,
+            colorScheme.primary.withOpacity(0.8),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -35,7 +38,7 @@ class SalesStatsCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colorsmanegments.primary.withOpacity(0.3),
+            color: colorScheme.primary.withOpacity(0.3),
             blurRadius: 8,
             offset: const Offset(0, 4),
           ),
@@ -45,18 +48,21 @@ class SalesStatsCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _item(
+            context,
             Iconss.order,
             "الطلبات",
             "${state.totalOrders}",
           ),
-          _divider(),
+          _divider(context),
           _item(
+            context,
             Iconss.sales,
             "الإجمالي",
             "${state.totalSales.toStringAsFixed(2)} ج.م",
           ),
-          _divider(),
+          _divider(context),
           _item(
+            context,
             Iconss.trendingUp,
             "المتوسط",
             "${state.averageOrderValue.toStringAsFixed(2)} ج.م",
@@ -66,33 +72,39 @@ class SalesStatsCard extends StatelessWidget {
     );
   }
 
-  Widget _divider() {
+  Widget _divider(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Container(
       width: 1,
       height: 40,
-      color: Colorsmanegments.textWhite.withOpacity(0.3),
+      color: colorScheme.onPrimary.withOpacity(0.3),
     );
   }
 
   Widget _item(
+      BuildContext context,
       IconData icon,
       String title,
       String value,
       ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       children: [
         Row(
           children: [
             Icon(
               icon,
-              color: Colorsmanegments.textWhite,
+              color: colorScheme.onPrimary,
               size: 18,
             ),
             const SizedBox(width: 6),
             Text(
               title,
-              style: TxtStyle.bodySmall.copyWith(
-                color: Colorsmanegments.textWhite.withOpacity(0.8),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onPrimary.withOpacity(0.8),
               ),
             ),
           ],
@@ -100,8 +112,9 @@ class SalesStatsCard extends StatelessWidget {
         const SizedBox(height: 6),
         Text(
           value,
-          style: TxtStyle.totalMedium.copyWith(
-            color: Colorsmanegments.textWhite,
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: colorScheme.onPrimary,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],

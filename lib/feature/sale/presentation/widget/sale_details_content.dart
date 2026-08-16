@@ -21,6 +21,9 @@ class SaleDetailsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return SafeArea(
       child: SizedBox(
         height: MediaQuery.of(context).size.height * .85,
@@ -31,16 +34,18 @@ class SaleDetailsContent extends StatelessWidget {
               width: 50,
               height: 5,
               decoration: BoxDecoration(
-                color: Colorsmanegments.grey300,
+                color: colorScheme.onSurface.withOpacity(0.3),
                 borderRadius: BorderRadius.circular(50),
               ),
             ),
             const SizedBox(height: 20),
             Text(
               "فاتورة رقم #${sale.orderNumber}",
-              style: TxtStyle.headerSmall,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const Divider(),
+            Divider(color: theme.dividerColor),
             Expanded(
               child: ListView.builder(
                 padding: const EdgeInsets.all(16),
@@ -50,36 +55,40 @@ class SaleDetailsContent extends StatelessWidget {
                   return ListTile(
                     title: Text(
                       item.productName,
-                      style: TxtStyle.bodyMedium,
+                      style: theme.textTheme.bodyMedium,
                     ),
                     subtitle: Text(
                       "الكمية : ${item.quantity}",
-                      style: TxtStyle.bodySmall,
+                      style: theme.textTheme.bodySmall,
                     ),
                     trailing: Text(
                       "${item.price} ج.م",
-                      style: TxtStyle.tableRowBold.copyWith(
-                        color: Colorsmanegments.primary,
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: colorScheme.primary,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   );
                 },
               ),
             ),
-            const Divider(),
+            Divider(color: theme.dividerColor),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
                   Text(
                     "الإجمالي",
-                    style: TxtStyle.totalMedium,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Spacer(),
                   Text(
                     "${sale.total} ج.م",
-                    style: TxtStyle.totalLarge.copyWith(
-                      color: Colorsmanegments.success,
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],

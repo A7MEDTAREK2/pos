@@ -22,14 +22,16 @@ class DashboardAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final now = DateTime.now();
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         border: Border(
-          bottom: BorderSide(color: Colorsmanegments.border),
+          bottom: BorderSide(color: theme.dividerColor),
         ),
       ),
       child: Row(
@@ -47,8 +49,8 @@ class DashboardAppBar extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 'ModuPos',
-                style: TxtStyle.headerMedium.copyWith(
-                  color: Colorsmanegments.textPrimary,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -60,22 +62,22 @@ class DashboardAppBar extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
-              color: Colorsmanegments.background,
+              color: colorScheme.background,
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colorsmanegments.border),
+              border: Border.all(color: colorScheme.outlineVariant),
             ),
             child: Row(
               children: [
                 Icon(
                   Iconss.calendar,
                   size: 16,
-                  color: Colorsmanegments.textSecondary,
+                  color: colorScheme.onSurface.withOpacity(0.6),
                 ),
                 const SizedBox(width: 6),
                 Text(
                   '${_formatDate(now)} • ${_formatTime(now)}',
-                  style: TxtStyle.bodySmall.copyWith(
-                    color: Colorsmanegments.textSecondary,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
               ],
@@ -91,14 +93,14 @@ class DashboardAppBar extends StatelessWidget {
             children: [
               Text(
                 userName,
-                style: TxtStyle.bodyMedium.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
                 userRole,
-                style: TxtStyle.bodySmall.copyWith(
-                  color: Colorsmanegments.textSecondary,
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ],
@@ -114,14 +116,14 @@ class DashboardAppBar extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colorsmanegments.background,
+                color: colorScheme.background,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colorsmanegments.border),
+                border: Border.all(color: colorScheme.outlineVariant),
               ),
               child: Icon(
                 Iconss.arrowForward,
                 size: 18,
-                color: Colorsmanegments.textSecondary,
+                color: colorScheme.onSurface.withOpacity(0.6),
               ),
             ),
           ),

@@ -7,7 +7,7 @@ class ReportsSidebar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onChanged;
 
-  ReportsSidebar({
+   ReportsSidebar({
     super.key,
     required this.selectedIndex,
     required this.onChanged,
@@ -24,12 +24,17 @@ class ReportsSidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       width: 240,
       height: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(right: BorderSide(color: const Color(0xFFE5E7EB))),
+        color: colorScheme.surface,
+        border: Border(
+          right: BorderSide(color: theme.dividerColor),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -39,15 +44,13 @@ class ReportsSidebar extends StatelessWidget {
             padding: const EdgeInsets.all(20),
             child: Text(
               'التقارير',
-              style: GoogleFonts.cairo(
-                fontSize: 18,
+              style: theme.textTheme.titleLarge?.copyWith(
                 fontWeight: FontWeight.bold,
-                color: const Color(0xFF111827),
               ),
             ),
           ),
 
-          const Divider(height: 0, color: Color(0xFFE5E7EB)),
+          Divider(height: 0, color: theme.dividerColor),
 
           const SizedBox(height: 12),
 
@@ -61,6 +64,7 @@ class ReportsSidebar extends StatelessWidget {
                 final isSelected = selectedIndex == index;
 
                 return _buildSidebarItem(
+                  context,
                   icon: item['icon'],
                   title: item['title'],
                   isSelected: isSelected,
@@ -78,12 +82,16 @@ class ReportsSidebar extends StatelessWidget {
     );
   }
 
-  Widget _buildSidebarItem({
-    required IconData icon,
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-  }) {
+  Widget _buildSidebarItem(
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required bool isSelected,
+        required VoidCallback onTap,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: InkWell(
@@ -92,7 +100,7 @@ class ReportsSidebar extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF2563EB) : Colors.transparent,
+            color: isSelected ? colorScheme.primary : Colors.transparent,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -100,15 +108,18 @@ class ReportsSidebar extends StatelessWidget {
               Icon(
                 icon,
                 size: 20,
-                color: isSelected ? Colors.white : const Color(0xFF6B7280),
+                color: isSelected
+                    ? colorScheme.onPrimary
+                    : colorScheme.onSurface.withOpacity(0.6),
               ),
               const SizedBox(width: 12),
               Text(
                 title,
-                style: GoogleFonts.cairo(
-                  fontSize: 14,
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: isSelected ? Colors.white : const Color(0xFF111827),
+                  color: isSelected
+                      ? colorScheme.onPrimary
+                      : colorScheme.onSurface,
                 ),
               ),
             ],

@@ -8,12 +8,14 @@ import 'package:home/feature/reports/presentation/Payment%20Report/widget/paymen
 import '../../../logic/report/payment_report_cubit.dart';
 import '../../../logic/report/payment_report_state.dart';
 
-
 class PaymentReportTable extends StatelessWidget {
   const PaymentReportTable({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocBuilder<PaymentReportCubit, PaymentReportState>(
       builder: (context, state) {
         if (state is! PaymentReportLoaded) {
@@ -25,15 +27,15 @@ class PaymentReportTable extends StatelessWidget {
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: colorScheme.surface,
             borderRadius: BorderRadius.circular(14),
             border: Border.all(
-              color: const Color(0xFFE5E7EB),
+              color: colorScheme.outlineVariant,
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: colorScheme.shadow.withOpacity(0.04),
                 blurRadius: 8,
                 offset: const Offset(0, 2),
               ),
@@ -44,7 +46,7 @@ class PaymentReportTable extends StatelessWidget {
               const PaymentTableHeader(),
               Container(
                 height: 1,
-                color: const Color(0xFFE5E7EB),
+                color: colorScheme.outlineVariant,
               ),
               Expanded(
                 child: ListView.separated(
@@ -67,13 +69,13 @@ class PaymentReportTable extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: colorScheme.background,
                   borderRadius: const BorderRadius.only(
                     bottomLeft: Radius.circular(14),
                     bottomRight: Radius.circular(14),
                   ),
                   border: Border(
-                    top: BorderSide(color: const Color(0xFFE5E7EB)),
+                    top: BorderSide(color: colorScheme.outlineVariant),
                   ),
                 ),
                 child: Row(
@@ -81,12 +83,10 @@ class PaymentReportTable extends StatelessWidget {
                   children: [
                     Text(
                       'إجمالي النتائج: ${cubit.totalCount}',
-                      style: GoogleFonts.cairo(
-                        fontSize: 13,
-                        color: const Color(0xFF6B7280),
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.6),
                       ),
                     ),
-
                   ],
                 ),
               ),
@@ -96,7 +96,4 @@ class PaymentReportTable extends StatelessWidget {
       },
     );
   }
-
-
-
 }

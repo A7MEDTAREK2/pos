@@ -21,19 +21,22 @@ class OrderTypeSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(
-            color: Colorsmanegments.background,
+            color: colorScheme.background,
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             children: [
-              Expanded(child: _buildButton(0, 'تيك أواي', Iconss.takeaway)),
-              Expanded(child: _buildButton(1, 'صالة', Iconss.tableRestaurant)),
-              Expanded(child: _buildButton(2, 'دليفري', Iconss.delivery)),
+              Expanded(child: _buildButton(context, 0, 'تيك أواي', Iconss.takeaway)),
+              Expanded(child: _buildButton(context, 1, 'صالة', Iconss.tableRestaurant)),
+              Expanded(child: _buildButton(context, 2, 'دليفري', Iconss.delivery)),
             ],
           ),
         ),
@@ -41,7 +44,9 @@ class OrderTypeSelector extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(int index, String label, IconData icon) {
+  Widget _buildButton(BuildContext context, int index, String label, IconData icon) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final isSelected = selectedIndex == index;
 
     return Tooltip(
@@ -55,12 +60,12 @@ class OrderTypeSelector extends StatelessWidget {
           curve: Curves.easeInOut,
           padding: const EdgeInsets.symmetric(vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? Colorsmanegments.card : Colorsmanegments.transparent,
+            color: isSelected ? colorScheme.surface : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
             boxShadow: isSelected
                 ? [
               BoxShadow(
-                color: Colorsmanegments.shadowLight,
+                color: colorScheme.shadow.withOpacity(0.08),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               )
@@ -73,20 +78,22 @@ class OrderTypeSelector extends StatelessWidget {
               Icon(
                 icon,
                 color: isSelected
-                    ? Colorsmanegments.primary
-                    : Colorsmanegments.textSecondary,
+                    ? colorScheme.primary
+                    : theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                 size: 20,
               ),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: isSelected
-                    ? TxtStyle.buttonPrimary.copyWith(
+                    ? theme.textTheme.labelLarge?.copyWith(
                   fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.primary,
                 )
-                    : TxtStyle.bodySmall.copyWith(
+                    : theme.textTheme.bodySmall?.copyWith(
                   fontSize: 11,
-                  color: Colorsmanegments.textSecondary,
+                  color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                 ),
               ),
             ],

@@ -29,6 +29,9 @@ class CartActionButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -43,12 +46,12 @@ class CartActionButtons extends StatelessWidget {
                   height: 50,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colorsmanegments.warning.withOpacity(0.1),
-                      foregroundColor: Colorsmanegments.warning,
+                      backgroundColor: Colors.amber.withOpacity(0.1),
+                      foregroundColor: Colors.amber,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(color: Colorsmanegments.warning.withOpacity(0.2)),
+                        side: BorderSide(color: Colors.amber.withOpacity(0.2)),
                       ),
                     ),
                     onPressed: () {
@@ -65,12 +68,12 @@ class CartActionButtons extends StatelessWidget {
                     icon: Icon(
                       Iconss.bookmark,
                       size: 18,
-                      color: Colorsmanegments.warning,
+                      color: Colors.amber,
                     ),
                     label: Text(
                       "حفظ الأوردر",
-                      style: TxtStyle.buttonSmall.copyWith(
-                        color: Colorsmanegments.warning,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: Colors.amber,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -87,8 +90,8 @@ class CartActionButtons extends StatelessWidget {
                   height: 50,
                   child: OutlinedButton.icon(
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: Colorsmanegments.danger,
-                      side: BorderSide(color: Colorsmanegments.danger),
+                      foregroundColor: Colors.red,
+                      side: BorderSide(color: Colors.red),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -97,12 +100,12 @@ class CartActionButtons extends StatelessWidget {
                     icon: Icon(
                       Iconss.delete,
                       size: 18,
-                      color: Colorsmanegments.danger,
+                      color: Colors.red,
                     ),
                     label: Text(
                       "مسح السلة",
-                      style: TxtStyle.buttonSmall.copyWith(
-                        color: Colorsmanegments.danger,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: Colors.red,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -123,7 +126,7 @@ class CartActionButtons extends StatelessWidget {
             height: 60,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colorsmanegments.success,
+                backgroundColor: Colors.green,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -135,20 +138,20 @@ class CartActionButtons extends StatelessWidget {
                 children: [
                   Icon(
                     Iconss.print,
-                    color: Colorsmanegments.textWhite,
+                    color: Colors.white,
                   ),
                   const SizedBox(width: 8),
                   Text(
                     'إنهاء الدفع',
-                    style: TxtStyle.buttonLarge.copyWith(
-                      color: Colorsmanegments.textWhite,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
                     ),
                   ),
                   const Spacer(),
                   Text(
                     '${totalAmount.toStringAsFixed(2)} ج.م',
-                    style: TxtStyle.buttonLarge.copyWith(
-                      color: Colorsmanegments.textWhite,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
                     ),
                   ),
                 ],
@@ -165,8 +168,6 @@ class CartActionButtons extends StatelessWidget {
 
     final order = await cubit.holdOrder(clearAfterSave: false);
     if (order == null) return;
-
-// طباعة ورقة المطبخ
 
     if (!context.mounted) return;
     showDialog(

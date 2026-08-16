@@ -20,6 +20,9 @@ class DriverDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocBuilder<DriverCubit, DriverState>(
       builder: (context, state) {
         if (state is DriverLoading) {
@@ -42,14 +45,29 @@ class DriverDropdown extends StatelessWidget {
 
           return DropdownButtonFormField<String>(
             value: selectedDriverName,
+            style: theme.textTheme.bodyMedium,
             decoration: InputDecoration(
               labelText: labelText ?? 'المندوب',
+              labelStyle: theme.textTheme.labelMedium,
               hintText: hintText ?? 'اختر المندوب',
-              border: const OutlineInputBorder(),
+              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.5),
+              ),
+              border: OutlineInputBorder(
+                borderSide: BorderSide(color: colorScheme.outlineVariant),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: colorScheme.outlineVariant),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: colorScheme.primary, width: 2),
+              ),
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 12,
                 vertical: 8,
               ),
+              filled: true,
+              fillColor: colorScheme.background,
             ),
             isExpanded: true,
             items: [
@@ -62,10 +80,10 @@ class DriverDropdown extends StatelessWidget {
                   value: driver.name,
                   child: Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.person,
                         size: 16,
-                        color: Colors.grey,
+                        color: colorScheme.onSurface.withOpacity(0.5),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -79,9 +97,9 @@ class DriverDropdown extends StatelessWidget {
                           padding: const EdgeInsets.only(left: 8),
                           child: Text(
                             driver.phone!,
-                            style: const TextStyle(
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface.withOpacity(0.5),
                               fontSize: 11,
-                              color: Colors.grey,
                             ),
                           ),
                         ),
@@ -104,26 +122,29 @@ class DriverDropdown extends StatelessWidget {
   }
 
   Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       height: 56,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade300),
+        border: Border.all(color: colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.warning_amber_rounded,
-            color: Colors.orange,
+            color: Colors.amber,
             size: 20,
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               'لا يوجد مندوبين، أضف مندوب أولاً',
-              style: TextStyle(
-                color: Colors.grey.shade600,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.6),
                 fontSize: 13,
               ),
             ),
@@ -137,7 +158,12 @@ class DriverDropdown extends StatelessWidget {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text('إعادة تحميل'),
+            child: Text(
+              'إعادة تحميل',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.primary,
+              ),
+            ),
           ),
         ],
       ),
@@ -145,17 +171,20 @@ class DriverDropdown extends StatelessWidget {
   }
 
   Widget _buildErrorState(BuildContext context, String message) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       height: 56,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.red.shade300),
+        border: Border.all(color: Colors.red.withOpacity(0.5)),
         borderRadius: BorderRadius.circular(8),
-        color: Colors.red.shade50,
+        color: Colors.red.withOpacity(0.05),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.error_outline,
             color: Colors.red,
             size: 20,
@@ -164,7 +193,7 @@ class DriverDropdown extends StatelessWidget {
           Expanded(
             child: Text(
               message,
-              style: const TextStyle(
+              style: theme.textTheme.bodySmall?.copyWith(
                 color: Colors.red,
                 fontSize: 12,
               ),
@@ -180,7 +209,12 @@ class DriverDropdown extends StatelessWidget {
               minimumSize: Size.zero,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap,
             ),
-            child: const Text('إعادة المحاولة'),
+            child: Text(
+              'إعادة المحاولة',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: colorScheme.primary,
+              ),
+            ),
           ),
         ],
       ),

@@ -8,18 +8,17 @@ import '../../data/model/sale_detail_report.dart';
 class SaleDetailsHeader extends StatelessWidget {
   final SaleDetailsModel sale;
 
-
   const SaleDetailsHeader({
     super.key,
     required this.sale,
   });
 
-
   @override
-
   Widget build(BuildContext context) {
-    String orderType;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
+    String orderType;
     switch (sale.orderType) {
       case 0:
         orderType = "تيك أواي";
@@ -33,15 +32,16 @@ class SaleDetailsHeader extends StatelessWidget {
       default:
         orderType = "-";
     }
+
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(
           top: Radius.circular(20),
         ),
         border: Border(
-          bottom: BorderSide(color: Color(0xFFE5E7EB)),
+          bottom: BorderSide(color: theme.dividerColor),
         ),
       ),
       child: Row(
@@ -52,18 +52,15 @@ class SaleDetailsHeader extends StatelessWidget {
             children: [
               Text(
                 'فاتورة رقم #${sale.orderNumber}',
-                style: GoogleFonts.cairo(
-                  fontSize: 22,
+                style: theme.textTheme.headlineMedium?.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF111827),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'تم الإنشاء: ${_formatDate(sale.createdAt)}',
-                style: GoogleFonts.cairo(
-                  fontSize: 13,
-                  color: const Color(0xFF6B7280),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ],
@@ -72,9 +69,9 @@ class SaleDetailsHeader extends StatelessWidget {
           const Spacer(),
 
           // ====== Order Type Badge ======
-
           _buildBadge(
-            label:orderType,
+            context,
+            label: orderType,
             color: _getOrderTypeColor(sale.orderType),
             icon: _getOrderTypeIcon(sale.orderType),
           ),
@@ -83,6 +80,7 @@ class SaleDetailsHeader extends StatelessWidget {
 
           // ====== Payment Badge ======
           _buildBadge(
+            context,
             label: sale.paymentMethod,
             color: _getPaymentMethodColor(sale.paymentMethod),
             icon: _getPaymentMethodIcon(sale.paymentMethod),
@@ -92,11 +90,14 @@ class SaleDetailsHeader extends StatelessWidget {
     );
   }
 
-  Widget _buildBadge({
-    required String label,
-    required Color color,
-    required IconData icon,
-  }) {
+  Widget _buildBadge(
+      BuildContext context, {
+        required String label,
+        required Color color,
+        required IconData icon,
+      }) {
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
@@ -117,8 +118,7 @@ class SaleDetailsHeader extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: GoogleFonts.cairo(
-              fontSize: 13,
+            style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -135,13 +135,13 @@ class SaleDetailsHeader extends StatelessWidget {
   Color _getOrderTypeColor(int type) {
     switch (type) {
       case 0:
-        return const Color(0xFFF59E0B);
+        return Colors.amber;
       case 1:
-        return const Color(0xFF16A34A);
+        return Colors.green;
       case 2:
         return const Color(0xFF2563EB);
       default:
-        return const Color(0xFF6B7280);
+        return Colors.grey;
     }
   }
 
@@ -161,13 +161,13 @@ class SaleDetailsHeader extends StatelessWidget {
   Color _getPaymentMethodColor(String method) {
     switch (method.toLowerCase()) {
       case 'cash':
-        return const Color(0xFF16A34A);
+        return Colors.green;
       case 'visa':
         return const Color(0xFF2563EB);
       case 'wallet':
-        return const Color(0xFF8B5CF6);
+        return Colors.purple;
       default:
-        return const Color(0xFF6B7280);
+        return Colors.grey;
     }
   }
 
@@ -182,9 +182,5 @@ class SaleDetailsHeader extends StatelessWidget {
       default:
         return Icons.payment;
     }
-
   }
-
-
-
 }

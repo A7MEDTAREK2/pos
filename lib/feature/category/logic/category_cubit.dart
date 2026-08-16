@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../data/model/category_model.dart';
 import '../data/repo/local_rapo.dart';
@@ -11,8 +12,12 @@ class CategoryCubit extends Cubit<CategoryState> {
   // 1. جلب جميع الأقسام من الداتا بيز
   Future<void> loadCategories() async {
     emit(CategoryLoading());
+
     try {
       final categories = await _repository.getCategories();
+
+      debugPrint("Cubit Categories = ${categories.length}");
+
       emit(CategorySuccess(categories));
     } catch (e) {
       emit(CategoryError("فشل في تحميل الأقسام: ${e.toString()}"));

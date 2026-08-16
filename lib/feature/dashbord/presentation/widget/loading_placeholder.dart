@@ -16,26 +16,27 @@ class LoadingPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colorsmanegments.card,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colorsmanegments.border),
+        border: Border.all(color: colorScheme.outlineVariant),
       ),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const CircularProgressIndicator(
-              color: Colorsmanegments.primary,
-            ),
+            const CircularProgressIndicator(),
             if (message != null) ...[
               const SizedBox(height: 16),
               Text(
                 message!,
-                style: TxtStyle.bodyMedium.copyWith(
-                  color: Colorsmanegments.textSecondary,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: colorScheme.onSurface.withOpacity(0.6),
                 ),
               ),
             ],

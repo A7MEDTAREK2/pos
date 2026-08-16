@@ -14,7 +14,6 @@ class SaleActions extends StatelessWidget {
   final VoidCallback onDetails;
   final VoidCallback onDelete;
 
-
   const SaleActions({
     super.key,
     required this.onReopen,
@@ -25,31 +24,34 @@ class SaleActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         _actionButton(
           tooltip: 'إعادة فتح',
           icon: Iconss.refresh,
-          color: Colorsmanegments.warning,
+          color: Colors.amber,
           onTap: onReopen,
         ),
         _actionButton(
           tooltip: 'طباعة',
           icon: Iconss.print,
-          color: Colorsmanegments.primary,
+          color: colorScheme.primary,
           onTap: onPrint,
         ),
         _actionButton(
           tooltip: 'التفاصيل',
           icon: Iconss.view,
-          color: Colorsmanegments.success,
+          color: Colors.green,
           onTap: onDetails,
         ),
         _actionButton(
           tooltip: 'حذف',
           icon: Iconss.delete,
-          color: Colorsmanegments.danger,
+          color: Colors.red,
           onTap: onDelete,
         ),
       ],
@@ -61,7 +63,6 @@ class SaleActions extends StatelessWidget {
     required IconData icon,
     required Color color,
     required VoidCallback onTap,
-
   }) {
     return IconButton(
       tooltip: tooltip,
@@ -83,7 +84,7 @@ class SaleActionDialogs {
       context: context,
       title: "حذف الفاتورة",
       message: "هل أنت متأكد من حذف هذه الفاتورة؟",
-      color: Colorsmanegments.danger,
+      color: Colors.red,
       icon: Iconss.delete,
       confirmText: "حذف",
     ) ??
@@ -95,7 +96,7 @@ class SaleActionDialogs {
       context: context,
       title: "إعادة فتح الأوردر",
       message: "سيتم تحويل الفاتورة إلى Holding Order مرة أخرى.",
-      color: Colorsmanegments.warning,
+      color: Colors.amber,
       icon: Iconss.refresh,
       confirmText: "إعادة فتح",
     ) ??

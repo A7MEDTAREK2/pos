@@ -15,15 +15,18 @@ class SaleActionsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(
           bottom: Radius.circular(20),
         ),
         border: Border(
-          top: BorderSide(color: Color(0xFFE5E7EB)),
+          top: BorderSide(color: theme.dividerColor),
         ),
       ),
       child: Row(
@@ -31,6 +34,7 @@ class SaleActionsBar extends StatelessWidget {
         children: [
           // ====== Print Button ======
           _buildPrimaryButton(
+            context,
             onPressed: () {},
             icon: Icons.print_outlined,
             label: 'طباعة الفاتورة',
@@ -40,6 +44,7 @@ class SaleActionsBar extends StatelessWidget {
 
           // ====== Export PDF Button ======
           _buildSecondaryButton(
+            context,
             onPressed: () {},
             icon: Icons.picture_as_pdf_outlined,
             label: 'تصدير PDF',
@@ -49,6 +54,7 @@ class SaleActionsBar extends StatelessWidget {
 
           // ====== Close Button ======
           _buildOutlinedButton(
+            context,
             onPressed: () => Navigator.pop(context),
             label: 'إغلاق',
           ),
@@ -57,26 +63,30 @@ class SaleActionsBar extends StatelessWidget {
     );
   }
 
-  Widget _buildPrimaryButton({
-    required VoidCallback onPressed,
-    required IconData icon,
-    required String label,
-  }) {
+  Widget _buildPrimaryButton(
+      BuildContext context, {
+        required VoidCallback onPressed,
+        required IconData icon,
+        required String label,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: ElevatedButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon, size: 18),
+        icon: Icon(icon, size: 18, color: colorScheme.onPrimary),
         label: Text(
           label,
-          style: GoogleFonts.cairo(
-            fontSize: 14,
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
+            color: colorScheme.onPrimary,
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2563EB),
-          foregroundColor: Colors.white,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -87,51 +97,58 @@ class SaleActionsBar extends StatelessWidget {
     );
   }
 
-  Widget _buildSecondaryButton({
-    required VoidCallback onPressed,
-    required IconData icon,
-    required String label,
-  }) {
+  Widget _buildSecondaryButton(
+      BuildContext context, {
+        required VoidCallback onPressed,
+        required IconData icon,
+        required String label,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: ElevatedButton.icon(
         onPressed: onPressed,
-        icon: Icon(icon, size: 18),
+        icon: Icon(icon, size: 18, color: colorScheme.onSurface),
         label: Text(
           label,
-          style: GoogleFonts.cairo(
-            fontSize: 14,
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFFF8FAFC),
-          foregroundColor: const Color(0xFF111827),
+          backgroundColor: colorScheme.background,
+          foregroundColor: colorScheme.onSurface,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          side: const BorderSide(color: Color(0xFFE5E7EB)),
+          side: BorderSide(color: colorScheme.outlineVariant),
           elevation: 0,
         ),
       ),
     );
   }
 
-  Widget _buildOutlinedButton({
-    required VoidCallback onPressed,
-    required String label,
-  }) {
+  Widget _buildOutlinedButton(
+      BuildContext context, {
+        required VoidCallback onPressed,
+        required String label,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: OutlinedButton(
         onPressed: onPressed,
         child: Text(
           label,
-          style: GoogleFonts.cairo(
-            fontSize: 14,
+          style: theme.textTheme.labelLarge?.copyWith(
             fontWeight: FontWeight.w500,
-            color: const Color(0xFF6B7280),
+            color: colorScheme.onSurface.withOpacity(0.6),
           ),
         ),
         style: OutlinedButton.styleFrom(
@@ -139,7 +156,7 @@ class SaleActionsBar extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
           ),
-          side: const BorderSide(color: Color(0xFFE5E7EB)),
+          side: BorderSide(color: colorScheme.outlineVariant),
         ),
       ),
     );

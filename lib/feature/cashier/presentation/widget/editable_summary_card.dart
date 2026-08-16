@@ -18,6 +18,9 @@ class EditableSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Tooltip(
       message: _getTooltipMessage(title),
       waitDuration: const Duration(milliseconds: 300),
@@ -27,26 +30,28 @@ class EditableSummaryCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(5),
           decoration: BoxDecoration(
-            color: Colorsmanegments.background,
+            color: colorScheme.background,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colorsmanegments.border),
+            border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: Column(
             children: [
               Icon(
                 icon,
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 size: 18,
               ),
               const SizedBox(height: 6),
               Text(
                 title,
-                style: TxtStyle.labelSmall,
+                style: theme.textTheme.labelSmall,
               ),
               const SizedBox(height: 4),
               Text(
                 "${value.toStringAsFixed(2)} ج.م",
-                style: TxtStyle.tableRowBold,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),

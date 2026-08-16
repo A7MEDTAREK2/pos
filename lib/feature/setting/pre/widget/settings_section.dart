@@ -20,6 +20,9 @@ class SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -27,13 +30,15 @@ class SettingsSection extends StatelessWidget {
           children: [
             Icon(
               icon,
-              color: Colorsmanegments.primary,
+              color: colorScheme.primary,
               size: 22,
             ),
             const SizedBox(width: 10),
             Text(
               title,
-              style: TxtStyle.headerSmall,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ],
         ),

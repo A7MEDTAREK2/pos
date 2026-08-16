@@ -34,7 +34,11 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return AlertDialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -42,13 +46,13 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
         children: [
           Icon(
             Iconss.category,
-            color: Colorsmanegments.primary,
+            color: colorScheme.primary,
             size: 28,
           ),
           const SizedBox(width: 10),
           Text(
             "إضافة قسم جديد",
-            style: TxtStyle.headerSmall,
+            style: theme.textTheme.titleLarge,
           ),
         ],
       ),
@@ -60,50 +64,52 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
             controller: _nameController,
             autofocus: true,
             textAlign: TextAlign.right,
-            style: TxtStyle.bodyMedium,
+            style: theme.textTheme.bodyMedium,
             decoration: InputDecoration(
               hintText: "اكتب اسم القسم (مثال: كريب، مشويات)",
-              hintStyle: TxtStyle.hint,
+              hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.5),
+              ),
               prefixIcon: Icon(
                 Iconss.category,
-                color: Colorsmanegments.primary.withOpacity(0.6),
+                color: colorScheme.primary.withOpacity(0.6),
                 size: 20,
               ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: Colorsmanegments.border,
+                  color: colorScheme.outlineVariant,
                 ),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: Colorsmanegments.border,
+                  color: colorScheme.outlineVariant,
                 ),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: Colorsmanegments.primary,
+                  color: colorScheme.primary,
                   width: 2,
                 ),
               ),
               errorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: Colorsmanegments.danger,
+                  color: Colors.red,
                   width: 1.5,
                 ),
               ),
               focusedErrorBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(
-                  color: Colorsmanegments.danger,
+                  color: Colors.red,
                   width: 2,
                 ),
               ),
               filled: true,
-              fillColor: Colorsmanegments.background,
+              fillColor: colorScheme.background,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: 16,
                 vertical: 14,
@@ -130,14 +136,16 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
           ),
           child: Text(
             "إلغاء",
-            style: TxtStyle.buttonPrimary,
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: colorScheme.primary,
+            ),
           ),
         ),
         ElevatedButton(
           onPressed: _submitData,
           style: ElevatedButton.styleFrom(
-            backgroundColor: Colorsmanegments.primary,
-            foregroundColor: Colorsmanegments.textWhite,
+            backgroundColor: colorScheme.primary,
+            foregroundColor: colorScheme.onPrimary,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
@@ -149,13 +157,16 @@ class _AddCategoryDialogState extends State<AddCategoryDialog> {
             children: [
               Icon(
                 Iconss.add,
-                color: Colorsmanegments.textWhite,
+                color: colorScheme.onPrimary,
                 size: 18,
               ),
               const SizedBox(width: 8),
               Text(
                 "حفظ",
-                style: TxtStyle.buttonMedium,
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: colorScheme.onPrimary,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),

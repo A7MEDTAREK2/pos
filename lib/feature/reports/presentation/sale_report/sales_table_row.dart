@@ -40,6 +40,9 @@ class _SalesTableRowState extends State<SalesTableRow> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return MouseRegion(
       cursor: SystemMouseCursors.basic,
       onEnter: (_) => setState(() => _isHovered = true),
@@ -50,7 +53,7 @@ class _SalesTableRowState extends State<SalesTableRow> {
         height: 56,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
-          color: _getRowColor(),
+          color: _getRowColor(colorScheme),
           border: const Border(
             bottom: BorderSide(
               color: Color(0xFFF1F5F9),
@@ -60,7 +63,7 @@ class _SalesTableRowState extends State<SalesTableRow> {
           boxShadow: _isHovered
               ? [
             BoxShadow(
-              color: const Color(0xFF2563EB).withOpacity(0.04),
+              color: colorScheme.primary.withOpacity(0.04),
               blurRadius: 6,
               offset: const Offset(0, 2),
             ),
@@ -71,6 +74,7 @@ class _SalesTableRowState extends State<SalesTableRow> {
           children: [
             // ====== Index ======
             _buildCell(
+              context,
               text: widget.index.toString(),
               flex: 1,
               isIndex: true,
@@ -78,6 +82,7 @@ class _SalesTableRowState extends State<SalesTableRow> {
 
             // ====== Invoice Number ======
             _buildCell(
+              context,
               text: widget.invoiceNumber,
               flex: 2,
               isBold: true,
@@ -85,6 +90,7 @@ class _SalesTableRowState extends State<SalesTableRow> {
 
             // ====== Customer Name ======
             _buildCell(
+              context,
               text: widget.customerName,
               flex: 3,
             ),
@@ -111,6 +117,7 @@ class _SalesTableRowState extends State<SalesTableRow> {
 
             // ====== Total ======
             _buildCell(
+              context,
               text: widget.total,
               flex: 2,
               isTotal: true,
@@ -118,6 +125,7 @@ class _SalesTableRowState extends State<SalesTableRow> {
 
             // ====== Date ======
             _buildCell(
+              context,
               text: widget.date,
               flex: 2,
             ),
@@ -129,16 +137,18 @@ class _SalesTableRowState extends State<SalesTableRow> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildActionButton(
+                    context,
                     icon: Icons.visibility_outlined,
                     tooltip: 'عرض التفاصيل',
-                    color: const Color(0xFF2563EB),
+                    color: colorScheme.primary,
                     onTap: widget.onView,
                   ),
                   const SizedBox(width: 2),
                   _buildActionButton(
+                    context,
                     icon: Icons.print_outlined,
                     tooltip: 'طباعة الفاتورة',
-                    color: const Color(0xFF6B7280),
+                    color: colorScheme.onSurface.withOpacity(0.6),
                     onTap: widget.onPrint,
                   ),
                 ],
@@ -150,37 +160,43 @@ class _SalesTableRowState extends State<SalesTableRow> {
     );
   }
 
-  Widget _buildCell({
-    required String text,
-    int flex = 1,
-    bool isBold = false,
-    bool isTotal = false,
-    bool isIndex = false,
-  }) {
+  Widget _buildCell(
+      BuildContext context, {
+        required String text,
+        int flex = 1,
+        bool isBold = false,
+        bool isTotal = false,
+        bool isIndex = false,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Expanded(
       flex: flex,
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: GoogleFonts.cairo(
-          fontSize: 13,
+        style: theme.textTheme.bodySmall?.copyWith(
           fontWeight: isBold || isTotal ? FontWeight.w600 : FontWeight.w400,
           color: isTotal
-              ? const Color(0xFF16A34A)
+              ? Colors.green
               : isIndex
-              ? const Color(0xFF9CA3AF)
-              : const Color(0xFF111827),
+              ? colorScheme.onSurface.withOpacity(0.4)
+              : colorScheme.onSurface,
         ),
       ),
     );
   }
 
-  Widget _buildActionButton({
-    required IconData icon,
-    required String tooltip,
-    required Color color,
-    VoidCallback? onTap,
-  }) {
+  Widget _buildActionButton(
+      BuildContext context, {
+        required IconData icon,
+        required String tooltip,
+        required Color color,
+        VoidCallback? onTap,
+      }) {
+    final theme = Theme.of(context);
+
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       child: Container(
@@ -193,7 +209,7 @@ class _SalesTableRowState extends State<SalesTableRow> {
           icon: Icon(
             icon,
             size: 17,
-            color: _isHovered ? color : const Color(0xFF9CA3AF),
+            color: _isHovered ? color : theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
           ),
           tooltip: tooltip,
           splashRadius: 20,
@@ -207,12 +223,12 @@ class _SalesTableRowState extends State<SalesTableRow> {
     );
   }
 
-  Color _getRowColor() {
+  Color _getRowColor(ColorScheme colorScheme) {
     if (_isHovered) {
-      return const Color(0xFF2563EB).withOpacity(0.04);
+      return colorScheme.primary.withOpacity(0.04);
     }
     return widget.isEven
-        ? const Color(0xFFFAFBFC)
-        : Colors.white;
+        ? colorScheme.background
+        : colorScheme.surface;
   }
 }

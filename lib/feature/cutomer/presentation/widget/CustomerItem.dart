@@ -47,14 +47,17 @@ class CustomerItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 3,
-      color: Colorsmanegments.card,
+      color: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: Colorsmanegments.primary.withOpacity(0.1),
+          color: colorScheme.primary.withOpacity(0.1),
           width: 1.5,
         ),
       ),
@@ -70,13 +73,13 @@ class CustomerItem extends StatelessWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Colorsmanegments.primary.withOpacity(0.2),
-                    Colorsmanegments.primary.withOpacity(0.1),
+                    colorScheme.primary.withOpacity(0.2),
+                    colorScheme.primary.withOpacity(0.1),
                   ],
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colorsmanegments.primary.withOpacity(0.2),
+                    color: colorScheme.primary.withOpacity(0.2),
                     blurRadius: 8,
                     offset: const Offset(0, 2),
                   ),
@@ -87,9 +90,10 @@ class CustomerItem extends StatelessWidget {
                 backgroundColor: Colors.transparent,
                 child: Text(
                   _getInitial(),
-                  style: TxtStyle.headerWhite.copyWith(
+                  style: theme.textTheme.headlineMedium?.copyWith(
                     fontSize: 20,
-                    color: Colorsmanegments.primary,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
                   ),
                 ),
               ),
@@ -104,7 +108,7 @@ class CustomerItem extends StatelessWidget {
                 children: [
                   Text(
                     customer.name,
-                    style: TxtStyle.titleSmall,
+                    style: theme.textTheme.titleMedium,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -114,12 +118,12 @@ class CustomerItem extends StatelessWidget {
                       Icon(
                         Iconss.phone,
                         size: 16,
-                        color: Colorsmanegments.textSecondary,
+                        color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                       ),
                       const SizedBox(width: 6),
                       Text(
                         customer.phone,
-                        style: TxtStyle.bodySmall,
+                        style: theme.textTheme.bodySmall,
                       ),
                     ],
                   ),
@@ -130,13 +134,13 @@ class CustomerItem extends StatelessWidget {
                         Icon(
                           Iconss.calendar,
                           size: 14,
-                          color: Colorsmanegments.textSecondary.withOpacity(0.6),
+                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                         ),
                         const SizedBox(width: 6),
                         Text(
                           _formatDate(customer.createdAt),
-                          style: TxtStyle.labelSmall.copyWith(
-                            color: Colorsmanegments.textSecondary.withOpacity(0.6),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
                           ),
                         ),
                       ],
@@ -151,14 +155,14 @@ class CustomerItem extends StatelessWidget {
               if (onEdit != null)
                 Container(
                   decoration: BoxDecoration(
-                    color: Colorsmanegments.primary.withOpacity(0.08),
+                    color: colorScheme.primary.withOpacity(0.08),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
                     onPressed: onEdit,
                     icon: Icon(
                       Iconss.edit,
-                      color: Colorsmanegments.primary,
+                      color: colorScheme.primary,
                       size: 22,
                     ),
                     padding: const EdgeInsets.all(8),
@@ -171,14 +175,14 @@ class CustomerItem extends StatelessWidget {
               if (onDelete != null)
                 Container(
                   decoration: BoxDecoration(
-                    color: Colorsmanegments.danger.withOpacity(0.08),
+                    color: Colors.red.withOpacity(0.08),
                     shape: BoxShape.circle,
                   ),
                   child: IconButton(
                     onPressed: onDelete,
                     icon: Icon(
                       Iconss.delete,
-                      color: Colorsmanegments.danger,
+                      color: Colors.red,
                       size: 22,
                     ),
                     padding: const EdgeInsets.all(8),

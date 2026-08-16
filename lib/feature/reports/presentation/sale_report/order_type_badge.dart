@@ -11,26 +11,29 @@ class OrderTypeBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     Color background;
     Color foreground;
     IconData icon;
 
     switch (type) {
       case "دليفري":
-        background = const Color(0xFFDBEAFE);
-        foreground = const Color(0xFF2563EB);
+        background = colorScheme.primary.withOpacity(0.1);
+        foreground = colorScheme.primary;
         icon = Icons.delivery_dining;
         break;
 
       case "داخل المطعم":
-        background = const Color(0xFFDCFCE7);
-        foreground = const Color(0xFF16A34A);
+        background = Colors.green.withOpacity(0.1);
+        foreground = Colors.green;
         icon = Icons.table_restaurant;
         break;
 
       default:
-        background = const Color(0xFFFFF7ED);
-        foreground = const Color(0xFFEA580C);
+        background = Colors.amber.withOpacity(0.1);
+        foreground = Colors.amber;
         icon = Icons.shopping_bag_outlined;
     }
 
@@ -54,8 +57,7 @@ class OrderTypeBadge extends StatelessWidget {
           const SizedBox(width: 4),
           Text(
             type,
-            style: GoogleFonts.cairo(
-              fontSize: 12,
+            style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.w600,
               color: foreground,
             ),

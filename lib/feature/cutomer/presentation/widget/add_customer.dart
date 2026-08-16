@@ -114,26 +114,28 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocListener<CustomerCubit, CustomerState>(
       listener: (context, state) {
         if (state is CustomerOperationSuccess) {
-          // تم إزالة SnackBar
           Navigator.pop(context);
-        }
-
-        if (state is CustomerError) {
-          // تم إزالة SnackBar
         }
       },
       child: Scaffold(
-        backgroundColor: Colorsmanegments.background,
+        backgroundColor: colorScheme.background,
         appBar: AppBar(
           elevation: 2,
-          backgroundColor: Colorsmanegments.primary,
-          foregroundColor: Colorsmanegments.textWhite,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
           title: Text(
             widget.customer == null ? "إضافة عميل" : "تعديل العميل",
-            style: TxtStyle.headerWhite.copyWith(fontSize: 22),
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onPrimary,
+            ),
           ),
           centerTitle: true,
           shape: const RoundedRectangleBorder(
@@ -157,7 +159,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
             child: SingleChildScrollView(
               child: Card(
                 elevation: 4,
-                color: Colorsmanegments.card,
+                color: colorScheme.surface,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -182,7 +184,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                       if (widget.customer != null) ...[
                         const SizedBox(height: 30),
                         Divider(
-                          color: Colorsmanegments.border,
+                          color: theme.dividerColor,
                           thickness: 1.5,
                         ),
                         const SizedBox(height: 20),
@@ -190,13 +192,15 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                           children: [
                             Icon(
                               Iconss.location,
-                              color: Colorsmanegments.primary,
+                              color: colorScheme.primary,
                               size: 24,
                             ),
                             const SizedBox(width: 10),
                             Text(
                               "عناوين العميل",
-                              style: TxtStyle.titleCard,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -217,10 +221,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                           child: ElevatedButton(
                             onPressed: saveCustomer,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: Colorsmanegments.primary,
-                              foregroundColor: Colorsmanegments.textWhite,
+                              backgroundColor: colorScheme.primary,
+                              foregroundColor: colorScheme.onPrimary,
                               elevation: 4,
-                              shadowColor: Colorsmanegments.primary.withOpacity(0.4),
+                              shadowColor: colorScheme.primary.withOpacity(0.4),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(14),
                               ),
@@ -239,7 +243,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                                   widget.customer == null
                                       ? "إضافة العميل"
                                       : "حفظ التعديلات",
-                                  style: TxtStyle.buttonMedium,
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    color: colorScheme.onPrimary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ],
                             ),

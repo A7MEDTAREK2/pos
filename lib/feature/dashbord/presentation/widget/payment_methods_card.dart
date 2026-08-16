@@ -13,21 +13,23 @@ import '../../logic/dash_cubit.dart';
 import '../../logic/dash_state.dart';
 import 'dashboard_card.dart';
 
-
 class PaymentMethodsCard extends StatelessWidget {
   const PaymentMethodsCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return DashboardCard(
       child: BlocBuilder<DashboardCubit, DashboardState>(
         builder: (context, state) {
           if (state is DashboardLoading) {
-            return _buildLoadingState();
+            return _buildLoadingState(context);
           }
 
           if (state is DashboardError) {
-            return _buildErrorState(state.message);
+            return _buildErrorState(context, state.message);
           }
 
           if (state is! DashboardSuccess) {
@@ -37,7 +39,7 @@ class PaymentMethodsCard extends StatelessWidget {
           final methods = state.dashboard.paymentMethods;
 
           if (methods.isEmpty) {
-            return _buildEmptyState();
+            return _buildEmptyState(context);
           }
 
           final totalAmount = methods.fold<double>(
@@ -45,74 +47,82 @@ class PaymentMethodsCard extends StatelessWidget {
                 (sum, item) => sum + item.total,
           );
 
-          return _buildContent(methods, totalAmount);
+          return _buildContent(context, methods, totalAmount);
         },
       ),
     );
   }
 
-  // ============================================================
-  // Loading State
-  // ============================================================
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(BuildContext context) {
     return const SizedBox(
       height: 220,
       child: Center(
-        child: CircularProgressIndicator(
-          color: Colorsmanegments.primary,
-        ),
+        child: CircularProgressIndicator(),
       ),
     );
   }
 
-  // ============================================================
-  // Error State
-  // ============================================================
-  Widget _buildErrorState(String message) {
+  Widget _buildErrorState(BuildContext context, String message) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       height: 220,
       child: Center(
         child: Text(
           message,
-          style: TxtStyle.danger,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: Colors.red,
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // Empty State
-  // ============================================================
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return SizedBox(
       height: 220,
       child: Center(
         child: Text(
           "لا توجد بيانات",
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface.withOpacity(0.6),
+          ),
         ),
       ),
     );
   }
 
-  // ============================================================
-  // Content
-  // ============================================================
-  Widget _buildContent(List<dynamic> methods, double totalAmount) {
+  Widget _buildContent(
+      BuildContext context,
+      List<dynamic> methods,
+      double totalAmount,
+      ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionTitle(title: 'طرق الدفع'),
+        Text(
+          'طرق الدفع',
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         const SizedBox(height: 16),
         ...methods.asMap().entries.map(
               (entry) {
             final item = entry.value;
             final percentage = totalAmount == 0 ? 0.0 : item.total / totalAmount;
             return _buildMethodItem(
+              context,
               name: item.method,
               count: item.count,
               percentage: percentage,
-              color: _getColor(entry.key),
+              color: _getColor(entry.key, colorScheme),
             );
           },
         ),
@@ -120,15 +130,16 @@ class PaymentMethodsCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Method Item
-  // ============================================================
-  Widget _buildMethodItem({
-    required String name,
-    required int count,
-    required double percentage,
-    required Color color,
-  }) {
+  Widget _buildMethodItem(
+      BuildContext context, {
+        required String name,
+        required int count,
+        required double percentage,
+        required Color color,
+      }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Column(
@@ -146,20 +157,23 @@ class PaymentMethodsCard extends StatelessWidget {
               const SizedBox(width: 10),
               Text(
                 name,
-                style: TxtStyle.bodyMedium.copyWith(
+                style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w500,
                 ),
               ),
               const Spacer(),
               Text(
                 '$count',
-                style: TxtStyle.tableRowBold,
+                style: theme.textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(width: 12),
               Text(
                 '${(percentage * 100).toStringAsFixed(1)}%',
-                style: TxtStyle.tableRowBold.copyWith(
+                style: theme.textTheme.titleSmall?.copyWith(
                   color: color,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ],
@@ -170,7 +184,7 @@ class PaymentMethodsCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: percentage,
               minHeight: 6,
-              backgroundColor: Colorsmanegments.border,
+              backgroundColor: colorScheme.outlineVariant,
               color: color,
             ),
           ),
@@ -179,17 +193,14 @@ class PaymentMethodsCard extends StatelessWidget {
     );
   }
 
-  // ============================================================
-  // Helper
-  // ============================================================
-  Color _getColor(int index) {
+  Color _getColor(int index, ColorScheme colorScheme) {
     final colors = [
-      Colorsmanegments.success,
-      Colorsmanegments.primary,
-      Colorsmanegments.purple,
-      Colorsmanegments.warning,
-      Colorsmanegments.danger,
-      Colorsmanegments.teal,
+      Colors.green,
+      colorScheme.primary,
+      Colors.purple,
+      Colors.amber,
+      Colors.red,
+      Colors.teal,
     ];
     return colors[index % colors.length];
   }

@@ -23,15 +23,17 @@ class SettingsActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return isFullWidth
         ? SizedBox(
       width: double.infinity,
-      child: _buildButton(),
+      child: _buildButton(theme),
     )
-        : _buildButton();
+        : _buildButton(theme);
   }
 
-  Widget _buildButton() {
+  Widget _buildButton(ThemeData theme) {
     return ElevatedButton.icon(
       style: ElevatedButton.styleFrom(
         backgroundColor: color.withOpacity(0.08),
@@ -53,8 +55,10 @@ class SettingsActionButton extends StatelessWidget {
       ),
       label: Text(
         label,
-        style: TxtStyle.buttonMedium.copyWith(
+        style: theme.textTheme.labelLarge?.copyWith(
           color: color,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.3,
         ),
       ),
     );

@@ -21,16 +21,18 @@ import '../widget/sales_chart_card.dart';
 import '../widget/statistics_grid.dart';
 import '../widget/top_products_card.dart';
 
-
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
-        backgroundColor: const Color(0xFFF8FAFC),
+        backgroundColor: colorScheme.background,
         body: CustomScrollView(
           slivers: [
             // ====== AppBar ======
@@ -71,7 +73,7 @@ class DashboardScreen extends StatelessWidget {
                                     ),
                                   )..loadSalesReport(),
                                   child: const ReportsScreen(),
-                                )
+                                ),
                               ),
                             );
                           },
@@ -101,7 +103,6 @@ class DashboardScreen extends StatelessWidget {
                         child: const TopProductsCard(),
                       ),
                       const SizedBox(width: 20),
-
                     ],
                   ),
 

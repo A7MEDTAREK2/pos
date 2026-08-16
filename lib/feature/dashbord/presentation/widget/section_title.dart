@@ -12,9 +12,13 @@ class SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Text(
       title,
-      style: TxtStyle.titleCard,
+      style: theme.textTheme.titleMedium?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 }

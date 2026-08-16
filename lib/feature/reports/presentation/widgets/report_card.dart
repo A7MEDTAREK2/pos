@@ -21,15 +21,18 @@ class ReportCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: colorScheme.shadow.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -52,18 +55,15 @@ class ReportCard extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: GoogleFonts.cairo(
-                    fontSize: 13,
-                    color: const Color(0xFF6B7280),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.6),
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   value,
-                  style: GoogleFonts.cairo(
-                    fontSize: 20,
+                  style: theme.textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF111827),
                   ),
                 ),
               ],
@@ -74,18 +74,17 @@ class ReportCard extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: change.startsWith('+')
-                    ? const Color(0xFF16A34A).withOpacity(0.1)
-                    : const Color(0xFFDC2626).withOpacity(0.1),
+                    ? Colors.green.withOpacity(0.1)
+                    : Colors.red.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
                 change,
-                style: GoogleFonts.cairo(
-                  fontSize: 12,
+                style: theme.textTheme.labelSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                   color: change.startsWith('+')
-                      ? const Color(0xFF16A34A)
-                      : const Color(0xFFDC2626),
+                      ? Colors.green
+                      : Colors.red,
                 ),
               ),
             ),

@@ -47,7 +47,11 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -62,14 +66,15 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
               children: [
                 Icon(
                   isEditing ? Icons.edit_rounded : Icons.person_add_rounded,
-                  color: Colorsmanegments.primary,
+                  color: colorScheme.primary,
                   size: 28,
                 ),
                 const SizedBox(width: 12),
                 Text(
                   isEditing ? 'تعديل مندوب' : 'إضافة مندوب جديد',
-                  style: TxtStyle.titleMedium.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     fontSize: 20,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
                 const Spacer(),
@@ -77,7 +82,7 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
                   onPressed: () => Navigator.pop(context),
                   icon: Icon(
                     Icons.close_rounded,
-                    color: Colorsmanegments.grey,
+                    color: colorScheme.onSurface.withOpacity(0.5),
                   ),
                   padding: EdgeInsets.zero,
                   constraints: const BoxConstraints(
@@ -97,18 +102,33 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
                   // ====== Name Field ======
                   TextFormField(
                     controller: _nameController,
+                    style: theme.textTheme.bodyMedium,
                     decoration: InputDecoration(
                       labelText: 'اسم المندوب *',
+                      labelStyle: theme.textTheme.labelMedium,
                       hintText: 'أدخل اسم المندوب',
+                      hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.5),
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.primary, width: 2),
                       ),
                       prefixIcon: Icon(
                         Icons.person_rounded,
-                        color: Colorsmanegments.grey,
+                        color: colorScheme.onSurface.withOpacity(0.5),
                       ),
+                      filled: true,
+                      fillColor: colorScheme.background,
                     ),
-                    style: TxtStyle.bodyMedium,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'اسم المندوب مطلوب';
@@ -124,18 +144,33 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
                   // ====== Phone Field ======
                   TextFormField(
                     controller: _phoneController,
+                    style: theme.textTheme.bodyMedium,
                     decoration: InputDecoration(
                       labelText: 'رقم الهاتف (اختياري)',
+                      labelStyle: theme.textTheme.labelMedium,
                       hintText: 'أدخل رقم الهاتف',
+                      hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.5),
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.outlineVariant),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(color: colorScheme.primary, width: 2),
                       ),
                       prefixIcon: Icon(
                         Icons.phone_rounded,
-                        color: Colorsmanegments.grey,
+                        color: colorScheme.onSurface.withOpacity(0.5),
                       ),
+                      filled: true,
+                      fillColor: colorScheme.background,
                     ),
-                    style: TxtStyle.bodyMedium,
                     keyboardType: TextInputType.phone,
                     validator: (value) {
                       if (value != null && value.isNotEmpty) {
@@ -162,10 +197,13 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
+                      side: BorderSide(color: colorScheme.outlineVariant),
                     ),
                     child: Text(
                       'إلغاء',
-                      style: TxtStyle.buttonPrimary,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: colorScheme.primary,
+                      ),
                     ),
                   ),
                 ),
@@ -173,7 +211,8 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
                 Expanded(
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colorsmanegments.primary,
+                      backgroundColor: colorScheme.primary,
+                      foregroundColor: colorScheme.onPrimary,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -181,17 +220,20 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
                     ),
                     onPressed: _isLoading ? null : _saveDriver,
                     child: _isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: Colors.white,
+                        color: colorScheme.onPrimary,
                       ),
                     )
                         : Text(
                       isEditing ? 'تحديث' : 'حفظ',
-                      style: TxtStyle.buttonMedium,
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
@@ -218,14 +260,12 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
           : _phoneController.text.trim();
 
       if (isEditing) {
-        // ====== Update ======
         final updatedDriver = widget.driver.copyWith(
           name: name,
           phone: phone,
         );
         await cubit.updateDriver(updatedDriver);
       } else {
-        // ====== Add ======
         final newDriver = DriverModel(
           name: name,
           phone: phone,
@@ -243,12 +283,7 @@ class _AddEditDriverDialogState extends State<AddEditDriverDialog> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('حدث خطأ: ${e.toString()}'),
-          backgroundColor: Colorsmanegments.danger,
-        ),
-      );
+      // تم إزالة SnackBar
     }
   }
 }

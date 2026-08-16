@@ -20,20 +20,23 @@ class SettingsSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: Text(
             label,
-            style: TxtStyle.bodyMedium,
+            style: theme.textTheme.bodyMedium,
           ),
         ),
         Switch(
           value: value,
           onChanged: onChanged,
-          activeColor: Colorsmanegments.primary,
-          activeTrackColor: Colorsmanegments.primary.withOpacity(0.3),
+          activeColor: colorScheme.primary,
+          activeTrackColor: colorScheme.primary.withOpacity(0.3),
         ),
       ],
     );

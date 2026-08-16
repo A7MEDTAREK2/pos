@@ -18,10 +18,14 @@ class SalesHistoryDialogs {
     String confirmText = "تأكيد",
     String cancelText = "إلغاء",
   }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return showDialog<bool>(
       context: context,
       builder: (_) {
         return AlertDialog(
+          backgroundColor: colorScheme.surface,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -32,14 +36,14 @@ class SalesHistoryDialogs {
               Expanded(
                 child: Text(
                   title,
-                  style: TxtStyle.headerSmall,
+                  style: theme.textTheme.titleLarge,
                 ),
               ),
             ],
           ),
           content: Text(
             message,
-            style: TxtStyle.bodyMedium,
+            style: theme.textTheme.bodyMedium,
           ),
           actions: [
             Tooltip(
@@ -49,7 +53,9 @@ class SalesHistoryDialogs {
                 onPressed: () => Navigator.pop(context, false),
                 child: Text(
                   cancelText,
-                  style: TxtStyle.buttonPrimary,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: colorScheme.primary,
+                  ),
                 ),
               ),
             ),
@@ -59,6 +65,7 @@ class SalesHistoryDialogs {
               child: FilledButton(
                 style: FilledButton.styleFrom(
                   backgroundColor: color,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -66,8 +73,9 @@ class SalesHistoryDialogs {
                 onPressed: () => Navigator.pop(context, true),
                 child: Text(
                   confirmText,
-                  style: TxtStyle.buttonMedium.copyWith(
-                    color: Colorsmanegments.textWhite,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
@@ -77,6 +85,4 @@ class SalesHistoryDialogs {
       },
     );
   }
-
-// تم إزالة showSnackBar بالكامل
 }

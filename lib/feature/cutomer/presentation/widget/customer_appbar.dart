@@ -35,11 +35,25 @@ class CustomerAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    // استخدام الألوان من Theme إذا كانت القيم الافتراضية
+    final bgColor = backgroundColor == Colorsmanegments.primary
+        ? colorScheme.primary
+        : backgroundColor;
+    final fgColor = foregroundColor == Colorsmanegments.textWhite
+        ? colorScheme.onPrimary
+        : foregroundColor;
+    final shadowCol = shadowColor == Colorsmanegments.primaryDark
+        ? colorScheme.primary
+        : shadowColor;
+
     return AppBar(
-      backgroundColor: backgroundColor,
-      foregroundColor: foregroundColor,
+      backgroundColor: bgColor,
+      foregroundColor: fgColor,
       elevation: elevation,
-      shadowColor: shadowColor.withOpacity(0.3),
+      shadowColor: shadowCol.withOpacity(0.3),
 
       shape: showBottomBorder
           ? RoundedRectangleBorder(
@@ -54,14 +68,16 @@ class CustomerAppBar extends StatelessWidget implements PreferredSizeWidget {
         children: [
           Icon(
             Iconss.people,
-            color: foregroundColor,
+            color: fgColor,
             size: 28,
           ),
           const SizedBox(width: 10),
           Text(
             titleText,
-            style: TxtStyle.headerWhite.copyWith(
+            style: theme.textTheme.headlineMedium?.copyWith(
               fontSize: titleFontSize,
+              fontWeight: FontWeight.bold,
+              color: fgColor,
             ),
           ),
         ],
@@ -73,19 +89,19 @@ class CustomerAppBar extends StatelessWidget implements PreferredSizeWidget {
         onPressed: onBackPressed ?? () => Navigator.pop(context),
         icon: Icon(
           Iconss.arrowBack,
-          color: foregroundColor,
+          color: fgColor,
         ),
         tooltip: 'رجوع',
       )
           : null,
 
       toolbarTextStyle: TextStyle(
-        color: foregroundColor,
+        color: fgColor,
         fontSize: 18,
         fontWeight: FontWeight.w600,
       ),
       titleTextStyle: TextStyle(
-        color: foregroundColor,
+        color: fgColor,
         fontSize: titleFontSize,
         fontWeight: FontWeight.bold,
       ),

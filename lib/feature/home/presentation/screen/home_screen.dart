@@ -27,7 +27,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colorsmanegments.background,
       body: SafeArea(
         child: BlocBuilder<HomeCubit, HomeState>(
           builder: (context, state) {

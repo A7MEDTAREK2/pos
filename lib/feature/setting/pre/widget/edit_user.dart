@@ -62,7 +62,11 @@ class _EditUserDialogState extends State<EditUserDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Dialog(
+      backgroundColor: colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
@@ -76,7 +80,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
               width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
-                color: Colorsmanegments.primary,
+                color: colorScheme.primary,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(20),
                 ),
@@ -85,20 +89,24 @@ class _EditUserDialogState extends State<EditUserDialog> {
                 children: [
                   Icon(
                     Iconss.edit,
-                    color: Colorsmanegments.textWhite,
+                    color: colorScheme.onPrimary,
                     size: 24,
                   ),
                   const SizedBox(width: 10),
                   Text(
                     'تعديل المستخدم',
-                    style: TxtStyle.headerWhite.copyWith(fontSize: 20),
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onPrimary,
+                    ),
                   ),
                   const Spacer(),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: Icon(
                       Iconss.close,
-                      color: Colorsmanegments.textWhite,
+                      color: colorScheme.onPrimary,
                     ),
                   ),
                 ],
@@ -116,9 +124,18 @@ class _EditUserDialogState extends State<EditUserDialog> {
                     TextFormField(
                       enabled: widget.user.id != 1,
                       controller: _nameController,
-                      decoration: const InputDecoration(
+                      style: theme.textTheme.bodyMedium,
+                      decoration: InputDecoration(
                         labelText: 'الاسم',
-                        border: OutlineInputBorder(),
+                        labelStyle: theme.textTheme.labelMedium,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.outlineVariant),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: colorScheme.background,
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -128,12 +145,22 @@ class _EditUserDialogState extends State<EditUserDialog> {
                       },
                     ),
                     const SizedBox(height: 16),
+
                     TextFormField(
                       enabled: widget.user.id != 1,
                       controller: _usernameController,
-                      decoration: const InputDecoration(
+                      style: theme.textTheme.bodyMedium,
+                      decoration: InputDecoration(
                         labelText: 'اسم المستخدم',
-                        border: OutlineInputBorder(),
+                        labelStyle: theme.textTheme.labelMedium,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.outlineVariant),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: colorScheme.background,
                       ),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -143,13 +170,23 @@ class _EditUserDialogState extends State<EditUserDialog> {
                       },
                     ),
                     const SizedBox(height: 16),
+
                     TextFormField(
                       enabled: widget.user.id != 1,
                       controller: _passwordController,
                       obscureText: _obscurePassword,
+                      style: theme.textTheme.bodyMedium,
                       decoration: InputDecoration(
                         labelText: 'كلمة المرور',
-                        border: const OutlineInputBorder(),
+                        labelStyle: theme.textTheme.labelMedium,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.outlineVariant),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: colorScheme.background,
                         suffixIcon: IconButton(
                           onPressed: () {
                             setState(() {
@@ -160,6 +197,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
                             _obscurePassword
                                 ? Icons.visibility_off
                                 : Icons.visibility,
+                            color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                           ),
                         ),
                       ),
@@ -174,31 +212,61 @@ class _EditUserDialogState extends State<EditUserDialog> {
                       },
                     ),
                     const SizedBox(height: 16),
+
                     TextFormField(
                       enabled: widget.user.id != 1,
                       controller: _phoneController,
-                      decoration: const InputDecoration(
+                      style: theme.textTheme.bodyMedium,
+                      decoration: InputDecoration(
                         labelText: 'رقم الهاتف',
-                        border: OutlineInputBorder(),
+                        labelStyle: theme.textTheme.labelMedium,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.outlineVariant),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: colorScheme.background,
                       ),
                       keyboardType: TextInputType.phone,
                     ),
                     const SizedBox(height: 16),
+
                     TextFormField(
                       enabled: widget.user.id != 1,
                       controller: _emailController,
-                      decoration: const InputDecoration(
+                      style: theme.textTheme.bodyMedium,
+                      decoration: InputDecoration(
                         labelText: 'البريد الإلكتروني',
-                        border: OutlineInputBorder(),
+                        labelStyle: theme.textTheme.labelMedium,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.outlineVariant),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: colorScheme.background,
                       ),
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: 16),
+
                     DropdownButtonFormField<String>(
                       value: _selectedRole,
-                      decoration: const InputDecoration(
+                      style: theme.textTheme.bodyMedium,
+                      decoration: InputDecoration(
                         labelText: 'الدور',
-                        border: OutlineInputBorder(),
+                        labelStyle: theme.textTheme.labelMedium,
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.outlineVariant),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        ),
+                        filled: true,
+                        fillColor: colorScheme.background,
                       ),
                       items: _roles.map((role) {
                         return DropdownMenuItem(
@@ -215,6 +283,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
                       },
                     ),
                     const SizedBox(height: 16),
+
                     Row(
                       children: [
                         Switch(
@@ -226,12 +295,12 @@ class _EditUserDialogState extends State<EditUserDialog> {
                               _isActive = value;
                             });
                           },
-                          activeColor: Colorsmanegments.primary,
+                          activeColor: colorScheme.primary,
                         ),
                         const SizedBox(width: 8),
                         Text(
                           _isActive ? 'نشط' : 'غير نشط',
-                          style: TxtStyle.bodyMedium,
+                          style: theme.textTheme.bodyMedium,
                         ),
                       ],
                     ),
@@ -245,7 +314,7 @@ class _EditUserDialogState extends State<EditUserDialog> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 border: Border(
-                  top: BorderSide(color: Colorsmanegments.border),
+                  top: BorderSide(color: theme.dividerColor),
                 ),
               ),
               child: Row(
@@ -261,7 +330,9 @@ class _EditUserDialogState extends State<EditUserDialog> {
                       ),
                       child: Text(
                         'إلغاء',
-                        style: TxtStyle.buttonPrimary,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.primary,
+                        ),
                       ),
                     ),
                   ),
@@ -269,7 +340,8 @@ class _EditUserDialogState extends State<EditUserDialog> {
                   Expanded(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colorsmanegments.primary,
+                        backgroundColor: colorScheme.primary,
+                        foregroundColor: colorScheme.onPrimary,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
@@ -277,17 +349,20 @@ class _EditUserDialogState extends State<EditUserDialog> {
                       ),
                       onPressed: _isSaving ? null : _saveUser,
                       child: _isSaving
-                          ? const SizedBox(
+                          ? SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: colorScheme.onPrimary,
                         ),
                       )
                           : Text(
                         'حفظ التعديلات',
-                        style: TxtStyle.buttonMedium,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: colorScheme.onPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -321,26 +396,16 @@ class _EditUserDialogState extends State<EditUserDialog> {
         role: _selectedRole,
         isActive: _isActive,
       );
-      print(updatedUser.toMap());
+
       await context.read<UserCubit>().updateUser(updatedUser);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('تم تحديث المستخدم بنجاح'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // تم إزالة SnackBar
         Navigator.pop(context);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('حدث خطأ: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
+        // تم إزالة SnackBar
         setState(() {
           _isSaving = false;
         });

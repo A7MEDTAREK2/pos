@@ -21,15 +21,18 @@ class ReportsContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
+        border: Border.all(color: colorScheme.outlineVariant),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: colorScheme.shadow.withOpacity(0.04),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -43,23 +46,16 @@ class ReportsContent extends StatelessWidget {
     switch (selectedIndex) {
       case 0:
         return const SalesReportView();
-
       case 1:
         return const ProductReportScreen();
-
       case 2:
         return const CustomerReportScreen();
-
       case 3:
         return const StockReportScreen();
-
       case 4:
         return const PaymentReportScreen();
-
       case 5:
-
-      return const OrderTypeReportScreen();
-
+        return const OrderTypeReportScreen();
       default:
         return const ReportsEmptyState();
     }

@@ -18,6 +18,9 @@ class UsersTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return BlocBuilder<UserCubit, UserState>(
       builder: (context, state) {
         final List<UserModel> users = context.read<UserCubit>().users;
@@ -27,24 +30,31 @@ class UsersTable extends StatelessWidget {
         }
 
         if (users.isEmpty) {
-          return const Center(child: Text("لا يوجد مستخدمين"));
+          return Center(
+            child: Text(
+              "لا يوجد مستخدمين",
+              style: theme.textTheme.bodyMedium,
+            ),
+          );
         }
 
         return Container(
           decoration: BoxDecoration(
-            color: Colorsmanegments.background,
+            color: colorScheme.background,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colorsmanegments.border),
+            border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: DataTable(
               columnSpacing: 16,
               headingRowColor: WidgetStateProperty.all(
-                Colorsmanegments.background,
+                colorScheme.background,
               ),
-              headingTextStyle: TxtStyle.tableHeader,
-              dataTextStyle: TxtStyle.tableRow,
+              headingTextStyle: theme.textTheme.labelLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+              dataTextStyle: theme.textTheme.bodyMedium,
               columns: const [
                 DataColumn(label: Text("")),
                 DataColumn(label: Text("الاسم")),
@@ -68,18 +78,19 @@ class UsersTable extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: isActive
-                              ? Colorsmanegments.primary.withOpacity(.15)
-                              : Colorsmanegments.textSecondary.withOpacity(.15),
+                              ? colorScheme.primary.withOpacity(.15)
+                              : theme.textTheme.bodyMedium?.color?.withOpacity(.15),
                         ),
                         child: Center(
                           child: Text(
                             user.name.isNotEmpty
                                 ? user.name.substring(0, 1)
                                 : "?",
-                            style: TxtStyle.badge.copyWith(
+                            style: theme.textTheme.labelLarge?.copyWith(
                               color: isActive
-                                  ? Colorsmanegments.primary
-                                  : Colorsmanegments.textSecondary,
+                                  ? colorScheme.primary
+                                  : theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                              fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
@@ -87,10 +98,22 @@ class UsersTable extends StatelessWidget {
                     ),
 
                     /// Name
-                    DataCell(Text(user.name, style: TxtStyle.tableRowBold)),
+                    DataCell(
+                      Text(
+                        user.name,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
 
                     /// Username
-                    DataCell(Text(user.username)),
+                    DataCell(
+                      Text(
+                        user.username,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
 
                     /// Role
                     DataCell(
@@ -108,8 +131,9 @@ class UsersTable extends StatelessWidget {
                         ),
                         child: Text(
                           user.role ?? 'cashier',
-                          style: TxtStyle.badgeSmall.copyWith(
+                          style: theme.textTheme.labelSmall?.copyWith(
                             color: _getRoleColor(user.role),
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
@@ -124,8 +148,8 @@ class UsersTable extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: isActive
-                              ? Colorsmanegments.success.withOpacity(.1)
-                              : Colorsmanegments.danger.withOpacity(.1),
+                              ? Colors.green.withOpacity(.1)
+                              : Colors.red.withOpacity(.1),
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Row(
@@ -134,17 +158,14 @@ class UsersTable extends StatelessWidget {
                             Icon(
                               isActive ? Iconss.success : Iconss.error,
                               size: 12,
-                              color: isActive
-                                  ? Colorsmanegments.success
-                                  : Colorsmanegments.danger,
+                              color: isActive ? Colors.green : Colors.red,
                             ),
                             const SizedBox(width: 4),
                             Text(
                               isActive ? "Active" : "Inactive",
-                              style: TxtStyle.badgeSmall.copyWith(
-                                color: isActive
-                                    ? Colorsmanegments.success
-                                    : Colorsmanegments.danger,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: isActive ? Colors.green : Colors.red,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
@@ -160,10 +181,11 @@ class UsersTable extends StatelessWidget {
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          /// Edit Button - (8) تعديل المستخدم
+                          /// Edit Button
                           _actionButton(
+                            context,
                             icon: Iconss.edit,
-                            color: Colorsmanegments.primary,
+                            color: colorScheme.primary,
                             tooltip: "تعديل",
                             onTap: () {
                               showDialog(
@@ -175,10 +197,11 @@ class UsersTable extends StatelessWidget {
                             },
                           ),
 
-                          /// Permissions Button - (6) صلاحيات المستخدم
+                          /// Permissions Button
                           _actionButton(
+                            context,
                             icon: Iconss.lock,
-                            color: Colorsmanegments.warning,
+                            color: Colors.amber,
                             tooltip: "الصلاحيات",
                             onTap: user.id == 1
                                 ? null
@@ -192,10 +215,11 @@ class UsersTable extends StatelessWidget {
                             },
                           ),
 
-                          /// Delete Button - (9) منع حذف الأدمن
+                          /// Delete Button
                           _actionButton(
+                            context,
                             icon: Iconss.delete,
-                            color: isAdmin ? Colors.grey : Colorsmanegments.danger,
+                            color: isAdmin ? Colors.grey : Colors.red,
                             tooltip: isAdmin
                                 ? "لا يمكن حذف المستخدم الأساسي"
                                 : "حذف",
@@ -225,22 +249,23 @@ class UsersTable extends StatelessWidget {
   Color _getRoleColor(String? role) {
     switch (role) {
       case 'Admin':
-        return Colorsmanegments.danger;
+        return Colors.red;
       case 'Manager':
-        return Colorsmanegments.warning;
+        return Colors.amber;
       case 'Cashier':
-        return Colorsmanegments.primary;
+        return const Color(0xFF2563EB);
       default:
-        return Colorsmanegments.grey;
+        return Colors.grey;
     }
   }
 
-  Widget _actionButton({
-    required IconData icon,
-    required Color color,
-    required String tooltip,
-    VoidCallback? onTap,
-  }) {
+  Widget _actionButton(
+      BuildContext context, {
+        required IconData icon,
+        required Color color,
+        required String tooltip,
+        VoidCallback? onTap,
+      }) {
     return IconButton(
       padding: EdgeInsets.zero,
       constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
@@ -255,9 +280,13 @@ class UsersTable extends StatelessWidget {
       UserModel user,
       UserCubit cubit,
       ) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        backgroundColor: colorScheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
@@ -265,28 +294,34 @@ class UsersTable extends StatelessWidget {
           children: [
             Icon(
               Iconss.delete,
-              color: Colorsmanegments.danger,
+              color: Colors.red,
               size: 28,
             ),
             const SizedBox(width: 12),
-            const Text('تأكيد الحذف'),
+            Text(
+              'تأكيد الحذف',
+              style: theme.textTheme.titleLarge,
+            ),
           ],
         ),
         content: Text(
           'هل أنت متأكد من حذف المستخدم "${user.name}"؟',
-          style: TxtStyle.bodyMedium,
+          style: theme.textTheme.bodyMedium,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: Text(
               'إلغاء',
-              style: TxtStyle.buttonPrimary,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: colorScheme.primary,
+              ),
             ),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colorsmanegments.danger,
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -295,27 +330,17 @@ class UsersTable extends StatelessWidget {
               Navigator.pop(context);
               if (user.id != null) {
                 cubit.deleteUser(user.id!);
-                _showSnackBar(context, 'تم حذف المستخدم بنجاح', Colors.green);
               }
             },
             child: Text(
               'حذف',
-              style: TxtStyle.buttonMedium.copyWith(
-                color: Colorsmanegments.textWhite,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  void _showSnackBar(BuildContext context, String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-        duration: const Duration(seconds: 2),
       ),
     );
   }
