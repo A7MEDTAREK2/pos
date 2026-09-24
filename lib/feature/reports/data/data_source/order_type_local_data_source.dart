@@ -24,22 +24,15 @@ class OrderTypeReportLocalDataSourceImpl
     final result = await db.rawQuery(
       '''
       SELECT
-    order_type AS orderType,
-
-    COUNT(*) AS ordersCount,
-
-    COALESCE(SUM(total),0) AS totalRevenue,
-
-    0 AS percentage
-
-FROM sales
-
-WHERE DATE(created_at)
-BETWEEN DATE(?) AND DATE(?)
-
-GROUP BY order_type
-
-ORDER BY ordersCount DESC
+          order_type AS orderType,
+          COUNT(*) AS ordersCount,
+          COALESCE(SUM(subtotal), 0) AS totalRevenue,          -- ✅ صافي المنتجات فقط بدون الدليفري
+          COALESCE(SUM(delivery_fee), 0) AS totalDeliveryFees,  -- ✅ إجمالي رسوم الدليفري وحدها
+          0 AS percentage
+      FROM sales
+      WHERE DATE(created_at) BETWEEN DATE(?) AND DATE(?)
+      GROUP BY order_type
+      ORDER BY ordersCount DESC
       ''',
       [
         from.toIso8601String(),

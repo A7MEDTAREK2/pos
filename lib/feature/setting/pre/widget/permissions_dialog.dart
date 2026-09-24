@@ -1,3 +1,5 @@
+// lib/feature/dashboard/presentation/widgets/permissions_dialog.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -29,9 +31,13 @@ class _PermissionsDialogState extends State<PermissionsDialog> {
   late bool canManageReports;
   late bool canManageSettings;
   late bool canManageUsers;
+
+  // صلاحيات نقطة البيع المفصلة والدقيقة
+  late bool canSell;
   late bool canDiscount;
   late bool canDeleteInvoice;
   late bool canHoldOrders;
+  late bool canPrintReceipt;
 
   bool _isSaving = false;
 
@@ -49,27 +55,64 @@ class _PermissionsDialogState extends State<PermissionsDialog> {
     canManageReports = user.canManageReports;
     canManageSettings = user.canManageSettings;
     canManageUsers = user.canManageUsers;
+
+    // قيم افتراضية أو مستخرجة من الموديل
+    canSell = true; // افتراضياً أي مستخدم له صلاحية البيع الأساسية
     canDiscount = user.canDiscount;
     canDeleteInvoice = user.canDeleteInvoice;
     canHoldOrders = user.canHoldOrders;
+    canPrintReceipt = true;
+  }
+
+  // دالة لتحديد أو إلغاء تحديد الكل
+  void _toggleAll(bool value) {
+    setState(() {
+      canManageProducts = value;
+      canManageCategories = value;
+      canManageCustomers = value;
+      canManageSuppliers = value;
+      canManageInventory = value;
+      canManageReports = value;
+      canManageSettings = value;
+      canManageUsers = value;
+      canSell = value;
+      canDiscount = value;
+      canDeleteInvoice = value;
+      canHoldOrders = value;
+      canPrintReceipt = value;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final bool allSelected = canManageProducts &&
+        canManageCategories &&
+        canManageCustomers &&
+        canManageSuppliers &&
+        canManageInventory &&
+        canManageReports &&
+        canManageSettings &&
+        canManageUsers &&
+        canSell &&
+        canDiscount &&
+        canDeleteInvoice &&
+        canHoldOrders &&
+        canPrintReceipt;
+
     return Dialog(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
       child: SizedBox(
-        width: 720,
-        height: 600,
+        width: 780,
+        height: 650,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             // ====== Header ======
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               decoration: BoxDecoration(
                 color: Colorsmanegments.primary,
                 borderRadius: const BorderRadius.vertical(
@@ -84,11 +127,27 @@ class _PermissionsDialogState extends State<PermissionsDialog> {
                     size: 24,
                   ),
                   const SizedBox(width: 10),
-                  Text(
-                    'الصلاحيات - ${widget.user.name}',
-                    style: TxtStyle.headerWhite.copyWith(fontSize: 20),
+                  Expanded(
+                    child: Text(
+                      'إدارة صلاحيات المستخدم: ${widget.user.name}',
+                      style: TxtStyle.headerWhite.copyWith(fontSize: 18),
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
-                  const Spacer(),
+                  // زر تحديد/إلغاء تحديد الكل السريع
+                  TextButton.icon(
+                    onPressed: () => _toggleAll(!allSelected),
+                    icon: Icon(
+                      allSelected ? Icons.deselect : Icons.select_all,
+                      color: Colors.white,
+                      size: 18,
+                    ),
+                    label: Text(
+                      allSelected ? 'إلغاء الكل' : 'تحديد الكل',
+                      style: const TextStyle(color: Colors.white, fontSize: 13),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
                     icon: Icon(
@@ -111,153 +170,145 @@ class _PermissionsDialogState extends State<PermissionsDialog> {
                     _buildPermissionGroup(
                       title: 'المنتجات',
                       icon: Iconss.product,
+                      isAllSelected: canManageProducts,
+                      onToggleAll: (val) => setState(() => canManageProducts = val!),
                       children: [
                         _permissionItem(
-                          title: 'إدارة المنتجات',
+                          title: 'إدارة المنتجات (إضافة/تعديل/حذف)',
                           value: canManageProducts,
-                          onChanged: (value) {
-                            setState(() {
-                              canManageProducts = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canManageProducts = val!),
                         ),
                       ],
                     ),
                     _buildPermissionGroup(
                       title: 'الأقسام',
                       icon: Iconss.category,
+                      isAllSelected: canManageCategories,
+                      onToggleAll: (val) => setState(() => canManageCategories = val!),
                       children: [
                         _permissionItem(
-                          title: 'إدارة الأقسام',
+                          title: 'إدارة أقسام المنتجات',
                           value: canManageCategories,
-                          onChanged: (value) {
-                            setState(() {
-                              canManageCategories = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canManageCategories = val!),
                         ),
                       ],
                     ),
                     _buildPermissionGroup(
                       title: 'العملاء',
                       icon: Iconss.customer,
+                      isAllSelected: canManageCustomers,
+                      onToggleAll: (val) => setState(() => canManageCustomers = val!),
                       children: [
                         _permissionItem(
-                          title: 'إدارة العملاء',
+                          title: 'إدارة بيانات العملاء والديون',
                           value: canManageCustomers,
-                          onChanged: (value) {
-                            setState(() {
-                              canManageCustomers = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canManageCustomers = val!),
                         ),
                       ],
                     ),
                     _buildPermissionGroup(
                       title: 'الموردين',
                       icon: Iconss.supplier,
+                      isAllSelected: canManageSuppliers,
+                      onToggleAll: (val) => setState(() => canManageSuppliers = val!),
                       children: [
                         _permissionItem(
-                          title: 'إدارة الموردين',
+                          title: 'إدارة الموردين وحساباتهم',
                           value: canManageSuppliers,
-                          onChanged: (value) {
-                            setState(() {
-                              canManageSuppliers = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canManageSuppliers = val!),
                         ),
                       ],
                     ),
                     _buildPermissionGroup(
                       title: 'المخزون',
                       icon: Iconss.inventory,
+                      isAllSelected: canManageInventory,
+                      onToggleAll: (val) => setState(() => canManageInventory = val!),
                       children: [
                         _permissionItem(
-                          title: 'إدارة المخزون',
+                          title: 'مراقبة وتعديل المخزون والتسويات',
                           value: canManageInventory,
-                          onChanged: (value) {
-                            setState(() {
-                              canManageInventory = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canManageInventory = val!),
                         ),
                       ],
                     ),
                     _buildPermissionGroup(
                       title: 'التقارير',
                       icon: Iconss.barChart,
+                      isAllSelected: canManageReports,
+                      onToggleAll: (val) => setState(() => canManageReports = val!),
                       children: [
                         _permissionItem(
-                          title: 'إدارة التقارير',
+                          title: 'عرض التقارير المالية والأرباح',
                           value: canManageReports,
-                          onChanged: (value) {
-                            setState(() {
-                              canManageReports = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canManageReports = val!),
                         ),
                       ],
                     ),
                     _buildPermissionGroup(
                       title: 'الإعدادات',
                       icon: Iconss.settings,
+                      isAllSelected: canManageSettings,
+                      onToggleAll: (val) => setState(() => canManageSettings = val!),
                       children: [
                         _permissionItem(
-                          title: 'إدارة الإعدادات',
+                          title: 'تعديل إعدادات النظام والطابعة',
                           value: canManageSettings,
-                          onChanged: (value) {
-                            setState(() {
-                              canManageSettings = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canManageSettings = val!),
                         ),
                       ],
                     ),
                     _buildPermissionGroup(
                       title: 'المستخدمين',
                       icon: Iconss.users,
+                      isAllSelected: canManageUsers,
+                      onToggleAll: (val) => setState(() => canManageUsers = val!),
                       children: [
                         _permissionItem(
-                          title: 'إدارة المستخدمين',
+                          title: 'إدارة المستخدمين وصلاحياتهم',
                           value: canManageUsers,
-                          onChanged: (value) {
-                            setState(() {
-                              canManageUsers = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canManageUsers = val!),
                         ),
                       ],
                     ),
                     _buildPermissionGroup(
-                      title: 'نقطة البيع',
+                      title: 'نقطة البيع (POS)',
                       icon: Iconss.pos,
+                      isAllSelected: canSell && canDiscount && canDeleteInvoice && canHoldOrders && canPrintReceipt,
+                      onToggleAll: (val) {
+                        setState(() {
+                          canSell = val!;
+                          canDiscount = val;
+                          canDeleteInvoice = val;
+                          canHoldOrders = val;
+                          canPrintReceipt = val;
+                        });
+                      },
                       children: [
                         _permissionItem(
-                          title: 'تطبيق الخصم',
+                          title: 'إتمام عمليات البيع',
+                          value: canSell,
+                          onChanged: (val) => setState(() => canSell = val!),
+                        ),
+                        _permissionItem(
+                          title: 'تطبيق الخصومات على الفاتورة',
                           value: canDiscount,
-                          onChanged: (value) {
-                            setState(() {
-                              canDiscount = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canDiscount = val!),
                         ),
                         _permissionItem(
-                          title: 'حذف الفاتورة',
+                          title: 'حذف أو إلغاء الفواتير',
                           value: canDeleteInvoice,
-                          onChanged: (value) {
-                            setState(() {
-                              canDeleteInvoice = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canDeleteInvoice = val!),
                         ),
                         _permissionItem(
-                          title: 'تعليق الطلبات',
+                          title: 'تعليق واسترجاع الطلبات',
                           value: canHoldOrders,
-                          onChanged: (value) {
-                            setState(() {
-                              canHoldOrders = value!;
-                            });
-                          },
+                          onChanged: (val) => setState(() => canHoldOrders = val!),
+                        ),
+                        _permissionItem(
+                          title: 'إعادة طباعة الفواتير',
+                          value: canPrintReceipt,
+                          onChanged: (val) => setState(() => canPrintReceipt = val!),
                         ),
                       ],
                     ),
@@ -329,10 +380,12 @@ class _PermissionsDialogState extends State<PermissionsDialog> {
   Widget _buildPermissionGroup({
     required String title,
     required IconData icon,
+    required bool isAllSelected,
+    required ValueChanged<bool?> onToggleAll,
     required List<Widget> children,
   }) {
     return Container(
-      width: 300,
+      width: 320,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colorsmanegments.card,
@@ -360,10 +413,32 @@ class _PermissionsDialogState extends State<PermissionsDialog> {
                 size: 18,
               ),
               const SizedBox(width: 8),
-              Text(
-                title,
-                style: TxtStyle.titleSmall.copyWith(
-                  fontSize: 14,
+              Expanded(
+                child: Text(
+                  title,
+                  style: TxtStyle.titleSmall.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // زر اختيار القسم بالكامل مصغر
+              SizedBox(
+                height: 24,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'الكل',
+                      style: TextStyle(fontSize: 11, color: Colors.grey[600]),
+                    ),
+                    Checkbox(
+                      value: isAllSelected,
+                      onChanged: onToggleAll,
+                      activeColor: Colorsmanegments.primary,
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -381,7 +456,7 @@ class _PermissionsDialogState extends State<PermissionsDialog> {
     required ValueChanged<bool?> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Checkbox(
@@ -390,10 +465,11 @@ class _PermissionsDialogState extends State<PermissionsDialog> {
             activeColor: Colorsmanegments.primary,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
+          const SizedBox(width: 4),
           Expanded(
             child: Text(
               title,
-              style: TxtStyle.bodySmall,
+              style: TxtStyle.bodySmall.copyWith(fontSize: 12.5),
             ),
           ),
         ],
@@ -419,8 +495,9 @@ class _PermissionsDialogState extends State<PermissionsDialog> {
         canDiscount: canDiscount,
         canDeleteInvoice: canDeleteInvoice,
         canHoldOrders: canHoldOrders,
+        // يمكنك إضافة الحقول الإضافية في موديل المستخدم إذا أردت لاحقاً مثل canSell و canPrintReceipt
       );
-      print(updatedUser.toMap());
+
       await context.read<UserCubit>().updateUser(updatedUser);
 
       if (mounted) {

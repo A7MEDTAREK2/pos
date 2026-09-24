@@ -1,3 +1,4 @@
+import '../../../../core/service/audit_log_service.dart';
 import '../data_source/order_type_local_data_source.dart';
 import '../model/order_type_report.dart';
 
@@ -21,10 +22,21 @@ class OrderTypeReportRepositoryImpl
   Future<List<OrderTypeReportModel>> getOrderTypeReport({
     required DateTime from,
     required DateTime to,
-  }) {
-    return localDataSource.getOrderTypeReport(
+  }) async {
+    final result = await localDataSource.getOrderTypeReport(
       from: from,
       to: to,
     );
+
+    await AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'VIEW',
+      module: 'التقارير',
+      entityType: 'OrderTypeReport',
+      description: 'تم فتح تقرير أنواع الطلبات',
+    );
+
+    return result;
   }
 }

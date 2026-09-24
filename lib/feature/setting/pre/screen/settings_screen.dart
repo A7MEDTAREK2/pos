@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 // ====== Core ======
+import '../../../../core/data_base/pos_database.dart';
 import '../../../../core/data_mange/data_mange/app_restart.dart';
 import '../../../../core/data_mange/data_mange/cubit_mange.dart';
 import '../../../../core/data_mange/data_mange/state_mange.dart';
@@ -11,6 +12,10 @@ import '../../../../core/theming/icons.dart';
 import '../../../../core/theming/txt_style.dart';
 
 // ====== Settings ======
+import '../../../audit_log/login/data/data_source/local_data_source.dart';
+import '../../../audit_log/login/data/repo/local_rapo.dart';
+import '../../../audit_log/login/logic/audit_log_cubit.dart';
+import '../../../audit_log/login/presentation/screen/audit_log.dart';
 import '../../../driver/data/localdata.dart';
 import '../../../driver/data/repo.dart';
 import '../../../driver/logic/drive_cubit.dart';
@@ -30,6 +35,9 @@ import '../widget/users_section.dart';
 
 // ====== Printer Settings Screen ======
 import 'printer_settings_screen.dart';
+
+// ====== Audit Logs ======
+
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -466,6 +474,52 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         },
                       ),
                     ),
+
+                    const SizedBox(height: 24),
+
+                    // ====== Audit Logs (سجل الحركات) ======
+                    Tooltip(
+                      message: "سجل الحركات والعمليات",
+                      waitDuration: const Duration(milliseconds: 300),
+                      child: ListTile(
+                        leading: Icon(
+                          Icons.history,
+                          color: colorScheme.primary,
+                          size: 28,
+                        ),
+                        title: Text(
+                          'سجل الحركات والعمليات',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        subtitle: Text(
+                          'متابعة ومراجعة جميع العمليات داخل النظام',
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        trailing: Icon(
+                          Icons.arrow_forward_ios,
+                          size: 16,
+                          color: theme.textTheme.bodyMedium?.color?.withOpacity(0.4),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => BlocProvider(
+                                create: (context) => AuditLogCubit(
+                                  AuditLogRepositoryImpl(
+                                    localDataSource: AuditLogLocalDataSourceImpl(AppDatabase.instance),
+                                  ),
+                                )..fetchAuditLogs(),
+                                child: const AuditLogScreen(),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+
                     const SizedBox(height: 24),
 
                     // ====== 8. About ======
@@ -476,9 +530,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           _buildAboutItem(context, 'اسم التطبيق', 'Modu POS'),
                           _buildAboutItem(context, 'الإصدار', '1.0.0'),
-                          _buildAboutItem(context, 'المطور','Ahmed Tarek'),
-                          _buildAboutItem(context, 'التواصل','01092400184'),
-                          _buildAboutItem(context, 'Email','modytareq225@gmail.com'),
+                          _buildAboutItem(context, 'المطور', 'Ahmed Tarek'),
+                          _buildAboutItem(context, 'التواصل', '01092400184'),
+                          _buildAboutItem(context, 'Email', 'modytareq225@gmail.com'),
                         ],
                       ),
                     ),

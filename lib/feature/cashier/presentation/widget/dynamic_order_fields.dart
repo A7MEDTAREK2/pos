@@ -39,6 +39,16 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
 
   String? phoneErrorText;
 
+  @override
+  void initState() {
+    super.initState();
+    // 🔍 أول ما الواجهة تفتح، جرب تحمل بيانات العميل لو ده أوردر قديم (Holding)
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadOpenedOrderCustomer();
+    });
+  }
+
+  // إظهار نافذة إضافة عميل جديد في حال لم يتم العثور على الرقم
   void _showNewCustomerDialog() {
     final phoneText = customerPhoneController.text.trim();
 
@@ -132,17 +142,21 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
   Widget build(BuildContext context) {
     final cubit = context.read<OrderCubit>();
 
+    // نوع الطلب: تيك أواي (لا يتطلب حقول إضافية)
     if (widget.orderTypeIndex == 0) {
       return const SizedBox.shrink();
     }
 
+    // نوع الطلب: صالة (إظهار حقول واختيار الطاولات)
     if (widget.orderTypeIndex == 1) {
       return _buildDineInFields(cubit);
     }
 
+    // نوع الطلب: دليفري (إظهار حقول البحث عن العميل ورقم الهاتف)
     return _buildDeliveryFields();
   }
 
+  // بناء حقول الطلب الداخلي (صالة)
   Widget _buildDineInFields(OrderCubit cubit) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -224,6 +238,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
+  // بناء حقول التوصيل (دليفري)
   Widget _buildDeliveryFields() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -274,6 +289,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
+  // حقل إدخال رقم الهاتف المدمج مع زر البحث وعرض العناوين
   Widget _buildCompactTextField({
     required TextEditingController controller,
     required String hint,
@@ -355,13 +371,14 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
+  // بطاقة عرض بيانات العميل المختصرة بعد العثور عليه
   Widget _buildCustomerCard() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
         color: colorScheme.primary.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
@@ -382,7 +399,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
           ),
           Container(
             width: 1,
-            height: 32,
+            height: 28,
             color: colorScheme.primary.withOpacity(0.2),
             margin: const EdgeInsets.symmetric(horizontal: 4),
           ),
@@ -395,7 +412,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
           ),
           Container(
             width: 1,
-            height: 32,
+            height: 28,
             color: colorScheme.primary.withOpacity(0.2),
             margin: const EdgeInsets.symmetric(horizontal: 4),
           ),
@@ -412,6 +429,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
+  // عنصر مساعدة لعرض التسمية والقيمة داخل بطاقة العميل
   Widget _buildLabeledValue({
     required IconData icon,
     required String label,
@@ -428,25 +446,26 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
           children: [
             Icon(
               icon,
-              size: 13,
+              size: 12,
               color: isHighlight
                   ? colorScheme.primary
                   : theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
             ),
-            const SizedBox(width: 4),
+            const SizedBox(width: 3),
             Text(
               label,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
+                fontSize: 10,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 2),
         Text(
           value,
           style: theme.textTheme.labelLarge?.copyWith(
-            fontSize: 12,
+            fontSize: 11,
             color: isHighlight
                 ? colorScheme.primary
                 : theme.textTheme.bodyLarge?.color,
@@ -459,6 +478,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     );
   }
 
+  // دالة البحث عن العميل برقم الهاتف في قاعدة البيانات
   Future<void> _searchCustomer() async {
     final phone = customerPhoneController.text.trim();
 
@@ -508,6 +528,7 @@ class _DynamicOrderFieldsState extends State<DynamicOrderFields> {
     }
   }
 
+  // تحميل بيانات العميل المرتبطة بأوردر مفتوح تم إعادة فتحه
   Future<void> _loadOpenedOrderCustomer() async {
     final orderCubit = context.read<OrderCubit>();
 

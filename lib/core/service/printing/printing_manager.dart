@@ -63,6 +63,12 @@ class PrintingManager {
   Future<void> printKitchen(OrderModel order) async {
     final settings = await _getSettings();
 
+    // 🚀 تعديل آمن: لا يتم التخطي إلا إذا كانت القيمة مطفية صراحة (false)
+    if (settings != null && settings.autoPrintKitchen == false) {
+      print("🖨️ تم تخطي طباعة المطبخ بناءً على رغبة المستخدم في الإعدادات");
+      return;
+    }
+
     // 🔍 التحقق من اسم طابعة المطبخ وتجاوز "طابعة 1" إن وجدت
     String printerName = settings?.kitchenPrinter ?? "";
     if (printerName.isEmpty || printerName == "طابعة 1") {
@@ -70,8 +76,6 @@ class PrintingManager {
     }
 
     print("🔍 طابعة المطبخ المُستخدمة: $printerName");
-
-    final int paperWidth = settings?.paperWidth ?? 80;
 
     if (printerName.isEmpty) return;
 
@@ -128,6 +132,12 @@ class PrintingManager {
   Future<void> printReceipt(OrderModel order) async {
     final settings = await _getSettings();
 
+    // 🚀 تعديل آمن: لا يتم التخطي إلا إذا كانت القيمة مطفية صراحة (false)
+    if (settings != null && settings.autoPrintReceipt == false) {
+      print("🖨️ تم تخطي طباعة إيصال العميل بناءً على رغبة المستخدم في الإعدادات");
+      return;
+    }
+
     // 🔍 التحقق من اسم طابعة الكاشير وتجاوز "طابعة 1" إن وجدت
     String printerName = settings?.cashierPrinter ?? "";
     if (printerName.isEmpty || printerName == "طابعة 1") {
@@ -177,7 +187,7 @@ class PrintingManager {
   }
 
   // =============================
-  // BARCODE PRINT (جديد للربط مع السيرفر)
+  // BARCODE PRINT
   // =============================
   Future<void> printBarcode({
     required String itemName,
@@ -278,9 +288,6 @@ class PrintingManager {
       "products": products,
     };
 
-    print("📤 DAILY REPORT REQUEST:");
-    print(requestData);
-
     try {
       await _service.printDailyReport(requestData);
     } catch (e) {
@@ -291,6 +298,7 @@ class PrintingManager {
       print("❌ Daily Report Print Failed: $e");
     }
   }
+
   // =============================
   // THERMAL REPORT PRINT
   // =============================
@@ -307,7 +315,6 @@ class PrintingManager {
       printerName = "XP-80C";
     }
 
-    print("🖨 Reports Printer = $printerName");
     final int paperWidth = settings?.paperWidth ?? 80;
 
     final request = {

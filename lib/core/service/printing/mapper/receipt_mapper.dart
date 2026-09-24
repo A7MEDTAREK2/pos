@@ -1,4 +1,4 @@
-// lib/core/service/printing/service/receipt_mapper.dart
+// lib/core/service/printing/mapper/receipt_mapper.dart
 
 import '../../../../feature/cashier/data/model/pos_model.dart';
 import '../../../../feature/setting/data/model/settings_model.dart';
@@ -11,9 +11,14 @@ class ReceiptMapper {
     required SettingsModel? settings,
     required String printerName,
   }) {
+    double calculatedSubtotal = 0.0;
+
     final products = order.items.map((e) {
       final price = double.tryParse(e["price"].toString()) ?? 0.0;
       final quantity = int.tryParse(e["quantity"].toString()) ?? 1;
+      final itemTotal = price * quantity;
+
+      calculatedSubtotal += itemTotal;
 
       return {
         "name": e["name"].toString(),
@@ -21,9 +26,20 @@ class ReceiptMapper {
         "size": e["size"]?.toString() ?? "",
         "note": e["note"]?.toString() ?? "",
         "price": price,
-        "total": price * quantity,
+        "total": itemTotal,
       };
     }).toList();
+
+    // ✅ التصحيح هنا بالتعامل الآمن مع الـ null
+    final double subTotal = (order.subtotal != null && order.subtotal! > 0)
+        ? order.subtotal!.toDouble()
+        : calculatedSubtotal;
+
+    final double discount = (order.discount ?? 0).toDouble();
+    final double tax = (order.tax ?? 0).toDouble();
+    final double delivery = (order.deliveryFee ?? 0).toDouble();
+
+    final double grandTotal = (subTotal - discount) + tax + delivery;
 
     return {
       "printerName": printerName,
@@ -62,11 +78,11 @@ class ReceiptMapper {
 
       "products": products,
 
-      "subTotal": (order.subtotal ?? order.totalAmount).toDouble(),
-      "discount": (order.discount ?? 0).toDouble(),
-      "tax": (order.tax ?? 0).toDouble(),
-      "delivery": (order.deliveryFee ?? 0).toDouble(),
-      "grandTotal": order.totalAmount.toDouble(),
+      "subTotal": subTotal,
+      "discount": discount,
+      "tax": tax,
+      "delivery": delivery,
+      "grandTotal": grandTotal,
     };
   }
 
@@ -76,9 +92,14 @@ class ReceiptMapper {
     required SettingsModel? settings,
     required String printerName,
   }) {
+    double calculatedSubtotal = 0.0;
+
     final products = order.items.map((e) {
       final price = double.tryParse(e["price"].toString()) ?? 0.0;
       final quantity = int.tryParse(e["quantity"].toString()) ?? 1;
+      final itemTotal = price * quantity;
+
+      calculatedSubtotal += itemTotal;
 
       return {
         "name": e["name"].toString(),
@@ -86,9 +107,20 @@ class ReceiptMapper {
         "size": e["size"]?.toString() ?? "",
         "note": e["note"]?.toString() ?? "",
         "price": price,
-        "total": price * quantity,
+        "total": itemTotal,
       };
     }).toList();
+
+    // ✅ التصحيح هنا أيضاً للتعامل الآمن مع الـ null
+    final double subTotal = (order.subtotal != null && order.subtotal! > 0)
+        ? order.subtotal!.toDouble()
+        : calculatedSubtotal;
+
+    final double discount = (order.discount ?? 0).toDouble();
+    final double tax = (order.tax ?? 0).toDouble();
+    final double delivery = (order.deliveryFee ?? 0).toDouble();
+
+    final double grandTotal = (subTotal - discount) + tax + delivery;
 
     return {
       "printerName": printerName,
@@ -111,8 +143,6 @@ class ReceiptMapper {
       "customerName": order.customerName ?? "",
       "customerPhone": order.customerPhone ?? "",
       "deliveryAddress": order.customerAddress ?? "",
-
-      // تم الربط هنا بالاسم الصحيح الموجود في الـ OrderModel
       "deliverymanName": order.driverName ?? "",
 
       "orderType": "دليفري",
@@ -120,11 +150,11 @@ class ReceiptMapper {
 
       "products": products,
 
-      "subTotal": (order.subtotal ?? order.totalAmount).toDouble(),
-      "discount": (order.discount ?? 0).toDouble(),
-      "tax": 0.0,
-      "delivery": (order.deliveryFee ?? 0).toDouble(),
-      "grandTotal": order.totalAmount.toDouble(),
+      "subTotal": subTotal,
+      "discount": discount,
+      "tax": tax,
+      "delivery": delivery,
+      "grandTotal": grandTotal,
     };
   }
 

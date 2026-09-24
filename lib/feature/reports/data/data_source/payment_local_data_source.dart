@@ -22,22 +22,14 @@ class PaymentReportLocalDataSourceImpl
     final result = await db.rawQuery(
       '''
       SELECT
-    payment_method AS paymentMethod,
-
-    COUNT(*) AS ordersCount,
-
-    COALESCE(SUM(total),0) AS totalRevenue,
-
-    0 AS percentage
-
-FROM sales
-
-WHERE DATE(created_at)
-BETWEEN DATE(?) AND DATE(?)
-
-GROUP BY payment_method
-
-ORDER BY totalRevenue DESC
+        payment_method AS paymentMethod,
+        COUNT(*) AS ordersCount,
+        COALESCE(SUM(subtotal), 0) AS totalRevenue,
+        0 AS percentage
+      FROM sales
+      WHERE DATE(created_at) BETWEEN DATE(?) AND DATE(?)
+      GROUP BY payment_method
+      ORDER BY totalRevenue DESC
       ''',
       [
         from.toIso8601String(),

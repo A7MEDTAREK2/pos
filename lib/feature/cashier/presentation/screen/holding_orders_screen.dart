@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/icons.dart';
 import '../../../../core/theming/txt_style.dart';
+import '../../../../core/service/audit_log_service.dart';
 
 // ====== Cashier ======
 import '../../data/model/pos_model.dart';
@@ -32,6 +33,16 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
   void initState() {
     super.initState();
 
+    // 📝 تسجيل الدخول لشاشة الأوردرات المحجوزة
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'ENTER',
+      module: 'الأوردرات المحجوزة',
+      entityType: 'Screen',
+      description: 'دخل إلى شاشة الأوردرات المحجوزة',
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<OrderCubit>().fetchHoldingOrders();
     });
@@ -45,6 +56,16 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
 
   @override
   void dispose() {
+    // 📝 تسجيل الخروج من شاشة الأوردرات المحجوزة
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'EXIT',
+      module: 'الأوردرات المحجوزة',
+      entityType: 'Screen',
+      description: 'خرج من شاشة الأوردرات المحجوزة',
+    );
+
     searchController.dispose();
     super.dispose();
   }
@@ -159,9 +180,6 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
   }
 
   Widget _buildFilterBar(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Row(
@@ -414,7 +432,7 @@ class _HoldingOrdersScreenState extends State<HoldingOrdersScreen> {
               Expanded(
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.red),
+                    side: const BorderSide(color: Colors.red),
                   ),
                   onPressed: () {
                     context.read<OrderCubit>().deleteHoldingOrder(order.id!);

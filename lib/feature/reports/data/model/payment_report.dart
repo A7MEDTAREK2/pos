@@ -11,10 +11,6 @@ class PaymentReportModel {
     required this.percentage,
   });
 
-  // ======================
-  // UI Compatibility
-  // ======================
-
   int get transactionCount => ordersCount;
 
   double get averageValue =>

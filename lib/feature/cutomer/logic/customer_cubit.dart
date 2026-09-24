@@ -2,7 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../data/model/customer_model.dart';
 import '../data/repo/address_local_rapo.dart';
-import '../data/repo/local_rapo.dart';
+import '../data/repo/local_rapo.dart' hide CustomerAddressRepository;
 import 'customer_state.dart';
 
 class CustomerCubit extends Cubit<CustomerState> {

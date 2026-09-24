@@ -1,3 +1,4 @@
+import '../../../../core/service/audit_log_service.dart';
 import '../data_source/local_data_source.dart';
 import '../model/product_model.dart';
 
@@ -12,8 +13,22 @@ class ProductRepository {
       product.toMap(),
       sizes: product.sizes,
     );
+    final success = id > 0;
 
-    return id > 0;
+    if (success) {
+      // 📝 تسجيل حركة إضافة منتج جديد
+      await AuditLogService.instance.log(
+        userId: 1,
+        userName: 'مشرف النظام',
+        action: 'CREATE',
+        module: 'المنتجات',
+        entityType: 'Product',
+        entityId: id.toString(),
+        description: 'تم إضافة منتج جديد: ${product.name ?? ""}',
+      );
+    }
+
+    return success;
   }
 
   // جلب كل المنتجات وتحويلها لـ List of Models، مع دمج الأحجام
@@ -44,12 +59,42 @@ class ProductRepository {
       product.toMap(),
       sizes: product.sizes,
     );
-    return rowsAffected > 0;
+    final success = rowsAffected > 0;
+
+    if (success) {
+      // 📝 تسجيل حركة تعديل منتج
+      await AuditLogService.instance.log(
+        userId: 1,
+        userName: 'مشرف النظام',
+        action: 'UPDATE',
+        module: 'المنتجات',
+        entityType: 'Product',
+        entityId: product.id?.toString() ?? '',
+        description: 'تم تحديث بيانات المنتج: ${product.name ?? ""}',
+      );
+    }
+
+    return success;
   }
 
   // حذف منتج
   Future<bool> removeProduct(int id) async {
     final rowsAffected = await _dataSource.deleteProduct(id);
-    return rowsAffected > 0;
+    final success = rowsAffected > 0;
+
+    if (success) {
+      // 📝 تسجيل حركة حذف منتج
+      await AuditLogService.instance.log(
+        userId: 1,
+        userName: 'مشرف النظام',
+        action: 'DELETE',
+        module: 'المنتجات',
+        entityType: 'Product',
+        entityId: id.toString(),
+        description: 'تم حذف المنتج برقم: $id',
+      );
+    }
+
+    return success;
   }
 }

@@ -38,10 +38,16 @@ import '../../../dashbord/logic/dash_cubit.dart';
 import '../../../dashbord/presentation/screen/dashbord_screen.dart';
 
 // ====== Product ======
+import '../../../inventory/data/datasource/inventory_local_data_source.dart';
+import '../../../inventory/data/repo/inventory_repository.dart';
+import '../../../inventory/logic/inventory_cubit.dart';
+import '../../../inventory/pre/screen/inventory_screen.dart';
 import '../../../product/logic/product_cubit.dart';
 import '../../../product/presentation/screen/product_screen.dart';
 
-// ====== Sales ======
+// ====== Sales & Purchases ======
+import '../../../purchase/logic/purchase_cubit.dart';
+import '../../../purchase/pre/screen/purchases_screen.dart';
 import '../../../sale/data/data_source/sales_history_local_data_source_impl.dart';
 import '../../../sale/data/repo/local_rapo.dart';
 import '../../../sale/logic/sale_cubit.dart';
@@ -51,6 +57,10 @@ import '../../../setting/data/model/users_model.dart';
 import '../../../setting/data/repo/repo.dart';
 import '../../../setting/logic/set_cubit.dart';
 import '../../../setting/pre/screen/settings_screen.dart';
+import '../../../supplier/pre/screen/supplier_screen.dart';
+
+// ====== Inventory ======
+
 
 class QuickActionsGrid extends StatelessWidget {
   final UserModel user;
@@ -322,7 +332,6 @@ class QuickActionsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     final List<Map<String, dynamic>> actions = [
       {"title": "الكاشير", "subtitle": "فاتورة جديدة", "icon": Iconss.pos, "isActive": true},
@@ -452,6 +461,20 @@ class QuickActionsGrid extends StatelessWidget {
                         ),
                       ),
                     );
+                  } else if (item["title"] == "المخزن") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider(
+                          create: (_) => InventoryCubit(
+                            inventoryRepository: InventoryRepositoryImpl(
+                              localDataSource: InventoryLocalDataSourceImpl(),
+                            ),
+                          ),
+                          child: const InventoryScreen(),
+                        ),
+                      ),
+                    );
                   } else if (item["title"] == "التقارير") {
                     Navigator.push(
                       context,
@@ -484,6 +507,23 @@ class QuickActionsGrid extends StatelessWidget {
                     await _handleEndShiftWorkflow(context);
                   } else if (item["title"] == "إغلاق Modu") {
                     await _handleExitAppWorkflow(context);
+                  } else if (item["title"] == "الموردين") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const SupplierScreen(),
+                      ),
+                    );
+                  } else if (item["title"] == "المشتريات") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: context.read<PurchaseCubit>(),
+                          child: const PurchasesScreen(),
+                        ),
+                      ),
+                    );
                   }
                 },
               );

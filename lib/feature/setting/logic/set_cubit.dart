@@ -50,7 +50,13 @@ class SettingsCubit extends Cubit<SettingsState> {
     String? logo,
     String? cashierPrinter,
     String? kitchenPrinter,
+    String? barcodePrinter,
+    String? reportsPrinter,
     int? paperWidth,
+    bool? taxEnabled,
+    bool? autoPrintReceipt,
+    bool? autoPrintKitchen,
+    bool? autoOpenDrawer,
   }) async {
     if (settings == null) return;
 
@@ -65,7 +71,13 @@ class SettingsCubit extends Cubit<SettingsState> {
       logo: logo,
       cashierPrinter: cashierPrinter,
       kitchenPrinter: kitchenPrinter,
+      barcodePrinter: barcodePrinter,
+      reportsPrinter: reportsPrinter,
       paperWidth: paperWidth,
+      taxEnabled: taxEnabled,
+      autoPrintReceipt: autoPrintReceipt,
+      autoPrintKitchen: autoPrintKitchen,
+      autoOpenDrawer: autoOpenDrawer,
     );
 
     await saveSettings(updated);

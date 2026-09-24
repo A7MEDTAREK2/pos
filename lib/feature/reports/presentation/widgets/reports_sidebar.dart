@@ -7,7 +7,7 @@ class ReportsSidebar extends StatelessWidget {
   final int selectedIndex;
   final ValueChanged<int> onChanged;
 
-   ReportsSidebar({
+  ReportsSidebar({
     super.key,
     required this.selectedIndex,
     required this.onChanged,
@@ -20,6 +20,7 @@ class ReportsSidebar extends StatelessWidget {
     {'icon': Icons.warehouse_outlined, 'title': 'تقرير المخزون'},
     {'icon': Icons.payment_outlined, 'title': 'تقرير طرق الدفع'},
     {'icon': Icons.shopping_bag_outlined, 'title': 'تقرير أنواع الطلبات'},
+    {'icon': Icons.delivery_dining_outlined, 'title': 'تقرير المناديب'}, // <--- التقرير الجديد هنا
   ];
 
   @override

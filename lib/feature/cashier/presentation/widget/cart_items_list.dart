@@ -1,58 +1,62 @@
+// lib/feature/cashier/presentation/widget/cart_items_list.dart
+
 import 'dart:io';
 import 'package:flutter/material.dart';
-import '../../../../core/theming/colors manegments.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theming/icons.dart';
-import '../../../../core/theming/txt_style.dart';
 import '../../logic/pos_cubit.dart';
+import '../../logic/pos_state.dart';
 
+import 'QuantityDialog.dart';
 import 'delete_item_dialog.dart';
 import 'notes_dialog.dart';
 
 class CartItemsList extends StatelessWidget {
-  final List<Map<String, dynamic>> items;
-  final OrderCubit cubit;
-
-  const CartItemsList({
-    super.key,
-    required this.items,
-    required this.cubit,
-  });
+  const CartItemsList({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    if (items.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Iconss.cartEmpty,
-              size: 30,
-              color: colorScheme.onSurface.withOpacity(0.3),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              "السلة فارغة",
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: colorScheme.onSurface.withOpacity(0.6),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    // 🔄 استخدام BlocBuilder صريح مع الاستماع لحالات الكيوبت الخاصة بالسلة
+    return BlocBuilder<OrderCubit, OrderState>(
+      builder: (context, state) {
+        final cubit = context.read<OrderCubit>();
+        final items = cubit.cartItems; // جلب الأصناف المحدثة مباشرة من الكيوبت
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(12),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        final total = (item['price'] as num).toDouble() * (item['quantity'] as int);
+        if (items.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Iconss.cartEmpty,
+                  size: 30,
+                  color: colorScheme.onSurface.withOpacity(0.3),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  "السلة فارغة",
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.6),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
 
-        return _buildCartItem(context, item, total);
+        return ListView.builder(
+          padding: const EdgeInsets.all(12),
+          itemCount: items.length,
+          itemBuilder: (context, index) {
+            final item = items[index];
+            final total = (item['price'] as num).toDouble() * (item['quantity'] as int);
+
+            return _buildCartItem(context, item, total, cubit);
+          },
+        );
       },
     );
   }
@@ -61,49 +65,54 @@ class CartItemsList extends StatelessWidget {
       BuildContext context,
       Map<String, dynamic> item,
       double total,
+      OrderCubit cubit,
       ) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: colorScheme.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: colorScheme.outlineVariant),
-        boxShadow: [
-          BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.05),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _buildProductImage(context, item),
-          const SizedBox(width: 10),
-          Expanded(
-            child: _buildProductDetails(context, item),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                "${total.toStringAsFixed(2)} ج.م",
-                style: theme.textTheme.titleSmall?.copyWith(
-                  color: colorScheme.primary,
-                  fontWeight: FontWeight.bold,
+    // 🎯 استخدام GestureDetector لدعم الضغط المزدوج (Double Tap) لتعديل الكمية بلوحة الأرقام
+    return GestureDetector(
+      onDoubleTap: () => _showQuantityDialog(context, item, cubit),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: colorScheme.surface,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: colorScheme.outlineVariant),
+          boxShadow: [
+            BoxShadow(
+              color: colorScheme.shadow.withOpacity(0.05),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            _buildProductImage(context, item),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _buildProductDetails(context, item),
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  "${total.toStringAsFixed(2)} ج.م",
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 4),
-              _buildQuantityControls(context, item),
-              const SizedBox(height: 4),
-              _buildActionButtons(context, item),
-            ],
-          ),
-        ],
+                const SizedBox(height: 4),
+                _buildQuantityControls(context, item, cubit),
+                const SizedBox(height: 4),
+                _buildActionButtons(context, item, cubit),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -136,7 +145,6 @@ class CartItemsList extends StatelessWidget {
 
   Widget _buildProductDetails(BuildContext context, Map<String, dynamic> item) {
     final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -185,31 +193,28 @@ class CartItemsList extends StatelessWidget {
     );
   }
 
-  Widget _buildQuantityControls(BuildContext context, Map<String, dynamic> item) {
+  Widget _buildQuantityControls(
+      BuildContext context, Map<String, dynamic> item, OrderCubit cubit) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Tooltip(
-          message: "Ctrl + - - تقليل الكمية",
-          waitDuration: const Duration(milliseconds: 300),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            icon: Icon(
-              Iconss.removeCircle,
-              size: 18,
-              color: colorScheme.onSurface.withOpacity(0.4),
-            ),
-            onPressed: () {
-              cubit.decrementItem(
-                item['productId'],
-                size: item['size'],
-              );
-            },
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          icon: Icon(
+            Iconss.removeCircle,
+            size: 18,
+            color: colorScheme.onSurface.withOpacity(0.4),
           ),
+          onPressed: () {
+            cubit.decrementItem(
+              item['productId'].toString(),
+              size: item['size'],
+            );
+          },
         ),
         const SizedBox(width: 4),
         Text(
@@ -219,75 +224,61 @@ class CartItemsList extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 4),
-        Tooltip(
-          message: "Ctrl + + - زيادة الكمية",
-          waitDuration: const Duration(milliseconds: 300),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            icon: Icon(
-              Iconss.addCircle,
-              color: colorScheme.primary,
-              size: 18,
-            ),
-            onPressed: () {
-              cubit.incrementItem(
-                item['productId'],
-                size: item['size'],
-              );
-            },
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          icon: Icon(
+            Iconss.addCircle,
+            color: colorScheme.primary,
+            size: 18,
           ),
+          onPressed: () {
+            cubit.incrementItem(
+              item['productId'].toString(),
+              size: item['size'],
+            );
+          },
         ),
       ],
     );
   }
 
-  Widget _buildActionButtons(BuildContext context, Map<String, dynamic> item) {
-    final theme = Theme.of(context);
-
+  Widget _buildActionButtons(
+      BuildContext context, Map<String, dynamic> item, OrderCubit cubit) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Tooltip(
-          message: "Ctrl + N - إضافة ملاحظة",
-          waitDuration: const Duration(milliseconds: 300),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            tooltip: "ملاحظة",
-            onPressed: () {
-              _showNotesDialog(context, item);
-            },
-            icon: Icon(
-              Iconss.noteOutline,
-              color: Colors.amber,
-              size: 16,
-            ),
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {
+            _showNotesDialog(context, item, cubit);
+          },
+          icon: Icon(
+            Iconss.noteOutline,
+            color: Colors.amber,
+            size: 16,
           ),
         ),
         const SizedBox(width: 8),
-        Tooltip(
-          message: "Delete - حذف العنصر",
-          waitDuration: const Duration(milliseconds: 300),
-          child: IconButton(
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            tooltip: "حذف",
-            onPressed: () {
-              _showDeleteDialog(context, item);
-            },
-            icon: Icon(
-              Iconss.delete,
-              color: Colors.red,
-              size: 16,
-            ),
+        IconButton(
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(),
+          onPressed: () {
+            _showDeleteDialog(context, item, cubit);
+          },
+          icon: Icon(
+            Iconss.delete,
+            color: Colors.red,
+            size: 16,
           ),
         ),
       ],
     );
   }
 
-  void _showNotesDialog(BuildContext context, Map<String, dynamic> item) async {
+  void _showNotesDialog(
+      BuildContext context, Map<String, dynamic> item, OrderCubit cubit) async {
     final controller = TextEditingController(text: item['note'] ?? "");
     final result = await showDialog<String>(
       context: context,
@@ -295,19 +286,40 @@ class CartItemsList extends StatelessWidget {
     );
 
     if (result != null) {
-      cubit.updateItemNote(item['productId'], result, size: item['size']);
+      cubit.updateItemNote(item['productId'].toString(), result, size: item['size']);
     }
   }
 
-  void _showDeleteDialog(BuildContext context, Map<String, dynamic> item) {
+  void _showDeleteDialog(
+      BuildContext context, Map<String, dynamic> item, OrderCubit cubit) {
     showDialog(
       context: context,
       builder: (_) => DeleteItemDialog(
         itemName: item['name'],
         onDelete: () {
-          cubit.removeItem(item['productId'], size: item['size']);
+          cubit.removeItem(item['productId'].toString(), size: item['size']);
         },
       ),
     );
+  }
+
+  // 🎯 دالة إظهار لوحة الأرقام عند الضغط المزدوج على كارت المنتج
+  void _showQuantityDialog(
+      BuildContext context, Map<String, dynamic> item, OrderCubit cubit) async {
+    final newQty = await showDialog<int>(
+      context: context,
+      builder: (_) => QuantityDialog(
+        itemName: item['name'],
+        currentQuantity: item['quantity'],
+      ),
+    );
+
+    if (newQty != null) {
+      cubit.updateItemQuantity(
+        item['productId'].toString(),
+        newQty,
+        size: item['size'],
+      );
+    }
   }
 }

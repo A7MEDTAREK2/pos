@@ -91,31 +91,57 @@ class OrderCubit extends Cubit<OrderState> {
     }
   }
 
+  // ================= Delivery Validation =================
+  String? validateDeliveryOrder() {
+    if (selectedOrderType == OrderType.delivery) {
+      if (customerPhone == null || customerPhone!.trim().isEmpty) {
+        return "يجب إدخال رقم هاتف العميل لأوردر الدليفري!";
+      }
+      if (customerAddress == null || customerAddress!.trim().isEmpty) {
+        return "يجب إدخال عنوان التوصيل بالتفصيل!";
+      }
+      if (_driverName == null || _driverName!.trim().isEmpty) {
+        return "يجب اختيار مندوب التوصيل!";
+      }
+      if (deliveryFee <= 0) {
+        return "يجب إدخال تكلفة التوصيل بشكل صحيح أكبر من الصفر!";
+      }
+    }
+    return null; // كل البيانات سليمة
+  }
+
   // ================= Cart Actions =================
 
   void addToCart(Map<String, dynamic> product) {
+    // 🔍 دمج دقيق بالـ productId والـ size والـ note لمنع تكرار الكروت وتجميعها فوراً
     final index = _cartItems.indexWhere(
           (e) =>
-      e['productId'] == product['productId'] &&
-          e['size'] == product['size'],
+      e['productId'].toString() == product['productId'].toString() &&
+          (e['size']?.toString() ?? '') == (product['size']?.toString() ?? '') &&
+          (e['note']?.toString() ?? '') == (product['note']?.toString() ?? ''),
     );
+
     final updatedItems = List<Map<String, dynamic>>.from(_cartItems);
     if (index != -1) {
       updatedItems[index] = Map<String, dynamic>.from(updatedItems[index]);
-      updatedItems[index]['quantity'] =
-          (updatedItems[index]['quantity'] as int) + 1;
+      final currentQty = (updatedItems[index]['quantity'] as num).toInt();
+      final addQty = (product['quantity'] as num?)?.toInt() ?? 1;
+      updatedItems[index]['quantity'] = currentQty + addQty;
     } else {
-      updatedItems.add({...product, 'quantity': 1});
+      updatedItems.add({...product, 'quantity': (product['quantity'] as num?)?.toInt() ?? 1});
     }
     _cartItems = updatedItems;
     emit(CartUpdatedState(List.from(_cartItems)));
   }
 
   void incrementItem(String productId, {String? size}) {
+    // 🔍 البحث المطابق باستخدام .toString() لتجنب اختلاف أنواع البيانات في الأوردرات القديمة
     final index = _cartItems.indexWhere(
-          (e) => e['productId'] == productId && e['size'] == size,
+          (e) => e['productId'].toString() == productId.toString() &&
+          (e['size']?.toString() ?? '') == (size?.toString() ?? ''),
     );
     if (index == -1) return;
+
     final updatedItems = List<Map<String, dynamic>>.from(_cartItems);
     updatedItems[index] = Map<String, dynamic>.from(updatedItems[index]);
     updatedItems[index]['quantity'] =
@@ -125,10 +151,13 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   void decrementItem(String productId, {String? size}) {
+    // 🔍 البحث المطابق باستخدام .toString() لتجنب اختلاف أنواع البيانات في الأوردرات القديمة
     final index = _cartItems.indexWhere(
-          (e) => e['productId'] == productId && e['size'] == size,
+          (e) => e['productId'].toString() == productId.toString() &&
+          (e['size']?.toString() ?? '') == (size?.toString() ?? ''),
     );
     if (index == -1) return;
+
     final updatedItems = List<Map<String, dynamic>>.from(_cartItems);
     if ((updatedItems[index]['quantity'] as int) > 1) {
       updatedItems[index] = Map<String, dynamic>.from(updatedItems[index]);
@@ -142,8 +171,12 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   void removeItem(String productId, {String? size}) {
+    // 🔍 الحذف الدقيق للمنتج بالحجم المحدد
     final updatedItems = List<Map<String, dynamic>>.from(_cartItems)
-      ..removeWhere((e) => e['productId'] == productId && e['size'] == size);
+      ..removeWhere((e) =>
+      e['productId'].toString() == productId.toString() &&
+          (e['size']?.toString() ?? '') == (size?.toString() ?? '')
+      );
     _cartItems = updatedItems;
 
     emit(
@@ -181,7 +214,9 @@ class OrderCubit extends Cubit<OrderState> {
     customerId = null;
     customerAddressId = null;
 
-    deliveryFee = 0;
+    discount = 0.0;
+    deliveryFee = 0.0;
+    taxPercent = 0.0;
     paymentMethod = "Cash";
     selectedOrderType = OrderType.takeAway;
 
@@ -248,6 +283,14 @@ class OrderCubit extends Cubit<OrderState> {
       final bool isUpdate = _currentOrder != null;
       final orderType = selectedOrderType;
 
+      final subtotal = totalAmount;
+      final currentDiscount = discount;
+      final currentTax = taxEnabled ? (subtotal * taxPercent / 100) : 0.0;
+      final currentDelivery = deliveryFee;
+
+      final calculatedTotal =
+          (subtotal - currentDiscount) + currentTax + currentDelivery;
+
       OrderModel order;
 
       if (isUpdate) {
@@ -255,10 +298,9 @@ class OrderCubit extends Cubit<OrderState> {
           id: _currentOrder!.id,
           orderNumber: _currentOrder!.orderNumber,
           items: List.from(_cartItems),
-          totalAmount: totalAmount,
+          totalAmount: calculatedTotal,
           orderType: orderType,
           orderStatus: OrderStatus.holding,
-
           customerId: selectedCustomer?.id,
           customerAddressId: selectedAddress?.id,
           tableNumber: tableNumber,
@@ -266,16 +308,18 @@ class OrderCubit extends Cubit<OrderState> {
           customerPhone: customerPhone,
           customerAddress: customerAddress,
           createdAt: _currentOrder!.createdAt,
-          subtotal: totalAmount,
-          discount: discount,
-          tax: taxEnabled ? (totalAmount * taxPercent / 100) : 0,
-          deliveryFee: deliveryFee,
+          subtotal: subtotal,
+          discount: currentDiscount,
+          tax: currentTax,
+          deliveryFee: currentDelivery,
           paymentMethod: paymentMethod,
           customerArea: customerArea,
-          driverName: _driverName, // ====== إضافة اسم المندوب ======
+          driverName: _driverName,
         );
 
         await _repository.updateHoldingOrder(order);
+        // ✅ الحفاظ على مرجعية الأوردر الحالي لتحديثه مجدداً دون الحاجة لإعادة فتح الشاشة
+        _currentOrder = order;
       } else {
         final orderNumber = await _repository.getNextOrderNumber();
 
@@ -283,7 +327,7 @@ class OrderCubit extends Cubit<OrderState> {
           id: const Uuid().v4(),
           orderNumber: orderNumber,
           items: List.from(_cartItems),
-          totalAmount: totalAmount,
+          totalAmount: calculatedTotal,
           orderType: orderType,
           orderStatus: OrderStatus.holding,
           tableNumber: tableNumber,
@@ -291,24 +335,24 @@ class OrderCubit extends Cubit<OrderState> {
           customerPhone: customerPhone,
           customerAddress: customerAddress,
           createdAt: DateTime.now(),
-          subtotal: totalAmount,
-          discount: discount,
-          tax: taxEnabled ? (totalAmount * taxPercent / 100) : 0,
-          deliveryFee: deliveryFee,
+          subtotal: subtotal,
+          discount: currentDiscount,
+          tax: currentTax,
+          deliveryFee: currentDelivery,
           paymentMethod: paymentMethod,
           customerArea: customerArea,
-          driverName: _driverName, // ====== إضافة اسم المندوب ======
+          driverName: _driverName,
         );
 
         await _repository.holdOrderAndPrintKitchen(order);
         await _repository.increaseOrderCounter();
         await refreshNextOrderNumber();
+        // ✅ ربط الأوردر الجديد بمتغير التعديل المباشر
+        _currentOrder = order;
       }
 
       if (clearAfterSave) {
         clearCart();
-      } else {
-        _currentOrder = order;
       }
 
       emit(OrderHeldSuccess(order));
@@ -325,6 +369,14 @@ class OrderCubit extends Cubit<OrderState> {
     emit(OrderLoading());
 
     try {
+      final subtotal = totalAmount;
+      final currentDiscount = discount;
+      final currentTax = taxEnabled ? (subtotal * taxPercent / 100) : 0.0;
+      final currentDelivery = deliveryFee;
+
+      final calculatedTotal =
+          (subtotal - currentDiscount) + currentTax + currentDelivery;
+
       if (_currentOrder != null) {
         final updatedOrder = _currentOrder!.copyWith(
           customerId: customerId,
@@ -332,14 +384,14 @@ class OrderCubit extends Cubit<OrderState> {
           customerName: customerName,
           customerPhone: customerPhone,
           customerAddress: customerAddress,
-          subtotal: totalAmount,
-          discount: discount,
-          tax: taxEnabled ? (totalAmount * taxPercent / 100) : 0,
-          deliveryFee: deliveryFee,
+          subtotal: subtotal,
+          discount: currentDiscount,
+          tax: currentTax,
+          deliveryFee: currentDelivery,
           paymentMethod: paymentMethod,
-          totalAmount: totalAmount,
+          totalAmount: calculatedTotal,
           customerArea: customerArea,
-          driverName: _driverName, // ====== إضافة اسم المندوب ======
+          driverName: _driverName,
         );
 
         await _repository.updateHoldingOrder(
@@ -385,10 +437,31 @@ class OrderCubit extends Cubit<OrderState> {
     customerAddressId = order.customerAddressId;
     customerArea = order.customerArea;
 
-    // ====== تحميل اسم المندوب ======
     _driverName = order.driverName;
 
-    _cartItems = List<Map<String, dynamic>>.from(order.items);
+    // ====== دمج الأصناف المتشابهة لمنع ظهور كروت منفصلة عند فتح الأوردر للتعديل ======
+    final Map<String, Map<String, dynamic>> mergedItems = {};
+    for (final item in order.items) {
+      final String productId = item['productId'].toString();
+      final String size = item['size']?.toString() ?? '';
+      final String note = item['note']?.toString() ?? '';
+      final String key = '${productId}_${size}_$note';
+
+      if (mergedItems.containsKey(key)) {
+        final currentQty = (mergedItems[key]!['quantity'] as num).toInt();
+        final addQty = (item['quantity'] as num).toInt();
+        mergedItems[key]!['quantity'] = currentQty + addQty;
+      } else {
+        mergedItems[key] = Map<String, dynamic>.from(item);
+      }
+    }
+
+    _cartItems = mergedItems.values.toList();
+    // ===========================================================================
+
+    discount = order.discount ?? 0.0;
+    deliveryFee = order.deliveryFee ?? 0.0;
+    paymentMethod = order.paymentMethod ?? "Cash";
 
     emit(
       CartUpdatedState(
@@ -411,8 +484,10 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   void updateItemNote(String productId, String note, {String? size}) {
+    // 🔍 البحث المطابق باستخدام .toString() لتجنب اختلاف أنواع البيانات في الأوردرات القديمة
     final index = _cartItems.indexWhere(
-          (e) => e['productId'] == productId && e['size'] == size,
+          (e) => e['productId'].toString() == productId.toString() &&
+          (e['size']?.toString() ?? '') == (size?.toString() ?? ''),
     );
     if (index == -1) return;
 
@@ -487,6 +562,36 @@ class OrderCubit extends Cubit<OrderState> {
         customerName: customerName,
         customerPhone: customerPhone,
         customerAddress: customerAddress,
+      ),
+    );
+  }
+  // ================= Update Item Quantity Directly =================
+  void updateItemQuantity(String productId, int quantity, {String? size}) {
+    // 🔍 البحث المطابق باستخدام معرف المنتج والحجم
+    final index = _cartItems.indexWhere(
+          (e) => e['productId'].toString() == productId.toString() &&
+          (e['size']?.toString() ?? '') == (size?.toString() ?? ''),
+    );
+    if (index == -1) return;
+
+    final updatedItems = List<Map<String, dynamic>>.from(_cartItems);
+
+    if (quantity > 0) {
+      updatedItems[index] = Map<String, dynamic>.from(updatedItems[index]);
+      updatedItems[index]['quantity'] = quantity;
+    } else {
+      // لو الكمية صفر أو أقل، يتم حذف المنتج من السلة
+      updatedItems.removeAt(index);
+    }
+
+    _cartItems = updatedItems;
+    emit(
+      CartUpdatedState(
+        List.from(_cartItems),
+        selectedTable: tableNumber,
+        customerPhone: customerPhone,
+        customerAddress: customerAddress,
+        customerName: customerName,
       ),
     );
   }

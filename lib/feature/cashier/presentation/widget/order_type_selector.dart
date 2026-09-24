@@ -25,12 +25,15 @@ class OrderTypeSelector extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
+        // الحاوية الخارجية لخيارات نوع الطلب بتصميم مدمج
         Container(
-          padding: const EdgeInsets.all(1),
+          padding: const EdgeInsets.all(3),
           decoration: BoxDecoration(
             color: colorScheme.background,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: colorScheme.outlineVariant.withOpacity(0.5)),
           ),
           child: Row(
             children: [
@@ -44,6 +47,7 @@ class OrderTypeSelector extends StatelessWidget {
     );
   }
 
+  // بناء زر تبديل نوع الطلب (تيك أواي / صالة / دليفري) بحجم مدمج
   Widget _buildButton(BuildContext context, int index, String label, IconData icon) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -54,20 +58,20 @@ class OrderTypeSelector extends StatelessWidget {
       waitDuration: const Duration(milliseconds: 300),
       child: InkWell(
         onTap: () => onTypeChanged(index),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
           curve: Curves.easeInOut,
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(vertical: 8), // تقليل الـ Padding الرأسي لتوفير المساحة
           decoration: BoxDecoration(
             color: isSelected ? colorScheme.surface : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(8),
             boxShadow: isSelected
                 ? [
               BoxShadow(
-                color: colorScheme.shadow.withOpacity(0.08),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
+                color: colorScheme.shadow.withOpacity(0.06),
+                blurRadius: 3,
+                offset: const Offset(0, 1),
               )
             ]
                 : [],
@@ -75,24 +79,26 @@ class OrderTypeSelector extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // الأيقونة بحجم مصغر
               Icon(
                 icon,
                 color: isSelected
                     ? colorScheme.primary
                     : theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
-                size: 20,
+                size: 18, // تصغير الأيقونة لتبدو أنحف وأرتب
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2), // تقليل المسافة بين الأيقونة والنص
+              // نص التسمية بحجم مدمج
               Text(
                 label,
                 style: isSelected
                     ? theme.textTheme.labelLarge?.copyWith(
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: FontWeight.bold,
                   color: colorScheme.primary,
                 )
                     : theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 11,
+                  fontSize: 10,
                   color: theme.textTheme.bodyMedium?.color?.withOpacity(0.6),
                 ),
               ),
@@ -103,6 +109,7 @@ class OrderTypeSelector extends StatelessWidget {
     );
   }
 
+  // تحديد رسالة الـ Tooltip واختصارات لوحة المفاتيح لأنواع الطلبات
   String _getTooltipMessage(int index, String label) {
     switch (index) {
       case 0:

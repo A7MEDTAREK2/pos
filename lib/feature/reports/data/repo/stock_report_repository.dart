@@ -1,21 +1,20 @@
+import '../../../../core/service/audit_log_service.dart';
 import '../data_source/stock_local_data_source.dart';
 import '../model/stock.dart';
 
 abstract class StockReportRepository {
   Future<List<StockReportModel>> getStockReport({
-    required String search,
-    required int limit,
-    required int offset,
+    String search = '',
+    int limit = 20,
+    int offset = 0,
   });
 
   Future<int> getStockReportCount({
-    required String search,
+    String search = '',
   });
 }
 
-class StockReportRepositoryImpl
-    implements StockReportRepository {
-
+class StockReportRepositoryImpl implements StockReportRepository {
   final StockReportLocalDataSource localDataSource;
 
   StockReportRepositoryImpl({
@@ -24,20 +23,31 @@ class StockReportRepositoryImpl
 
   @override
   Future<List<StockReportModel>> getStockReport({
-    required String search,
-    required int limit,
-    required int offset,
-  }) {
-    return localDataSource.getStockReport(
+    String search = '',
+    int limit = 20,
+    int offset = 0,
+  }) async {
+    final result = await localDataSource.getStockReport(
       search: search,
       limit: limit,
       offset: offset,
     );
+
+    await AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'VIEW',
+      module: 'التقارير',
+      entityType: 'StockReport',
+      description: 'تم فتح تقرير جرد المخزن',
+    );
+
+    return result;
   }
 
   @override
   Future<int> getStockReportCount({
-    required String search,
+    String search = '',
   }) {
     return localDataSource.getStockReportCount(
       search: search,

@@ -4,24 +4,13 @@ import '../model/pos_model.dart';
 
 abstract class OrderLocalDataSource {
   Future<void> increaseOrderCounter();
-  // حفظ الأوردر كمعلق
   Future<void> cacheOrder(OrderModel order);
-
   Future<void> deleteHoldingOrder(String orderId);
-
   Future<void> updateHoldingOrder(OrderModel order);
-
-  // جلب الأوردرات المعلقة
   Future<List<OrderModel>> getHoldingOrders();
-
   Future<OrderModel?> getOrderById(String orderId);
-
-  // تحديث حالة الأوردر
   Future<void> updateOrderStatus(String orderId, OrderStatus status);
-
   Future<int> getNextOrderNumber();
-
-  // إتمام البيع (هنكتبها بعدين)
   Future<void> completeOrder(OrderModel order);
 }
 
@@ -32,59 +21,70 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
   Future<void> cacheOrder(OrderModel order) async {
     final db = await _database;
 
-
     await db.transaction((txn) async {
-      // حفظ الأوردر الرئيسي
+      // 1. حفظ الأوردر الرئيسي في جدول الأوردرات المعلقة مع ربط سعر الدليفري والـ driver_name
       await txn.insert('holding_orders', {
         'id': order.id,
         'order_number': order.orderNumber,
         'customer_id': order.customerId,
         'customer_address_id': order.customerAddressId,
         'user_id': null,
-
         'subtotal': order.subtotal,
         'discount': order.discount,
         'tax': order.tax,
-        'delivery_fee': order.deliveryFee,
-
+        'delivery_fee': order.deliveryFee, // حفظ قيمة الدليفري سليمة
         'total': order.totalAmount,
         'payment_method': order.paymentMethod,
-
         'order_type': order.orderType.index,
         'order_status': order.orderStatus.index,
-
         'table_number': order.tableNumber,
         'customer_name': order.customerName,
         'customer_phone': order.customerPhone,
         'customer_address': order.customerAddress,
+        'driver_name': order.driverName,
         'created_at': order.createdAt.toIso8601String(),
-      });
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-
-      // حفظ الأصناف
+      // 2. دمج الأصناف المتشابهة لمنع تكرارها في كروت منفصلة
+      final Map<String, Map<String, dynamic>> mergedItems = {};
       for (final item in order.items) {
-        await txn.insert('holding_order_items', {
-          'holding_order_id': order.id,
-          'product_id': item['productId'],
-          'product_name': item['name'],
-          'quantity': item['quantity'],
-          'price': item['price'],
-          'image': item['image'],
-          'note': item['note'],
-          'size_name': item['size'],
+        final String productId = item['productId'].toString();
+        final String size = item['size']?.toString() ?? '';
+        final String note = item['note']?.toString() ?? '';
+        final String key = '${productId}_${size}_$note';
 
-        }, conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-
+        if (mergedItems.containsKey(key)) {
+          final currentQty = (mergedItems[key]!['quantity'] as num).toDouble();
+          final addQty = (item['quantity'] as num).toDouble();
+          mergedItems[key]!['quantity'] = currentQty + addQty;
+        } else {
+          mergedItems[key] = Map<String, dynamic>.from(item);
+        }
       }
 
+      // 3. حفظ الأصناف بعد دمجها
+      for (final item in mergedItems.values) {
+        await txn.insert(
+          'holding_order_items',
+          {
+            'holding_order_id': order.id,
+            'product_id': item['productId'],
+            'product_name': item['name'],
+            'quantity': item['quantity'],
+            'price': item['price'],
+            'image': item['image'],
+            'note': item['note'],
+            'size_name': item['size'],
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
     });
   }
 
   @override
   Future<List<OrderModel>> getHoldingOrders() async {
     final db = await _database;
-
     final orders = await db.query('holding_orders', orderBy: 'created_at DESC');
 
     List<OrderModel> result = [];
@@ -124,8 +124,9 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
           subtotal: (order['subtotal'] as num?)?.toDouble() ?? 0,
           discount: (order['discount'] as num?)?.toDouble() ?? 0,
           tax: (order['tax'] as num?)?.toDouble() ?? 0,
-          deliveryFee: (order['delivery_fee'] as num?)?.toDouble() ?? 0,
+          deliveryFee: (order['delivery_fee'] as num?)?.toDouble() ?? 0.0, // قراءة سعر الدليفري بضمان تام
           paymentMethod: order['payment_method']?.toString() ?? 'Cash',
+          driverName: order['driver_name']?.toString(),
         ),
       );
     }
@@ -136,7 +137,6 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
   @override
   Future<void> updateOrderStatus(String orderId, OrderStatus status) async {
     final db = await _database;
-
     await db.update(
       'holding_orders',
       {'order_status': status.index},
@@ -148,7 +148,6 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
   @override
   Future<OrderModel?> getOrderById(String orderId) async {
     final db = await _database;
-
     final orders = await db.query(
       'holding_orders',
       where: 'id = ?',
@@ -160,7 +159,6 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
     }
 
     final order = orders.first;
-
     final items = await db.query(
       'holding_order_items',
       where: 'holding_order_id = ?',
@@ -179,7 +177,6 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
           'image': e['image'],
           'note': e['note'] ?? "",
           'size': e['size_name'],
-
         };
       }).toList(),
       totalAmount: (order['total'] as num).toDouble(),
@@ -195,73 +192,46 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
       subtotal: (order['subtotal'] as num?)?.toDouble() ?? 0,
       discount: (order['discount'] as num?)?.toDouble() ?? 0,
       tax: (order['tax'] as num?)?.toDouble() ?? 0,
-      deliveryFee: (order['delivery_fee'] as num?)?.toDouble() ?? 0,
+      deliveryFee: (order['delivery_fee'] as num?)?.toDouble() ?? 0.0, // قراءة دقيقة لحقل الدليفري
       paymentMethod: order['payment_method']?.toString() ?? 'Cash',
+      driverName: order['driver_name']?.toString(),
     );
   }
 
   @override
   Future<void> completeOrder(OrderModel order) async {
-    print('📊 Order Items: ${order.items}');
-    print('📊 Order Discount: ${order.discount}');
-    print('📊 Order Tax: ${order.tax}');
-    print('📊 Order DeliveryFee: ${order.deliveryFee}');
-    print('📊 Payment Method: ${order.paymentMethod}');
     final db = await _database;
 
     await db.transaction((txn) async {
-      // ====== حساب الإجمالي الفرعي ======
       final subtotal = order.items.fold<double>(
         0,
             (sum, item) => sum + ((item['price'] as num).toDouble() * (item['quantity'] as num).toDouble()),
       );
 
-      // ====== حساب الخصم (إذا موجود) ======
       final discount = order.discount ?? 0.0;
-
-      // ====== حساب الضريبة (إذا موجودة) ======
       final tax = order.tax ?? 0.0;
-
-      // ====== رسوم التوصيل (إذا موجودة) ======
       final deliveryFee = order.deliveryFee ?? 0.0;
-
-      // ====== حساب الإجمالي النهائي ======
       final total = subtotal - discount + tax + deliveryFee;
-      print("Customer Name: ${order.customerName}");
-      print("Customer Phone: ${order.customerPhone}");
-      print("Customer Address: ${order.customerAddress}");
-      // ====== إنشاء فاتورة بيع ======
+
       final saleId = await txn.insert('sales', {
         'order_number': order.orderNumber,
-
-        // بيانات العميل
         'customer_id': order.customerId,
         'customer_address_id': order.customerAddressId,
         'customer_name': order.customerName ?? '',
         'customer_phone': order.customerPhone ?? '',
         'customer_address': order.customerAddress ?? '',
-
-        // المستخدم
+        'driver_name': order.driverName ?? '',
         'user_id': null,
-
-        // نوع الأوردر
         'order_type': order.orderType.index,
-
-        // الحسابات
         'subtotal': subtotal,
         'discount': discount,
         'tax': tax,
         'delivery_fee': deliveryFee,
         'total': total,
-
-        // طريقة الدفع
         'payment_method': order.paymentMethod ?? 'Cash',
-
-        // التاريخ
         'created_at': order.createdAt.toIso8601String(),
       });
 
-      // ====== حفظ الأصناف ======
       for (final item in order.items) {
         await txn.insert('sale_items', {
           'sale_id': saleId,
@@ -274,71 +244,89 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
         });
       }
 
-      // ====== خصم الكمية من المخزون ======
       for (final item in order.items) {
         await txn.rawUpdate(
           '''
-        UPDATE products
-        SET quantity = quantity - ?
-        WHERE id = ?
-        ''',
+          UPDATE products
+          SET quantity = quantity - ?
+          WHERE id = ?
+          ''',
           [item['quantity'], item['productId']],
         );
       }
 
-      // ====== حذف أصناف الأوردر المعلق ======
-      await txn.delete(
-        'holding_order_items',
-        where: 'holding_order_id = ?',
-        whereArgs: [order.id],
+      final activeShiftResult = await txn.query(
+        'shifts',
+        where: 'status = ?',
+        whereArgs: ['open'],
+        orderBy: 'id DESC',
+        limit: 1,
       );
 
-      // ====== حذف الأوردر المعلق ======
-      await txn.delete(
-        'holding_orders',
-        where: 'id = ?',
-        whereArgs: [order.id],
-      );
+      if (activeShiftResult.isNotEmpty) {
+        final shiftId = activeShiftResult.first['id'] as int;
+
+        if (order.paymentMethod == 'Cash' || order.paymentMethod == 'كاش') {
+          final cashForDrawer = total - deliveryFee;
+
+          if (cashForDrawer > 0) {
+            await txn.insert('cash_transactions', {
+              'shift_id': shiftId,
+              'user_id': activeShiftResult.first['user_id'],
+              'type': 'cash_in',
+              'amount': cashForDrawer,
+              'reason': 'مبيعات أوردر رقم #${order.orderNumber}',
+              'created_at': order.createdAt.toIso8601String(),
+            });
+
+            final currentExpected = (activeShiftResult.first['expected_cash'] as num).toDouble();
+            await txn.update(
+              'shifts',
+              {'expected_cash': currentExpected + cashForDrawer},
+              where: 'id = ?',
+              whereArgs: [shiftId],
+            );
+          }
+        }
+      }
+
+      await txn.delete('holding_order_items', where: 'holding_order_id = ?', whereArgs: [order.id]);
+      await txn.delete('holding_orders', where: 'id = ?', whereArgs: [order.id]);
     });
   }
-
 
   @override
   Future<int> getNextOrderNumber() async {
     final db = await _database;
 
-    final result = await db.query(
-      'shift_session',
-      where: 'id = ?',
-      whereArgs: [1],
+    // 1. جلب أكبر رقم أوردر من جدول المبيعات (sales)
+    final salesResult = await db.rawQuery(
+      'SELECT MAX(order_number) as max_order FROM sales',
     );
-
-    if (result.isEmpty) {
-      await db.insert(
-        'shift_session',
-        {
-          'id': 1,
-          'shift_start': DateTime.now().toIso8601String(),
-          'order_counter': 1,
-        },
-      );
-
-      return 1;
+    int maxSalesOrder = 0;
+    if (salesResult.isNotEmpty && salesResult.first['max_order'] != null) {
+      maxSalesOrder = salesResult.first['max_order'] as int;
     }
 
-    return (result.first['order_counter'] as int?) ?? 1;
+    // 2. جلب أكبر رقم أوردر من جدول الأوردرات المعلقة (holding_orders)
+    final holdingResult = await db.rawQuery(
+      'SELECT MAX(order_number) as max_order FROM holding_orders',
+    );
+    int maxHoldingOrder = 0;
+    if (holdingResult.isNotEmpty && holdingResult.first['max_order'] != null) {
+      maxHoldingOrder = holdingResult.first['max_order'] as int;
+    }
+
+    // 3. مقارنة الرقمين واختيار الأعلى ثم إضافة 1
+    int currentHighest = maxSalesOrder > maxHoldingOrder ? maxSalesOrder : maxHoldingOrder;
+
+    return currentHighest + 1;
   }
 
   @override
   Future<void> deleteHoldingOrder(String orderId) async {
     final db = await _database;
-
-    await db.delete(
-      'holding_order_items',
-      where: 'holding_order_id = ?',
-      whereArgs: [orderId],
-    );
-
+    await db.delete('holding_order_items', where: 'holding_order_id = ?', whereArgs: [orderId]);
     await db.delete('holding_orders', where: 'id = ?', whereArgs: [orderId]);
   }
 
@@ -347,7 +335,6 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
     final db = await _database;
 
     await db.transaction((txn) async {
-      // تحديث بيانات الأوردر
       await txn.update(
         'holding_orders',
         {
@@ -359,26 +346,37 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
           'customer_name': order.customerName,
           'customer_phone': order.customerPhone,
           'customer_address': order.customerAddress,
+          'driver_name': order.driverName,
           'subtotal': order.subtotal,
           'discount': order.discount,
           'tax': order.tax,
-          'delivery_fee': order.deliveryFee,
+          'delivery_fee': order.deliveryFee, // تحديث رسوم التوصيل بدقة
           'payment_method': order.paymentMethod,
-
         },
         where: 'id = ?',
         whereArgs: [order.id],
       );
 
-      // حذف الأصناف القديمة
-      await txn.delete(
-        'holding_order_items',
-        where: 'holding_order_id = ?',
-        whereArgs: [order.id],
-      );
+      await txn.delete('holding_order_items', where: 'holding_order_id = ?', whereArgs: [order.id]);
 
-      // إضافة الأصناف الجديدة
+      // دمج الأصناف المتشابهة عند تحديث الأوردر لمنع تكرار الكروت
+      final Map<String, Map<String, dynamic>> mergedItems = {};
       for (final item in order.items) {
+        final String productId = item['productId'].toString();
+        final String size = item['size']?.toString() ?? '';
+        final String note = item['note']?.toString() ?? '';
+        final String key = '${productId}_${size}_$note';
+
+        if (mergedItems.containsKey(key)) {
+          final currentQty = (mergedItems[key]!['quantity'] as num).toDouble();
+          final addQty = (item['quantity'] as num).toDouble();
+          mergedItems[key]!['quantity'] = currentQty + addQty;
+        } else {
+          mergedItems[key] = Map<String, dynamic>.from(item);
+        }
+      }
+
+      for (final item in mergedItems.values) {
         await txn.insert('holding_order_items', {
           'holding_order_id': order.id,
           'product_id': item['productId'],
@@ -391,17 +389,10 @@ class OrderLocalDataSourceImpl implements OrderLocalDataSource {
         });
       }
     });
-
   }
+
   @override
   Future<void> increaseOrderCounter() async {
-    final db = await _database;
-
-    await db.rawUpdate('''
-    UPDATE shift_session
-    SET order_counter = order_counter + 1
-    WHERE id = 1
-  ''');
+    // تم إلغاء الاعتماد عليها لضمان عدم حدوث أي لخبطة، والاعتماد بالكامل على MAX(order_number)
   }
 }
-

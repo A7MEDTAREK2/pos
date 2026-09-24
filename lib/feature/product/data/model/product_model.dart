@@ -57,7 +57,6 @@ class OrderModel {
     String? customerName,
     String? customerPhone,
     String? customerAddress,
-
   }) {
     return OrderModel(
       id: id ?? this.id,
@@ -71,7 +70,6 @@ class OrderModel {
       customerPhone: customerPhone ?? this.customerPhone,
       customerAddress: customerAddress ?? this.customerAddress,
       createdAt: this.createdAt,
-
     );
   }
 
@@ -108,7 +106,7 @@ class OrderModel {
   }
 }
 
-// ✅ [جديد] موديل حجم المنتج (صغير / وسط / كبير ... إلخ)
+// ✅ موديل حجم المنتج (صغير / وسط / كبير ... إلخ)
 class ProductSize {
   final int? id;
   final int? productId;
@@ -155,6 +153,7 @@ class ProductSize {
   }
 }
 
+// ✅ موديل المنتج المحدث مع دعم الحد الأدنى للمخزون (minimumStock)
 class ProductModel {
   final int? id;
   final String? barcode;
@@ -162,13 +161,12 @@ class ProductModel {
   final double? costPrice;
   final double? sellPrice;
   final int quantity;
+  final double minimumStock; // ✅ حقل الحد الأدنى للمخزون
   final int? categoryId;
   final String? image;
   final String createdAt;
   final String? categoryName;
 
-  // ✅ [جديد] لو null أو فاضية = منتج عادي بسعر واحد (sellPrice)
-  //    لو فيها عناصر = منتج بأحجام، وكل حجم بسعره الخاص
   final List<ProductSize>? sizes;
 
   ProductModel({
@@ -178,6 +176,7 @@ class ProductModel {
     required this.costPrice,
     required this.sellPrice,
     this.quantity = 0,
+    this.minimumStock = 0.0,
     this.categoryId,
     this.image,
     required this.createdAt,
@@ -185,10 +184,8 @@ class ProductModel {
     this.categoryName,
   });
 
-  // ✅ هل المنتج ده عنده أحجام متعددة؟
   bool get hasSizes => sizes != null && sizes!.isNotEmpty;
 
-  // ✅ السعر المعروض في الكارت (أقل سعر لو فيه أحجام، أو السعر العادي)
   double get displayPrice {
     if (hasSizes) {
       return sizes!.map((s) => s.price).reduce((a, b) => a < b ? a : b);
@@ -196,8 +193,6 @@ class ProductModel {
     return sellPrice ?? 0;
   }
 
-  // تحويل الكائن إلى Map لتخزينه في SQLite
-  // ملحوظة: sizes بتتخزن في جدول منفصل (product_sizes)، مش جوه صف المنتج نفسه
   Map<String, dynamic> toMap() {
     return {
       'id': id,
@@ -206,14 +201,13 @@ class ProductModel {
       'cost_price': costPrice,
       'sell_price': sellPrice,
       'quantity': quantity,
+      'minimum_stock': minimumStock, // ✅ إضافته للـ Map
       'category_id': categoryId,
       'image': image,
       'created_at': createdAt,
     };
   }
 
-  // إنشاء كائن من الـ Map القادمة من الداتا بيز
-  // sizes بتتبعت منفصلة بعد ما تتجاب من جدول product_sizes
   factory ProductModel.fromMap(
       Map<String, dynamic> map, {
         List<ProductSize>? sizes,
@@ -222,19 +216,18 @@ class ProductModel {
       id: map['id'] as int?,
       barcode: map['barcode'] as String?,
       name: map['name'] as String,
-      // استخدمنا num للأسعار عشان نتجنب مشكلة تحويل الـ int لـ double في SQLite
-      costPrice: (map['cost_price'] as num).toDouble(),
-      sellPrice: (map['sell_price'] as num).toDouble(),
+      costPrice: (map['cost_price'] as num?)?.toDouble() ?? 0.0,
+      sellPrice: (map['sell_price'] as num?)?.toDouble() ?? 0.0,
       quantity: map['quantity'] as int? ?? 0,
+      minimumStock: (map['minimum_stock'] as num?)?.toDouble() ?? 0.0, // ✅ قراءته من قاعدة البيانات
       categoryId: map['category_id'] as int?,
       image: map['image'] as String?,
-      createdAt: map['created_at'] as String,
+      createdAt: map['created_at'] as String? ?? DateTime.now().toIso8601String(),
       sizes: sizes,
       categoryName: map['category_name'] as String?,
     );
   }
 
-  // دالة copyWith للتعديل السهل
   ProductModel copyWith({
     int? id,
     String? barcode,
@@ -242,12 +235,12 @@ class ProductModel {
     double? costPrice,
     double? sellPrice,
     int? quantity,
+    double? minimumStock,
     int? categoryId,
     String? image,
     String? createdAt,
     List<ProductSize>? sizes,
     String? categoryName,
-
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -256,12 +249,12 @@ class ProductModel {
       costPrice: costPrice ?? this.costPrice,
       sellPrice: sellPrice ?? this.sellPrice,
       quantity: quantity ?? this.quantity,
+      minimumStock: minimumStock ?? this.minimumStock,
       categoryId: categoryId ?? this.categoryId,
       image: image ?? this.image,
       createdAt: createdAt ?? this.createdAt,
       sizes: sizes ?? this.sizes,
       categoryName: categoryName ?? this.categoryName,
-
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/icons.dart';
 import '../../../../core/theming/txt_style.dart';
+import '../../../../core/service/audit_log_service.dart';
 
 // ====== Category ======
 import '../../data/model/category_model.dart';
@@ -14,8 +15,41 @@ import '../../logic/category_cubit.dart';
 import '../../logic/category_state.dart';
 import '../widget/AddCategoryDialog.dart';
 
-class CategoriesScreen extends StatelessWidget {
+class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({Key? key}) : super(key: key);
+
+  @override
+  State<CategoriesScreen> createState() => _CategoriesScreenState();
+}
+
+class _CategoriesScreenState extends State<CategoriesScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 📝 تسجيل الدخول لشاشة الأقسام
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'ENTER',
+      module: 'الأقسام',
+      entityType: 'Screen',
+      description: 'دخل إلى شاشة إدارة الأقسام',
+    );
+  }
+
+  @override
+  void dispose() {
+    // 📝 تسجيل الخروج من شاشة الأقسام
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'EXIT',
+      module: 'الأقسام',
+      entityType: 'Screen',
+      description: 'خرج من شاشة إدارة الأقسام',
+    );
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,8 +130,6 @@ class CategoriesScreen extends StatelessWidget {
   // Grid Content
   // ============================================================
   Widget _buildGridContent(BuildContext context, CategoryState state) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     if (state is CategoryLoading) {
       return const Center(
         child: CircularProgressIndicator(),
@@ -181,7 +213,7 @@ class CategoriesScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    PopupMenuItem(
+                    const PopupMenuItem(
                       value: 'delete',
                       child: Row(
                         children: [
@@ -190,7 +222,7 @@ class CategoriesScreen extends StatelessWidget {
                             color: Colors.red,
                             size: 18,
                           ),
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8),
                           Text(
                             'حذف',
                             style: TextStyle(color: Colors.red),
@@ -212,7 +244,7 @@ class CategoriesScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    Icon(
+                    const Icon(
                       Iconss.success,
                       size: 8,
                       color: Colors.green,

@@ -114,7 +114,7 @@ class SettingsModel {
           : map["reports_printer"],
       paperWidth: map["paper_width"] ?? 80,
       taxEnabled: (map["tax_enabled"] ?? 1) == 1,
-      autoPrintReceipt: (map["auto_print_receipt"] ?? 0) == 1,
+      autoPrintReceipt: (map["auto_print_receipt"] ?? 1) == 1,
       autoPrintKitchen: (map["auto_print_kitchen"] ?? 1) == 1,
       autoOpenDrawer: (map["auto_open_drawer"] ?? 1) == 1,
       showLogo: (map["show_logo"] ?? 1) == 1,

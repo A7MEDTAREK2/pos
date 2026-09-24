@@ -2,6 +2,8 @@ import '../../../../core/service/printing/mapper/kitchen_mapper.dart';
 import '../../../../core/service/printing/mapper/receipt_mapper.dart';
 import '../../../../core/service/printing/printing_manager.dart';
 import '../../../../core/service/printing/service/modu_print_service.dart';
+// تأكد من ضبط هذا المسار حسب موقع ملف الـ audit_log_service.dart في مشروعك
+import '../../../../core/service/audit_log_service.dart';
 import '../../../setting/data/repo/repo.dart';
 import '../data_source/local_data_source.dart';
 import '../model/pos_model.dart';
@@ -28,39 +30,59 @@ class OrderRepositoryImpl implements OrderRepository {
   final ModuPrintService printService;
   final ModuPrintService _printer = ModuPrintService();
 
-  // لو عندك برضه برينتر داتا سورس ممكن تعملها Inject هنا
-
   OrderRepositoryImpl({required this.localDataSource, required this.printService,});
 
   @override
   Future<void> holdOrderAndPrintKitchen(OrderModel order) async {
-    // 1. احفظ الأوردر في الداتا سورس المحلي كـ holding
+    // 1. حفظ الأوردر
     await localDataSource.cacheOrder(order);
 
-    // 2. تريجر كود الطباعة الصغير للمطبخ (بون الشغل)
+    // 2. طباعة بون المطبخ
     await PrintingManager.instance.printKitchen(order);
+
+    // 3. تسجيل في سجل الحركات
+    await AuditLogService.instance.log(
+      userId: 1,
+      userName: 'الكاشير',
+      action: 'CREATE',
+      module: 'المبيعات / الأوردرات',
+      entityType: 'Order',
+      entityId: order.id.toString(),
+      description: 'تم تعليق أوردر جديد برقم: ${order.id}',
+    );
   }
 
   @override
   Future<void> completePaymentAndPrintReceipt(String orderId) async {
-    // 1. هات الأوردر من الـ Holding
     final order = await localDataSource.getOrderById(orderId);
 
     if (order == null) {
       throw Exception("Order not found");
     }
 
-    print("Repository Payment Method = ${order.paymentMethod}");
-    // 2. انقله إلى جدول المبيعات
+    // 1. نقل الأوردر إلى جدول المبيعات
     await localDataSource.completeOrder(order);
 
-    // 3. اطبع الفاتورة الكبيرة
-    await PrintingManager.instance.printReceipt(order); }
+    // 2. طباعة الفاتورة
+    await PrintingManager.instance.printReceipt(order);
+
+    // 3. تسجيل في سجل الحركات
+    await AuditLogService.instance.log(
+      userId: 1,
+      userName: 'الكاشير',
+      action: 'PAYMENT',
+      module: 'المبيعات',
+      entityType: 'Order',
+      entityId: orderId,
+      description: 'تم إتمام دفع الفاتورة رقم $orderId',
+    );
+  }
 
   @override
   Future<List<OrderModel>> fetchHoldingOrders() async {
     return await localDataSource.getHoldingOrders();
   }
+
   @override
   Future<OrderModel?> getOrderById(String orderId) {
     return localDataSource.getOrderById(orderId);
@@ -71,16 +93,22 @@ class OrderRepositoryImpl implements OrderRepository {
     return localDataSource.getNextOrderNumber();
   }
 
-  // ميثودس داخلية للطباعة
-
-
-
   @override
-  Future<void> deleteHoldingOrder(String orderId) {
-    return localDataSource.deleteHoldingOrder(orderId);
+  Future<void> deleteHoldingOrder(String orderId) async {
+    await localDataSource.deleteHoldingOrder(orderId);
+
+    // تسجيل في سجل الحركات
+    await AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'DELETE',
+      module: 'المبيعات',
+      entityType: 'Order',
+      entityId: orderId,
+      description: 'تم حذف أوردر معلق برقم: $orderId',
+    );
   }
-  @override
-  @override
+
   @override
   Future<void> updateHoldingOrder(
       OrderModel order, {
@@ -92,6 +120,7 @@ class OrderRepositoryImpl implements OrderRepository {
       await PrintingManager.instance.printKitchen(order);
     }
   }
+
   @override
   Future<void> increaseOrderCounter() {
     return localDataSource.increaseOrderCounter();

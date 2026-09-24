@@ -8,12 +8,10 @@ import '../../../cashier/data/data_source/local_data_source.dart';
 import '../../../cashier/data/model/pos_model.dart';
 
 class SalesHistoryLocalDataSourceImpl implements SalesHistoryLocalDataSource {
-
   final Future<Database> _database = AppDatabase.instance.database;
 
   @override
   Future<List<Map<String, dynamic>>> getSales() async {
-
     final db = await _database;
     return await db.query('sales', orderBy: 'created_at DESC');
   }
@@ -21,21 +19,15 @@ class SalesHistoryLocalDataSourceImpl implements SalesHistoryLocalDataSource {
   @override
   Future<List<Map<String, dynamic>>> searchSales(String keyword) async {
     final db = await _database;
-
     final search = keyword.trim().toLowerCase();
 
     int? orderType;
 
-    if (search == "takeaway" ||
-        search == "take away" ||
-        search == "سفري") {
+    if (search == "takeaway" || search == "take away" || search == "سفري") {
       orderType = 0;
-    } else if (search == "dinein" ||
-        search == "dine in" ||
-        search == "صالة") {
+    } else if (search == "dinein" || search == "dine in" || search == "صالة") {
       orderType = 1;
-    } else if (search == "delivery" ||
-        search == "دليفري") {
+    } else if (search == "delivery" || search == "دليفري") {
       orderType = 2;
     }
 
@@ -78,28 +70,19 @@ class SalesHistoryLocalDataSourceImpl implements SalesHistoryLocalDataSource {
     });
   }
 
-  // ✅ دالة واحدة فقط لإعادة فتح الأوردر
-  // في SalesHistoryLocalDataSourceImpl - reopenOrder
-
+  // إعادة فتح الأوردر ونقله إلى جدول الطلبات المعلقة مع الحفاظ على قيم التوصيل والصافي
   @override
   Future<void> reopenOrder(int saleId) async {
-    print("1- Start");
-
     final db = await _database;
-    print("2- Database Open");
 
     await db.transaction((txn) async {
-      print("3- Transaction Started");
-
       final sales = await txn.query(
         'sales',
         where: 'id = ?',
         whereArgs: [saleId],
       );
-      print("4- Sale Loaded");
 
       if (sales.isEmpty) {
-        print("Sale Not Found");
         throw Exception("Sale Not Found");
       }
 
@@ -110,16 +93,13 @@ class SalesHistoryLocalDataSourceImpl implements SalesHistoryLocalDataSource {
         where: 'sale_id = ?',
         whereArgs: [saleId],
       );
-      print("5- Items Loaded");
 
-      // ✅ إنشاء OrderModel مع كل البيانات
       final order = OrderModel(
         id: const Uuid().v4(),
         orderNumber: sale['order_number'] as int,
         items: items
             .map(
-              (item) =>
-          {
+              (item) => {
             'productId': item['product_id'].toString(),
             'name': item['product_name'],
             'quantity': item['quantity'],
@@ -135,65 +115,56 @@ class SalesHistoryLocalDataSourceImpl implements SalesHistoryLocalDataSource {
         orderStatus: OrderStatus.holding,
         customerId: sale['customer_id'] as int?,
         customerAddressId: sale['customer_address_id'] as int?,
-        // ✅
         customerName: sale['customer_name'] as String?,
         customerPhone: sale['customer_phone'] as String?,
         customerAddress: sale['customer_address']?.toString(),
         createdAt: DateTime.now(),
       );
 
-      // ✅ حفظ في holding_orders جوا نفس الـ transaction
-      await txn.insert('holding_orders', {
-        'id': order.id,
-        'order_number': order.orderNumber,
-        'customer_id': order.customerId,
-        'customer_address_id': order.customerAddressId, // ✅
-        'customer_name': order.customerName,
-        'customer_phone': order.customerPhone,
-        'customer_address': order.customerAddress,
-        'order_type': order.orderType.index,
-        'order_status': order.orderStatus.index,
-        'total': order.totalAmount,
-        'created_at': order.createdAt.toIso8601String(),
-      }, conflictAlgorithm: ConflictAlgorithm.replace);
+      // حفظ الأوردر في جدول الطلبات المعلقة مع تمرير الصافي ورسوم التوصيل
+      await txn.insert(
+        'holding_orders',
+        {
+          'id': order.id,
+          'order_number': order.orderNumber,
+          'customer_id': order.customerId,
+          'customer_address_id': order.customerAddressId,
+          'customer_name': order.customerName,
+          'customer_phone': order.customerPhone,
+          'customer_address': order.customerAddress,
+          'order_type': order.orderType.index,
+          'order_status': order.orderStatus.index,
+          'subtotal': (sale['subtotal'] as num?)?.toDouble() ?? 0.0,
+          'discount': (sale['discount'] as num?)?.toDouble() ?? 0.0,
+          'tax': (sale['tax'] as num?)?.toDouble() ?? 0.0,
+          'delivery_fee': (sale['delivery_fee'] as num?)?.toDouble() ?? 0.0,
+          'total': order.totalAmount,
+          'created_at': order.createdAt.toIso8601String(),
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
 
-      // ✅ حفظ الأصناف في holding_order_items
+      // حفظ أصناف الأوردر المعلق
       for (final item in order.items) {
-        await txn.insert('holding_order_items', {
-          'holding_order_id': order.id,
-          'product_id': item['productId'],
-          'product_name': item['name'],
-          'quantity': item['quantity'],
-          'price': item['price'],
-          'size_name': item['size'],
-          'note': item['note'] ?? '',
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
+        await txn.insert(
+          'holding_order_items',
+          {
+            'holding_order_id': order.id,
+            'product_id': item['productId'],
+            'product_name': item['name'],
+            'quantity': item['quantity'],
+            'price': item['price'],
+            'size_name': item['size'],
+            'note': item['note'] ?? '',
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
 
-      // ✅ حذف من sales
+      // حذف الأوردر القديم من سجل المبيعات نهائياً
       await txn.delete('sale_items', where: 'sale_id = ?', whereArgs: [saleId]);
       await txn.delete('sales', where: 'id = ?', whereArgs: [saleId]);
-
-      print("6- Before Insert Holding");
-
-      // insert holding_orders
-
-      print("7- Holding Inserted");
-
-      // insert items
-
-      print("8- Items Inserted");
-
-      // delete sale_items
-
-      print("9- Sale Items Deleted");
-
-      // delete sales
-
-      print("10- Sale Deleted");
     });
-
-    print("11- Transaction Finished");
   }
 
   @override
@@ -232,38 +203,20 @@ class SalesHistoryLocalDataSourceImpl implements SalesHistoryLocalDataSource {
           'size': item['size_name'],
         };
       }).toList(),
-
       totalAmount: (sale['total'] as num).toDouble(),
-
-      orderType:
-      OrderType.values[sale['order_type'] as int],
-
+      orderType: OrderType.values[sale['order_type'] as int],
       orderStatus: OrderStatus.paid,
-
       customerId: sale['customer_id'] as int?,
       customerAddressId: sale['customer_address_id'] as int?,
-
       customerName: sale['customer_name']?.toString(),
       customerPhone: sale['customer_phone']?.toString(),
       customerAddress: sale['customer_address']?.toString(),
-
-      subtotal:
-      (sale['subtotal'] as num?)?.toDouble() ?? 0,
-
-      discount:
-      (sale['discount'] as num?)?.toDouble() ?? 0,
-
-      tax:
-      (sale['tax'] as num?)?.toDouble() ?? 0,
-
-      deliveryFee:
-      (sale['delivery_fee'] as num?)?.toDouble() ?? 0,
-
-      paymentMethod:
-      sale['payment_method']?.toString() ?? 'Cash',
-
-      createdAt:
-      DateTime.parse(sale['created_at'].toString()),
+      subtotal: (sale['subtotal'] as num?)?.toDouble() ?? 0,
+      discount: (sale['discount'] as num?)?.toDouble() ?? 0,
+      tax: (sale['tax'] as num?)?.toDouble() ?? 0,
+      deliveryFee: (sale['delivery_fee'] as num?)?.toDouble() ?? 0,
+      paymentMethod: sale['payment_method']?.toString() ?? 'Cash',
+      createdAt: DateTime.parse(sale['created_at'].toString()),
     );
   }
 }

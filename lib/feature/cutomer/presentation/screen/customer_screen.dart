@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/icons.dart';
 import '../../../../core/theming/txt_style.dart';
+import '../../../../core/service/audit_log_service.dart';
 
 // ====== Home (لعمل Refresh للداشبورد) ======
 import '../../../home/logic/home_cubit.dart';
@@ -33,11 +34,32 @@ class _CustomerScreenState extends State<CustomerScreen> {
   @override
   void initState() {
     super.initState();
+
+    // 📝 تسجيل الدخول لشاشة العملاء
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'ENTER',
+      module: 'العملاء',
+      entityType: 'Screen',
+      description: 'دخل إلى شاشة إدارة العملاء',
+    );
+
     context.read<CustomerCubit>().loadCustomers();
   }
 
   @override
   void dispose() {
+    // 📝 تسجيل الخروج من شاشة العملاء
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'EXIT',
+      module: 'العملاء',
+      entityType: 'Screen',
+      description: 'خرج من شاشة إدارة العملاء',
+    );
+
     searchController.dispose();
     super.dispose();
   }

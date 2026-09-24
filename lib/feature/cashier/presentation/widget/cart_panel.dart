@@ -35,7 +35,7 @@ class CartPanel extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      width: 550,
+      width: 530, // عرض لوحة السلة والعمليات الجانبية
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
@@ -44,18 +44,22 @@ class CartPanel extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // 1. رأس اللوحة (عنوان "الطلب الحالي" وعدد المنتجات)
           _buildHeader(context),
+
+          // 2. محدد نوع الأوردر (دليفري، صالة، تيك أواي) مع الحقول الخاصة بها
           _buildOrderTypeSelector(context),
-          Flexible(
+
+          // 3. قائمة المنتجات المضافة للسلة (تأخذ المساحة المتبقية بشكل مرن)
+          Expanded(
             child: Container(
               color: colorScheme.background,
               child: CartItemsList(
-                items: cartItems,
-                cubit: cubit,
               ),
             ),
           ),
-          // ====== Financial Summary ======
+
+          // 4. الملخص المالي (الخصم، الضريبة، التوصيل، الإجمالي)
           PosFinancialSummary(
             totals: totals,
             isDelivery: cubit.selectedOrderType == OrderType.delivery,
@@ -78,10 +82,11 @@ class CartPanel extends StatelessWidget {
               onSave: (v) => cubit.setDiscount(v),
             ),
           ),
-          // ====== Driver Dropdown (for Delivery) ======
+
+          // 5. قائمة اختيار مندوب التوصيل (تظهر فقط في حالة كان الأوردر دليفري)
           if (cubit.selectedOrderType == OrderType.delivery) ...[
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
               child: BlocBuilder<DriverCubit, DriverState>(
                 builder: (context, driverState) {
                   return DriverDropdown(
@@ -94,9 +99,10 @@ class CartPanel extends StatelessWidget {
               ),
             ),
           ],
-          // ====== Action Buttons ======
+
+          // 6. أزرار الإجراءات السفلية (حفظ الأوردر، مسح السلة، وإنهاء الدفع)
           Padding(
-            padding: const EdgeInsets.only(left: 14, right: 14, bottom: 14),
+            padding: const EdgeInsets.all(10),
             child: CartActionButtons(
               currentOrder: cubit.currentOrder,
               orderType: OrderType.values[cubit.selectedOrderType.index],
@@ -108,13 +114,14 @@ class CartPanel extends StatelessWidget {
     );
   }
 
+  // بناء رأس اللوحة العلوي
   Widget _buildHeader(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: colorScheme.surface,
         border: Border(
@@ -126,17 +133,18 @@ class CartPanel extends StatelessWidget {
           Icon(
             Iconss.cart,
             color: colorScheme.primary,
+            size: 30,
           ),
           const SizedBox(width: 8),
           Text(
             "الطلب الحالي",
-            style: theme.textTheme.titleMedium,
+            style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
           ),
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: 5,
-              vertical: 5,
+              horizontal: 8,
+              vertical: 3,
             ),
             decoration: BoxDecoration(
               color: colorScheme.primary.withOpacity(0.1),
@@ -155,21 +163,22 @@ class CartPanel extends StatelessWidget {
     );
   }
 
+  // بناء حاوية اختيار نوع الأوردر وبيانات العميل المرتبطة به
   Widget _buildOrderTypeSelector(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Card(
         elevation: 0,
         color: colorScheme.surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(14),
           side: BorderSide(color: colorScheme.outlineVariant),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(10),
           child: Column(
             children: [
               OrderTypeSelector(
@@ -181,7 +190,7 @@ class CartPanel extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: 3),
+              const SizedBox(height: 2),
               DynamicOrderFields(
                 orderTypeIndex: cubit.selectedOrderType.index,
               ),
@@ -192,6 +201,7 @@ class CartPanel extends StatelessWidget {
     );
   }
 
+  // دالة مساعدة لإظهار نافذة تعديل القيم المالية (ضريبة، خصم، توصيل)
   Future<void> _editValue({
     required BuildContext context,
     required String title,

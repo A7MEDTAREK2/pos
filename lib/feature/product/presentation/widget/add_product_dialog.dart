@@ -52,6 +52,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
   final _costController = TextEditingController();
   final _sellController = TextEditingController();
   final _quantityController = TextEditingController();
+  final _minimumStockController = TextEditingController(); // ✅ 1. تعريف الـ Controller للحد الأدنى
 
   int? _selectedCategoryId;
   String? _imagePath;
@@ -71,6 +72,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
       _costController.text = p.costPrice.toString();
       _sellController.text = p.sellPrice.toString();
       _quantityController.text = p.quantity.toString();
+      _minimumStockController.text = p.minimumStock.toString(); // ✅ 2. جلب قيمة الحد الأدنى عند التعديل
       _selectedCategoryId = p.categoryId;
       _imagePath = p.image;
 
@@ -99,6 +101,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
     _costController.dispose();
     _sellController.dispose();
     _quantityController.dispose();
+    _minimumStockController.dispose(); // ✅ 3. التخلص من الـ Controller لمنع التسريب
     for (final row in _sizeRows) {
       row.dispose();
     }
@@ -169,6 +172,7 @@ class _AddProductDialogState extends State<AddProductDialog> {
       costPrice: double.tryParse(_costController.text) ?? 0,
       sellPrice: double.tryParse(_sellController.text) ?? 0,
       quantity: int.tryParse(_quantityController.text) ?? 0,
+      minimumStock: double.tryParse(_minimumStockController.text) ?? 0, // ✅ 4. إرسال قيمة الحد الأدنى للمنتج
       image: _imagePath,
       createdAt:
       widget.productToEdit?.createdAt ?? DateTime.now().toIso8601String(),
@@ -286,6 +290,16 @@ class _AddProductDialogState extends State<AddProductDialog> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 14),
+
+                    // ✅ 5. حقل الحد الأدنى للمخزون المرئي في الواجهة
+                    _buildTextField(
+                      context,
+                      controller: _minimumStockController,
+                      label: "الحد الأدنى للمخزون للتنبيه",
+                      icon: Iconss.numbers, // يمكنك استبدال الأيقونة بأيقونة تنبيه إن وجدت
+                      keyboardType: TextInputType.number,
                     ),
                     const SizedBox(height: 14),
 

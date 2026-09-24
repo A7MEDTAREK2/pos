@@ -13,6 +13,7 @@ import '../../core/service/export/report_export_model.dart';
 import '../../core/service/export/report_export_service.dart';
 import 'logic/product_report_cubit.dart';
 import 'logic/report/customer_report_cubit.dart';
+import 'logic/report/driver_report_cubit.dart'; // <--- استيراد كيوبت المناديب
 import 'logic/report/order_type_report_cubit.dart';
 import 'logic/report/payment_report_cubit.dart';
 import 'logic/report/stock_report_cubit.dart';
@@ -52,6 +53,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
         return "لا يوجد بحث";
       case 5:
         return "لا يوجد بحث";
+      case 6:
+        return "ابحث باسم المندوب...";
       default:
         return "بحث...";
     }
@@ -74,6 +77,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
       case 4:
         break;
       case 5:
+        break;
+      case 6:
+      // لو حبيت تضيف بحث للمناديب لاحقاً
         break;
     }
   }
@@ -116,6 +122,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
           to: to,
         );
         break;
+      case 6:
+      // لو حبيت تضيف فلترة تاريخ للمناديب لاحقاً
+        break;
     }
   }
 
@@ -138,6 +147,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         break;
       case 5:
         context.read<OrderTypeReportCubit>().loadReport();
+        break;
+      case 6:
+        context.read<DriverReportCubit>().loadReport();
         break;
     }
   }
@@ -180,6 +192,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
                     break;
                   case 5:
                     context.read<OrderTypeReportCubit>().loadReport();
+                    break;
+                  case 6:
+                    context.read<DriverReportCubit>().loadReport();
                     break;
                 }
               },
@@ -298,6 +313,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
       case 5:
         await exporter.exportPdf(mapper.orderTypes());
         break;
+      case 6:
+      // await exporter.exportPdf(mapper.drivers()); // لو مضاف في الـ Mapper
+        break;
     }
   }
 
@@ -322,6 +340,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         break;
       case 5:
         await exporter.exportExcel(mapper.orderTypes());
+        break;
+      case 6:
+      // await exporter.exportExcel(mapper.drivers());
         break;
     }
   }
@@ -357,6 +378,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
         await PrintingManager.instance.printReport(
           mapper.orderTypes(),
         );
+        break;
+      case 6:
+      // await PrintingManager.instance.printReport(mapper.drivers());
         break;
     }
   }

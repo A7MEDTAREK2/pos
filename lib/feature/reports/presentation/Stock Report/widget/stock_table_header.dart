@@ -1,4 +1,4 @@
-// lib/feature/reports/stock_report/presentation/widgets/stock_table_header.dart
+// lib/feature/reports/stock_report/presentation/widgets/driver_table_header.dart
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/data_base/pos_database.dart';
 import '../../../../core/keyboard/keyboard_shortcuts.dart';
+import '../../../../core/service/audit_log_service.dart';
 import '../../../../core/theming/colors manegments.dart';
 import '../../../driver/data/localdata.dart';
 import '../../../driver/data/repo.dart';
@@ -37,6 +38,38 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
   final TextEditingController searchController = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+
+    // تسجيل دخول الكاشير إلى الشاشة
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'ENTER',
+      module: 'شاشة الكاشير',
+      entityType: 'Screen',
+      description: 'دخل إلى شاشة نقطة البيع (الكاشير)',
+    );
+  }
+
+  @override
+  void dispose() {
+    // تسجيل خروج الكاشير من الشاشة
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'EXIT',
+      module: 'شاشة الكاشير',
+      entityType: 'Screen',
+      description: 'خرج من شاشة نقطة البيع (الكاشير)',
+    );
+
+    searchFocusNode.dispose();
+    searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -59,7 +92,15 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
           // ====== F1 - إنهاء الطلب ======
           const SingleActivator(LogicalKeyboardKey.f1): () {
             final cubit = context.read<OrderCubit>();
-            if (cubit.cartItems.isNotEmpty && cubit.currentOrder != null) {
+            if (cubit.cartItems.isNotEmpty) {
+
+              // التحقق من اكتمال بيانات الدليفري قبل إتمام الطلب
+              final String? validationError = cubit.validateDeliveryOrder();
+              if (validationError != null) {
+                _showValidationError(context, validationError);
+                return;
+              }
+
               PosHelpers.showPaymentDialog(
                 context,
                 cubit,
@@ -87,7 +128,15 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
           // ====== F4 - حفظ الأوردر ======
           const SingleActivator(LogicalKeyboardKey.f4): () {
             final cubit = context.read<OrderCubit>();
-            if (cubit.currentOrder != null) {
+            if (cubit.cartItems.isNotEmpty) {
+
+              // التحقق من اكتمال بيانات الدليفري قبل الحفظ أيضاً
+              final String? validationError = cubit.validateDeliveryOrder();
+              if (validationError != null) {
+                _showValidationError(context, validationError);
+                return;
+              }
+
               cubit.holdOrder();
             }
           },
@@ -128,7 +177,7 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
             final cubit = context.read<OrderCubit>();
             _editValue(
               context: context,
-              title: "رسوم التويل",
+              title: "رسوم التوصيل",
               currentValue: cubit.deliveryFee,
               onSave: (v) => cubit.setDeliveryFee(v),
             );
@@ -347,8 +396,20 @@ class _PosCashierScreenState extends State<PosCashierScreen> {
     );
   }
 
+  void _showValidationError(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.redAccent,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
   void _handleOrderStateChanges(BuildContext context, OrderState state) {
-    // تم إزالة جميع الـ SnackBar
     if (state is PaymentCompleteSuccess) {
       try {
         context.read<HomeCubit>().refreshDashboard();

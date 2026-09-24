@@ -5,17 +5,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import '../../../../core/notification/notification_cubit.dart';
 import '../../../../core/service/user_session.dart';
 import '../../../../core/theming/theme_cubit.dart';
 import '../../../auth/login/presentation/screen/login_screen.dart';
 
+// ⚠️ تأكد من استيراد مسار الـ NotificationCubit الصحيح هنا:
+// import '../manager/notification_cubit.dart';
+
 class HomeAppBar extends StatefulWidget {
-  final VoidCallback? onNotificationsPressed;
   final VoidCallback? onSettingsPressed;
 
   const HomeAppBar({
     super.key,
-    this.onNotificationsPressed,
     this.onSettingsPressed,
   });
 
@@ -38,6 +40,9 @@ class _HomeAppBarState extends State<HomeAppBar> {
         });
       }
     });
+
+    // جلب الإشعارات فور فتح الصفحة
+    context.read<NotificationCubit>().checkLowStockProducts();
   }
 
   @override
@@ -176,40 +181,54 @@ class _HomeAppBarState extends State<HomeAppBar> {
 
           const SizedBox(width: 16),
 
-          // ====== زر الإشعارات ======
-          Stack(
-            children: [
-              Container(
-                width: 42,
-                height: 42,
-                decoration: BoxDecoration(
-                  color: colorScheme.background,
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: theme.dividerColor),
-                ),
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: widget.onNotificationsPressed ?? () {},
-                  icon: Icon(
-                    Icons.notifications_none,
-                    size: 22,
-                    color: theme.textTheme.bodySmall?.color,
+          // ====== زر الإشعارات المربوط بالمخزون ======
+          BlocBuilder<NotificationCubit, NotificationState>(
+            builder: (context, state) {
+              int lowStockCount = 0;
+              if (state is NotificationLoaded) {
+                lowStockCount = state.lowStockProducts.length;
+              }
+
+              return Stack(
+                children: [
+                  Container(
+                    width: 42,
+                    height: 42,
+                    decoration: BoxDecoration(
+                      color: colorScheme.background,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: theme.dividerColor),
+                    ),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () {
+                        // تحديث البيانات لحظياً عند فتح النافذة وعرضها
+                        context.read<NotificationCubit>().checkLowStockProducts();
+                        _showLowStockDialog(context, state);
+                      },
+                      icon: Icon(
+                        Icons.notifications_none,
+                        size: 22,
+                        color: theme.textTheme.bodySmall?.color,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              Positioned(
-                top: 8,
-                right: 8,
-                child: Container(
-                  width: 8,
-                  height: 8,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFDC2626),
-                    shape: BoxShape.circle,
-                  ),
-                ),
-              ),
-            ],
+                  if (lowStockCount > 0)
+                    Positioned(
+                      top: 8,
+                      right: 8,
+                      child: Container(
+                        width: 8,
+                        height: 8,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFDC2626),
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
           ),
 
           const SizedBox(width: 16),
@@ -291,6 +310,66 @@ class _HomeAppBarState extends State<HomeAppBar> {
           ),
         ],
       ),
+    );
+  }
+
+  // دالة عرض النافذة المنبثقة للتنبيهات
+  void _showLowStockDialog(BuildContext context, NotificationState state) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded, color: Colors.orange),
+              const SizedBox(width: 8),
+              Text(
+                'تنبيهات نقص المخزون',
+                style: GoogleFonts.cairo(fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: SizedBox(
+            width: 400,
+            height: 300,
+            child: BlocBuilder<NotificationCubit, NotificationState>(
+              builder: (context, dialogState) {
+                if (dialogState is NotificationLoaded) {
+                  if (dialogState.lowStockProducts.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'لا توجد منتجات منخفضة المخزون حالياً',
+                        style: GoogleFonts.cairo(),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    itemCount: dialogState?.lowStockProducts.length,
+                    itemBuilder: (context, index) {
+                      final product = dialogState?.lowStockProducts[index];
+                      return ListTile(
+                        leading: const Icon(Icons.inventory_2_outlined, color: Colors.red),
+                        title: Text(product!.name, style: GoogleFonts.cairo(fontWeight: FontWeight.bold)),
+                        subtitle: Text(
+                          'الكمية الحالية: ${product?.quantity} | الحد الأدنى: ${product?.minimumStock}',
+                          style: GoogleFonts.cairo(fontSize: 12, color: Colors.red),
+                        ),
+                      );
+                    },
+                  );
+                }
+                return const Center(child: CircularProgressIndicator());
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('إغلاق', style: GoogleFonts.cairo()),
+            ),
+          ],
+        );
+      },
     );
   }
 

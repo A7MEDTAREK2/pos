@@ -11,6 +11,7 @@ import 'core/data_base/pos_database.dart';
 import 'core/data_mange/data_mange/cubit_mange.dart';
 import 'core/data_mange/data_mange/local_mange.dart';
 import 'core/data_mange/data_mange/repo.dart';
+import 'core/notification/notification_cubit.dart';
 import 'core/service/printing/printing_manager.dart';
 import 'core/service/printing/service/modu_print_service.dart';
 import 'core/service/server_service.dart';
@@ -18,14 +19,23 @@ import 'core/theming/app_theme.dart';
 import 'core/theming/colors manegments.dart';
 import 'core/theming/theme_cubit.dart';
 
-// ====== Splash ======
+// ====== Splash & System ======
+import 'feature/audit_log/login/data/data_source/local_data_source.dart';
+import 'feature/audit_log/login/data/repo/local_rapo.dart';
+import 'feature/audit_log/login/logic/audit_log_cubit.dart';
 import 'feature/driver/data/localdata.dart';
 import 'feature/driver/data/repo.dart';
 import 'feature/driver/logic/drive_cubit.dart';
+import 'feature/inventory/data/datasource/inventory_local_data_source.dart';
+import 'feature/inventory/logic/inventory_cubit.dart';
+import 'feature/purchase/data/datasource/local_data_source.dart';
+import 'feature/purchase/data/repo/local_repo.dart';
+import 'feature/purchase/logic/purchase_cubit.dart';
+import 'feature/reports/data/data_source/driver_report_local_data_source.dart';
 import 'feature/reports/logic/SaleDetailsCubit .dart';
 import 'feature/setting/data/datasorce/UserLocalDataSource.dart';
 import 'feature/setting/data/datasorce/local_data.dart';
-import 'feature/setting/data/repo/repo.dart';
+import 'feature/setting/data/repo/repo.dart' hide UserRepository;
 import 'feature/setting/data/repo/repo_user.dart';
 import 'feature/setting/logic/set_cubit.dart';
 import 'feature/setting/logic/user_cubit.dart';
@@ -45,7 +55,7 @@ import 'feature/category/logic/category_cubit.dart';
 import 'feature/cutomer/data/data_source/address_local_data_source.dart';
 import 'feature/cutomer/data/data_source/local_data_source.dart';
 import 'feature/cutomer/data/repo/address_local_rapo.dart';
-import 'feature/cutomer/data/repo/local_rapo.dart';
+import 'feature/cutomer/data/repo/local_rapo.dart' hide CustomerAddressRepository;
 import 'feature/cutomer/logic/customer_cubit.dart';
 
 // ====== Dashboard ======
@@ -62,6 +72,9 @@ import 'feature/home/logic/home_cubit.dart';
 import 'feature/product/data/data_source/local_data_source.dart';
 import 'feature/product/data/repo/local_rapo.dart';
 import 'feature/product/logic/product_cubit.dart';
+
+// ====== Inventory ======
+import 'feature/inventory/data/repo/inventory_repository.dart';
 
 // ====== Reports ======
 import 'feature/reports/data/data_source/customer_local_data_source.dart';
@@ -82,10 +95,17 @@ import 'feature/reports/logic/report/payment_report_cubit.dart';
 import 'feature/reports/logic/report/stock_report_cubit.dart';
 import 'feature/reports/presentation/product_report/screen/product_report_screen.dart';
 
-// ====== Sales ======
+// ====== Driver Report (تعديل: استيراد مستودع وكيوبت تقرير المناديب) ======
+import 'feature/reports/data/repo/driver_report_repository.dart';
+import 'feature/reports/logic/report/driver_report_cubit.dart';
+
+// ====== Sales & Supplier ======
 import 'feature/sale/data/data_source/sales_history_local_data_source_impl.dart';
 import 'feature/sale/data/repo/local_rapo.dart';
 import 'feature/sale/logic/sale_cubit.dart';
+import 'feature/supplier/data/datasource/local_data_source.dart';
+import 'feature/supplier/data/repo/local_repo.dart';
+import 'feature/supplier/logic/supplier_cubit.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -143,6 +163,15 @@ class MyApp extends StatelessWidget {
             ),
             context.read<HomeCubit>(),
           )..loadProducts(),
+        ),
+
+        // ====== Inventory ======
+        BlocProvider<InventoryCubit>(
+          create: (_) => InventoryCubit(
+            inventoryRepository: InventoryRepositoryImpl(
+              localDataSource: InventoryLocalDataSourceImpl(),
+            ),
+          )..fetchStockItems(),
         ),
 
         // ====== Order ======
@@ -255,12 +284,33 @@ class MyApp extends StatelessWidget {
             ),
           )..loadReport(),
         ),
+
+        // ====== Driver Report (تعديل: إضافة كيوبت تقرير المناديب هنا) ======
+        // ====== Driver Report ======
+        BlocProvider<DriverReportCubit>(
+          create: (_) => DriverReportCubit(
+            repository: DriverReportRepository(
+              localDataSource: DriverReportLocalDataSource(), // أو الـ LocalDataSource الخاص بتقرير المناديب
+            ),
+          )..loadReport(),
+        ),
+
         BlocProvider<SettingsCubit>(
           create: (_) => SettingsCubit(
             SettingsRepository(
               SettingsLocalDataSourceImpl(),
             ),
           )..loadSettings(),
+        ),
+
+        // ====== Purchase ======
+        BlocProvider<PurchaseCubit>(
+          create: (_) => PurchaseCubit(
+            PurchaseRepositoryImpl(
+              localDataSource:
+              PurchaseLocalDataSourceImpl(),
+            ),
+          )..loadData(),
         ),
 
         // ===== Users =====
@@ -286,6 +336,26 @@ class MyApp extends StatelessWidget {
               ),
             ),
           ),
+        ),
+
+        BlocProvider(
+          create: (context) => NotificationCubit()..checkLowStockProducts(),
+        ),
+        // ====== Audit Logs ======
+        BlocProvider<AuditLogCubit>(
+          create: (_) => AuditLogCubit(
+            AuditLogRepositoryImpl(
+              localDataSource: AuditLogLocalDataSourceImpl(AppDatabase.instance),
+            ),
+          )..fetchAuditLogs(),
+        ),
+        // ===== Supplier =====
+        BlocProvider<SupplierCubit>(
+          create: (_) => SupplierCubit(
+            SupplierRepository(
+              SupplierLocalDataSource(),
+            ),
+          )..loadSuppliers(),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(

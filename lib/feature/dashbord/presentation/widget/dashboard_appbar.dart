@@ -1,30 +1,58 @@
 // lib/feature/dashboard/presentation/widgets/dashboard_appbar.dart
 
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 // ====== Core ======
+import '../../../../core/service/user_session.dart';
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/icons.dart';
 import '../../../../core/theming/txt_style.dart';
 
-class DashboardAppBar extends StatelessWidget {
+class DashboardAppBar extends StatefulWidget {
   final VoidCallback? onBackPressed;
-  final String userName;
-  final String userRole;
 
   const DashboardAppBar({
     super.key,
     this.onBackPressed,
-    this.userName = 'أحمد محمد',
-    this.userRole = 'مدير المتجر',
   });
+
+  @override
+  State<DashboardAppBar> createState() => _DashboardAppBarState();
+}
+
+class _DashboardAppBarState extends State<DashboardAppBar> {
+  late DateTime _now;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _now = DateTime.now();
+    // تحديث الوقت كل ثانية ليكون تفاعلياً وحقيقياً
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _now = DateTime.now();
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final now = DateTime.now();
+
+    // جلب بيانات المستخدم الحقيقية من UserSession مع قيم افتراضية احتياطية
+    final String currentUserName = UserSession.currentUser?.name ?? 'مستخدم النظام';
+    final String currentUserRole = UserSession.currentUser?.role ?? 'مدير المتجر';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -58,7 +86,7 @@ class DashboardAppBar extends StatelessWidget {
 
           const Spacer(),
 
-          // ====== التاريخ والوقت ======
+          // ====== التاريخ والوقت الحقيقي ======
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
             decoration: BoxDecoration(
@@ -75,7 +103,7 @@ class DashboardAppBar extends StatelessWidget {
                 ),
                 const SizedBox(width: 6),
                 Text(
-                  '${_formatDate(now)} • ${_formatTime(now)}',
+                  '${_formatDate(_now)} • ${_formatTime(_now)}',
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: colorScheme.onSurface.withOpacity(0.6),
                   ),
@@ -86,19 +114,19 @@ class DashboardAppBar extends StatelessWidget {
 
           const SizedBox(width: 12),
 
-          // ====== اسم المستخدم ======
+          // ====== اسم ودور المستخدم الحقيقي ======
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                userName,
+                currentUserName,
                 style: theme.textTheme.bodyMedium?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               Text(
-                userRole,
+                currentUserRole,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: colorScheme.onSurface.withOpacity(0.6),
                 ),
@@ -111,7 +139,7 @@ class DashboardAppBar extends StatelessWidget {
           // ====== زر الرجوع ======
           InkWell(
             borderRadius: BorderRadius.circular(10),
-            onTap: onBackPressed ?? () => Navigator.pop(context),
+            onTap: widget.onBackPressed ?? () => Navigator.pop(context),
             child: Container(
               width: 40,
               height: 40,
@@ -145,7 +173,7 @@ class DashboardAppBar extends StatelessWidget {
   }
 
   String _formatTime(DateTime date) {
-    final hour = date.hour > 12 ? date.hour - 12 : date.hour;
+    final hour = date.hour == 0 ? 12 : (date.hour > 12 ? date.hour - 12 : date.hour);
     final minute = date.minute.toString().padLeft(2, '0');
     final ampm = date.hour >= 12 ? 'م' : 'ص';
     return '$hour:$minute $ampm';

@@ -1,3 +1,5 @@
+// lib/feature/cashier/presentation/widget/editable_summary_card.dart
+
 import 'package:flutter/material.dart';
 import '../../../../core/theming/colors manegments.dart';
 import '../../../../core/theming/txt_style.dart';
@@ -26,31 +28,36 @@ class EditableSummaryCard extends StatelessWidget {
       waitDuration: const Duration(milliseconds: 300),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(10),
         child: Container(
-          padding: const EdgeInsets.all(5),
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
           decoration: BoxDecoration(
             color: colorScheme.background,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: colorScheme.outlineVariant),
           ),
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // أيقونة البطاقة بحجم مصغر
               Icon(
                 icon,
                 color: colorScheme.primary,
-                size: 18,
+                size: 16,
               ),
-              const SizedBox(height: 6),
+              const SizedBox(height: 3),
+              // عنوان البطاقة
               Text(
                 title,
-                style: theme.textTheme.labelSmall,
+                style: theme.textTheme.labelSmall?.copyWith(fontSize: 10),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
+              // القيمة المالية بخط مدمج
               Text(
                 "${value.toStringAsFixed(2)} ج.م",
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  fontSize: 11,
                 ),
               ),
             ],
@@ -60,6 +67,7 @@ class EditableSummaryCard extends StatelessWidget {
     );
   }
 
+  // تحديد رسالة الـ Tooltip واختصارات لوحة المفاتيح
   String _getTooltipMessage(String title) {
     switch (title) {
       case "الضريبة":

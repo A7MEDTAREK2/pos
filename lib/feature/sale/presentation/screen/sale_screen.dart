@@ -3,6 +3,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+// ====== Core ======
+import '../../../../core/service/audit_log_service.dart';
+
 // ====== Home (لعمل Refresh للداشبورد) ======
 import '../../../home/logic/home_cubit.dart';
 
@@ -31,11 +34,32 @@ class _SalesHistoryScreenState extends State<SalesHistoryScreen> {
   @override
   void initState() {
     super.initState();
+
+    // 📝 تسجيل الدخول لشاشة سجل المبيعات
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'ENTER',
+      module: 'المبيعات',
+      entityType: 'Screen',
+      description: 'دخل إلى شاشة سجل المبيعات',
+    );
+
     context.read<SalesHistoryCubit>().loadSales();
   }
 
   @override
   void dispose() {
+    // 📝 تسجيل الخروج من شاشة سجل المبيعات
+    AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'EXIT',
+      module: 'المبيعات',
+      entityType: 'Screen',
+      description: 'خرج من شاشة سجل المبيعات',
+    );
+
     searchController.dispose();
     super.dispose();
   }

@@ -1,3 +1,4 @@
+import '../../../../core/service/audit_log_service.dart';
 import '../../../../core/service/printing/model/daily_closing_report_model.dart';
 import '../data_source/local_data_source.dart';
 import '../data_source/prudct_local_data_source.dart';
@@ -28,21 +29,33 @@ abstract class ReportsRepository {
 }
 
 class ReportsRepositoryImpl implements ReportsRepository {
-  @override
-  Future<List<ShiftProductModel>> getShiftProducts({
-    required DateTime from,
-    required DateTime to,
-  }) {
-    return localDataSource.getShiftProducts(
-      from: from,
-      to: to,
-    );
-  }
   final ReportsLocalDataSource localDataSource;
 
   ReportsRepositoryImpl({
     required this.localDataSource,
   });
+
+  @override
+  Future<List<ShiftProductModel>> getShiftProducts({
+    required DateTime from,
+    required DateTime to,
+  }) async {
+    final result = await localDataSource.getShiftProducts(
+      from: from,
+      to: to,
+    );
+
+    await AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'VIEW',
+      module: 'التقارير',
+      entityType: 'ShiftReport',
+      description: 'تم فتح تقرير وردية المنتجات',
+    );
+
+    return result;
+  }
 
   @override
   Future<List<SalesReportModel>> getSalesReport({
@@ -51,15 +64,27 @@ class ReportsRepositoryImpl implements ReportsRepository {
     String search = '',
     int limit = 20,
     int offset = 0,
-  }) {
-    return localDataSource.getSalesReport(
+  }) async {
+    final result = await localDataSource.getSalesReport(
       from: from,
       to: to,
       search: search,
       limit: limit,
       offset: offset,
     );
+
+    await AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'VIEW',
+      module: 'التقارير',
+      entityType: 'SalesReport',
+      description: 'تم فتح تقرير المبيعات',
+    );
+
+    return result;
   }
+
   @override
   Future<int> getSalesReportCount({
     required DateTime from,
@@ -72,11 +97,23 @@ class ReportsRepositoryImpl implements ReportsRepository {
       search: search,
     );
   }
-  @override
-  Future<SaleDetailsModel?> getSaleDetails(int saleId) {
-    return localDataSource.getSaleDetails(saleId);
-  }
 
+  @override
+  Future<SaleDetailsModel?> getSaleDetails(int saleId) async {
+    final result = await localDataSource.getSaleDetails(saleId);
+
+    await AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'VIEW',
+      module: 'التقارير',
+      entityType: 'SaleDetails',
+      entityId: saleId.toString(),
+      description: 'تم استعراض تفاصيل الفاتورة رقم: $saleId من التقارير',
+    );
+
+    return result;
+  }
 }
 
 
@@ -114,15 +151,26 @@ class ProductReportRepositoryImpl
     String search='',
     int limit=20,
     int offset=0,
-  }) {
+  }) async {
 
-    return localDataSource.getProductReport(
+    final result = await localDataSource.getProductReport(
       from: from,
       to: to,
       search: search,
       limit: limit,
       offset: offset,
     );
+
+    await AuditLogService.instance.log(
+      userId: 1,
+      userName: 'مشرف النظام',
+      action: 'VIEW',
+      module: 'التقارير',
+      entityType: 'ProductReport',
+      description: 'تم فتح تقرير أداء المنتجات',
+    );
+
+    return result;
   }
 
   @override
@@ -138,7 +186,4 @@ class ProductReportRepositoryImpl
       search: search,
     );
   }
-
-
-
 }

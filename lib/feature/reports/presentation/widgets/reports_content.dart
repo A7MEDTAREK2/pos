@@ -6,7 +6,7 @@ import '../Customer Report/screen/customer_report_screen.dart';
 import '../Order Type Report/screen/orderType_report_screen.dart';
 import '../Payment Report/screen/payment_report_screen.dart';
 import '../Stock Report/screen/stock_report_screen.dart';
-
+import '../drive_report/screen/DriverReportScreen.dart';
 import '../product_report/screen/product_report_screen.dart';
 import '../sale_report/sales_report_view.dart';
 import 'reports_empty_state.dart';
@@ -56,6 +56,8 @@ class ReportsContent extends StatelessWidget {
         return const PaymentReportScreen();
       case 5:
         return const OrderTypeReportScreen();
+      case 6: // <--- أضفنا الـ Case الخاصة بتقرير المناديب هنا
+        return const DriverReportScreen(); // (أو DriverReportView حسب اسم الـ Widget بتاعتك)
       default:
         return const ReportsEmptyState();
     }

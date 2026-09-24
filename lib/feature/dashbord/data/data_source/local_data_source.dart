@@ -46,6 +46,7 @@ abstract class DashboardLocalDataSource {
     int limit = 10,
   });
 }
+
 class DashboardLocalDataSourceImpl
     implements DashboardLocalDataSource {
   final Future<Database> _database =
@@ -55,7 +56,6 @@ class DashboardLocalDataSourceImpl
   // Dashboard Summary
   //========================================================
 
-  @override
   @override
   Future<DashboardModel> getDashboardSummary({
     required DateTime from,
@@ -67,8 +67,8 @@ class DashboardLocalDataSourceImpl
       '''
 SELECT
 COUNT(*) AS total_orders,
-IFNULL(SUM(total),0) AS total_sales,
-IFNULL(AVG(total),0) AS average_order
+IFNULL(SUM(subtotal), 0) AS total_sales,
+IFNULL(AVG(subtotal), 0) AS average_order
 FROM sales
 WHERE DATE(created_at)
 BETWEEN DATE(?) AND DATE(?)
@@ -92,7 +92,7 @@ BETWEEN DATE(?) AND DATE(?)
     final profitResult = await db.rawQuery('''
 SELECT
 IFNULL(
-SUM((si.price-p.cost_price)*si.quantity),
+SUM((si.price - p.cost_price) * si.quantity),
 0
 ) AS total_profit
 FROM sale_items si
@@ -106,7 +106,8 @@ BETWEEN DATE(?) AND DATE(?)
       [
         from.toIso8601String(),
         to.toIso8601String(),
-      ],);
+      ],
+    );
 
     final totalProfit =
         (profitResult.first['total_profit'] as num?)?.toDouble() ?? 0;
@@ -125,7 +126,6 @@ BETWEEN DATE(?) AND DATE(?)
       totalCustomers: (customers.first["total"] as num).toInt(),
       totalProducts: (products.first["total"] as num).toInt(),
 
-      // القوائم هتتملى من الميثودات الخاصة بيها
       salesChart: [],
       topProducts: [],
       recentSales: [],
@@ -134,6 +134,7 @@ BETWEEN DATE(?) AND DATE(?)
       lowStockProducts: [],
     );
   }
+
   //========================================================
   // Sales Chart
   //========================================================
@@ -149,7 +150,7 @@ BETWEEN DATE(?) AND DATE(?)
       '''
 SELECT
 DATE(created_at) AS day,
-SUM(total) AS total
+SUM(subtotal) AS total
 FROM sales
 WHERE DATE(created_at)
 BETWEEN DATE(?) AND DATE(?)
@@ -181,7 +182,6 @@ ORDER BY DATE(created_at)
     required DateTime from,
     required DateTime to,
     int limit = 5,
-
   }) async {
     final db = await _database;
 
@@ -199,11 +199,12 @@ BETWEEN DATE(?) AND DATE(?)
 GROUP BY si.product_id
 ORDER BY qty DESC
 LIMIT ?
-''',[
-      from.toIso8601String(),
-      to.toIso8601String(),
-      limit,
-    ]
+''',
+      [
+        from.toIso8601String(),
+        to.toIso8601String(),
+        limit,
+      ],
     );
 
     return result
@@ -226,7 +227,6 @@ LIMIT ?
     required DateTime from,
     required DateTime to,
     int limit = 10,
-
   }) async {
     final db = await _database;
 
@@ -244,12 +244,9 @@ LIMIT ?
         .map(
           (e) => RecentSaleModel(
         orderNumber: e["order_number"] as int,
-        customerName:
-        e["customer_name"]?.toString() ?? "عميل نقدي",
+        customerName: e["customer_name"]?.toString() ?? "عميل نقدي",
         total: (e["total"] as num).toDouble(),
-        paymentMethod:
-        e["payment_method"].toString(),
-
+        paymentMethod: e["payment_method"].toString(),
       ),
     )
         .toList();
@@ -270,16 +267,16 @@ LIMIT ?
 SELECT
 payment_method,
 COUNT(*) count,
-SUM(total) total
+SUM(subtotal) total
 FROM sales
 WHERE DATE(created_at)
 BETWEEN DATE(?) AND DATE(?)
 GROUP BY payment_method
 ORDER BY total DESC
-''',[
-    from.toIso8601String(),
-        to.toIso8601String(),
-        ]);
+''', [
+      from.toIso8601String(),
+      to.toIso8601String(),
+    ]);
 
     return result.map((e) {
       return PaymentMethodModel(
@@ -288,7 +285,6 @@ ORDER BY total DESC
         total: (e["total"] as num).toDouble(),
       );
     }).toList();
-
   }
 
   //========================================================
@@ -310,7 +306,7 @@ FROM sales
 WHERE DATE(created_at)
 BETWEEN DATE(?) AND DATE(?)
 GROUP BY order_type
-''',[
+''', [
       from.toIso8601String(),
       to.toIso8601String(),
     ]);
@@ -319,7 +315,6 @@ GROUP BY order_type
       final orderType = (e["order_type"] as num).toInt();
 
       String type;
-
       switch (orderType) {
         case 0:
           type = "تيك أواي";
@@ -346,8 +341,7 @@ GROUP BY order_type
   //========================================================
 
   @override
-  Future<List<LowStockModel>>
-  getLowStockProducts({
+  Future<List<LowStockModel>> getLowStockProducts({
     int limit = 10,
   }) async {
     final db = await _database;
@@ -363,7 +357,6 @@ GROUP BY order_type
     return result
         .map(
           (e) => LowStockModel(
-
         name: e["name"].toString(),
         quantity: e["quantity"] as int,
       ),

@@ -14,11 +14,8 @@ class SalesHistoryLoading extends SalesHistoryState {}
 
 class SalesHistorySuccess extends SalesHistoryState {
   final List<SalesHistoryModel> sales;
-
   final bool isSearching;
   final List<SalesHistoryModel> filteredSales;
-
-
   final String? successMessage;
   final String? errorMessage;
 
@@ -33,8 +30,9 @@ class SalesHistorySuccess extends SalesHistoryState {
   List<SalesHistoryModel> get displaySales =>
       isSearching ? filteredSales : sales;
 
+  // ✅ التعديل هنا: استخدام subtotal بدلاً من total عشان يحسب صافي المنتجات فقط بدون الدليفري
   double get totalSales =>
-      displaySales.fold(0, (sum, e) => sum + e.total);
+      displaySales.fold(0.0, (sum, e) => sum + (e.subtotal ?? 0.0));
 
   int get totalOrders => displaySales.length;
 
@@ -75,14 +73,9 @@ class SalesHistoryError extends SalesHistoryState {
   @override
   List<Object?> get props => [message];
 }
+
 class SalesDeleteLoading extends SalesHistoryState {}
 
 class SalesReopenLoading extends SalesHistoryState {}
 
 class SalesPrintLoading extends SalesHistoryState {}
-
-
-
-
-
-

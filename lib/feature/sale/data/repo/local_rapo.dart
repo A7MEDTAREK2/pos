@@ -1,5 +1,6 @@
 // lib/feature/sales_history/data/repo/local_rapo.dart
 
+import '../../../../core/service/audit_log_service.dart';
 import '../../../cashier/data/model/pos_model.dart';
 import '../data_source/local_data_source.dart';
 import '../model/sale_model.dart';
@@ -55,6 +56,17 @@ class SalesHistoryRepositoryImpl implements SalesHistoryRepository {
   Future<void> deleteSale(int saleId) async {
     try {
       await dataSource.deleteSale(saleId);
+
+      // 📝 تسجيل حركة حذف فاتورة مبيعات
+      await AuditLogService.instance.log(
+        userId: 1,
+        userName: 'مشرف النظام',
+        action: 'DELETE',
+        module: 'سجل المبيعات',
+        entityType: 'Sale',
+        entityId: saleId.toString(),
+        description: 'تم حذف فاتورة المبيعات رقم: $saleId',
+      );
     } catch (e) {
       throw Exception('Failed to delete sale: $e');
     }
@@ -74,15 +86,27 @@ class SalesHistoryRepositoryImpl implements SalesHistoryRepository {
     }
   }
 
-  // ✅ إضافة دالة إعادة فتح الأوردر
+  // ✅ إعادة فتح الأوردر
   @override
   Future<void> reopenOrder(int saleId) async {
     try {
       await dataSource.reopenOrder(saleId);
+
+      // 📝 تسجيل حركة إعادة فتح فاتورة/أوردر
+      await AuditLogService.instance.log(
+        userId: 1,
+        userName: 'مشرف النظام',
+        action: 'UPDATE',
+        module: 'سجل المبيعات',
+        entityType: 'Sale',
+        entityId: saleId.toString(),
+        description: 'تم إعادة فتح فاتورة المبيعات رقم: $saleId لتعديلها',
+      );
     } catch (e) {
       throw Exception('Failed to reopen order: $e');
     }
   }
+
   @override
   Future<OrderModel> getSaleAsOrder(int saleId) {
     return dataSource.getSaleAsOrder(saleId);
